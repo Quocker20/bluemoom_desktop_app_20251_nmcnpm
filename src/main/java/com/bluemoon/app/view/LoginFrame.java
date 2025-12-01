@@ -2,11 +2,13 @@ package com.bluemoon.app.view;
 
 import com.bluemoon.app.controller.LoginController;
 import com.bluemoon.app.model.User;
+import com.bluemoon.app.view.MainFrame;
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.net.URL;
+
 
 public class LoginFrame extends JFrame {
 
@@ -123,7 +125,7 @@ public class LoginFrame extends JFrame {
         cardPanel.add(btnLogin);
 
         // Nút Thoát
-        btnExit = new JButton("Quay lại");
+        btnExit = new JButton("Thoát ứng dụng");
         btnExit.setBounds(40, 390, 340, 30);
         btnExit.setContentAreaFilled(false);
         btnExit.setBorderPainted(false);
@@ -144,20 +146,31 @@ public class LoginFrame extends JFrame {
     private void handleLogin() {
         String username = txtUsername.getText();
         String password = new String(txtPassword.getPassword());
-        User user = controller.login(username, password);
+        
+        try {
+            User user = controller.login(username, password);
 
-        if (user != null) {
-            JOptionPane.showMessageDialog(this, 
-                "Đăng nhập thành công!\nXin chào: " + user.getVaiTro(), 
-                "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            this.dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, 
-                "Sai tên đăng nhập hoặc mật khẩu!", 
-                "Lỗi", JOptionPane.ERROR_MESSAGE);
+            if (user != null) {
+                // Mở màn hình chính
+                try {
+                    MainFrame mainFrame = new MainFrame(user);
+                    mainFrame.setVisible(true);
+
+                    this.dispose();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Lỗi mở MainFrame: " + e.getMessage());
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                        "Sai tên đăng nhập hoặc mật khẩu!", 
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+             JOptionPane.showMessageDialog(this, "Lỗi hệ thống: " + e.getMessage());
         }
     }
-
     // ==========================================
     // CÁC CLASS TIỆN ÍCH GIAO DIỆN (CUSTOM UI)
     // ==========================================
