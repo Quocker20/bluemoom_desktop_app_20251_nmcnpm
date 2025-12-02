@@ -61,8 +61,7 @@ public class HoKhauPanel extends JPanel {
         txtSearch.setFont(new Font("Inter", Font.PLAIN, 14));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(new Color(220, 220, 220), 1),
-                new EmptyBorder(0, 10, 0, 0)
-        ));
+                new EmptyBorder(0, 10, 0, 0)));
         txtSearch.putClientProperty("JTextField.placeholderText", "Tìm kiếm...");
         toolBox.add(txtSearch);
 
@@ -74,7 +73,8 @@ public class HoKhauPanel extends JPanel {
         btnSearch.setCursor(new Cursor(Cursor.HAND_CURSOR));
         URL searchUrl = getClass().getResource("/images/icon_search.png");
         if (searchUrl != null) {
-            btnSearch.setIcon(new ImageIcon(new ImageIcon(searchUrl).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+            btnSearch.setIcon(
+                    new ImageIcon(new ImageIcon(searchUrl).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
         } else {
             btnSearch.setText("🔍");
         }
@@ -87,7 +87,10 @@ public class HoKhauPanel extends JPanel {
         btnAdd.setFont(new Font("Inter", Font.BOLD, 14));
         btnAdd.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnAdd.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Chức năng Thêm đang phát triển!");
+            // Mở Dialog Thêm
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            ThemHoKhauDialog dialog = new ThemHoKhauDialog(parentFrame, this);
+            dialog.setVisible(true);
         });
         toolBox.add(btnAdd);
 
@@ -97,7 +100,7 @@ public class HoKhauPanel extends JPanel {
         // ==================================================================
         // 2. BẢNG DỮ LIỆU
         // ==================================================================
-        String[] columnNames = {"STT", "Mã hộ", "Tên chủ hộ", "Diện tích (m2)", "Số điện thoại", "Thao tác"};
+        String[] columnNames = { "STT", "Mã hộ", "Tên chủ hộ", "Diện tích (m2)", "Số điện thoại", "Thao tác" };
 
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -110,10 +113,10 @@ public class HoKhauPanel extends JPanel {
 
         // --- 2.1 CẤU HÌNH KÍCH THƯỚC CỘT (ĐÃ CHỈNH SỬA) ---
         TableColumnModel columnModel = table.getColumnModel();
-        
+
         // Cột 0: STT (Nhỏ, cố định)
         columnModel.getColumn(0).setPreferredWidth(80);
-        columnModel.getColumn(0).setMaxWidth(80); 
+        columnModel.getColumn(0).setMaxWidth(80);
 
         // Cột 1: Mã hộ (Nhỏ vừa phải)
         columnModel.getColumn(1).setPreferredWidth(120);
@@ -132,20 +135,22 @@ public class HoKhauPanel extends JPanel {
         columnModel.getColumn(5).setMinWidth(150);
         columnModel.getColumn(5).setMaxWidth(150);
 
-
         // --- 2.2 CẤU HÌNH HEADER VÀ BODY ---
         JTableHeader header = table.getTableHeader();
         header.setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                        column);
                 lbl.setFont(new Font("Inter", Font.BOLD, 24));
                 lbl.setBackground(COL_TABLE_HEADER);
                 lbl.setForeground(Color.BLACK);
                 lbl.setHorizontalAlignment(JLabel.LEFT);
                 lbl.setBorder(new EmptyBorder(10, 15, 10, 0));
-                
-                if (column == 5) lbl.setHorizontalAlignment(JLabel.CENTER);
+
+                if (column == 5)
+                    lbl.setHorizontalAlignment(JLabel.CENTER);
                 return lbl;
             }
         });
@@ -159,8 +164,10 @@ public class HoKhauPanel extends JPanel {
 
         DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                        column);
                 lbl.setHorizontalAlignment(JLabel.LEFT);
                 lbl.setBorder(new EmptyBorder(0, 15, 0, 0));
                 return lbl;
@@ -196,7 +203,7 @@ public class HoKhauPanel extends JPanel {
         List<HoKhau> list = controller.getAllHoKhau();
         int stt = 1;
         for (HoKhau hk : list) {
-            tableModel.addRow(new Object[]{
+            tableModel.addRow(new Object[] {
                     stt++,
                     hk.getSoCanHo(),
                     hk.getTenChuHo(),
@@ -221,7 +228,7 @@ public class HoKhauPanel extends JPanel {
             btnAdd = createBtn("/images/icon_add_resident.png");
             btnEdit = createBtn("/images/icon_edit.png");
             btnDelete = createBtn("/images/icon_delete.png");
-            
+
             add(btnAdd);
             add(btnEdit);
             add(btnDelete);
@@ -234,28 +241,98 @@ public class HoKhauPanel extends JPanel {
             btn.setFocusPainted(false);
             btn.setBorder(null);
             btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            
+
             URL url = getClass().getResource(iconPath);
             if (url != null) {
                 ImageIcon icon = new ImageIcon(url);
                 Image img = icon.getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
                 btn.setIcon(new ImageIcon(img));
             } else {
-                btn.setText("●"); 
+                btn.setText("●");
             }
             return btn;
         }
-        
+
         public void initEvent(int row) {
-            btnAdd.addActionListener(e -> JOptionPane.showMessageDialog(this, "Thêm thành viên vào hộ dòng: " + (row + 1)));
-            btnEdit.addActionListener(e -> JOptionPane.showMessageDialog(this, "Sửa hộ dòng: " + (row + 1)));
-            btnDelete.addActionListener(e -> JOptionPane.showMessageDialog(this, "Xóa hộ dòng: " + (row + 1)));
+            btnAdd.addActionListener(
+                    e -> JOptionPane.showMessageDialog(this, "Thêm thành viên vào hộ dòng: " + (row + 1)));
+
+            btnEdit.addActionListener(e -> {
+                // 1. Lấy Mã hộ từ bảng
+                String maHoStr = table.getValueAt(row, 1).toString();
+
+                // 2. Tìm object HoKhau gốc từ CSDL (hoặc list)
+                // (Cách đơn giản nhất là tìm trong list controller đang giữ)
+                java.util.List<HoKhau> list = controller.getAllHoKhau();
+                HoKhau selectedHk = null;
+                for (HoKhau hk : list) {
+                    if (hk.getSoCanHo().equals(maHoStr)) {
+                        selectedHk = hk;
+                        break;
+                    }
+                }
+
+                // 3. Mở Dialog và truyền dữ liệu vào
+                if (selectedHk != null) {
+                    JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(HoKhauPanel.this);
+                    ThemHoKhauDialog dialog = new ThemHoKhauDialog(parentFrame, HoKhauPanel.this);
+
+                    // Gọi hàm setEditData vừa viết
+                    dialog.setEditData(selectedHk);
+
+                    dialog.setVisible(true);
+                }
+            });
+
+            btnDelete.addActionListener(e -> {
+                // 1. Lấy Mã hộ của dòng hiện tại (Giả sử cột 1 là Mã Hộ dạng String như
+                // "A-101")
+                // Hoặc nếu bảng lưu ID ẩn, ta cần cách khác.
+                // Ở đây ta lấy object HoKhau từ danh sách gốc trong controller (cần chỉnh lại
+                // loadData để lưu list)
+
+                // Cách đơn giản: Lấy Mã Hộ (String) từ bảng
+                String maHoStr = table.getValueAt(row, 1).toString();
+
+                // Hộp thoại xác nhận
+                int confirm = JOptionPane.showConfirmDialog(HoKhauPanel.this,
+                        "Bạn có chắc chắn muốn xóa hộ " + maHoStr
+                                + " không?\n(Dữ liệu nhân khẩu liên quan cũng sẽ bị xóa)",
+                        "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    // Cần tìm ID (int) của hộ này để xóa.
+                    // (Lưu ý: Trong thực tế ta nên lưu listHoKhau làm biến toàn cục để tra cứu)
+                    // Giả sử ta tìm lại ID từ CSDL hoặc List tạm:
+
+                    List<HoKhau> list = controller.getAllHoKhau();
+                    int idToDelete = -1;
+                    for (HoKhau hk : list) {
+                        if (hk.getSoCanHo().equals(maHoStr)) {
+                            idToDelete = hk.getMaHo();
+                            break;
+                        }
+                    }
+
+                    if (idToDelete != -1) {
+                        boolean deleted = controller.deleteHoKhau(idToDelete);
+                        if (deleted) {
+                            JOptionPane.showMessageDialog(HoKhauPanel.this, "Đã xóa thành công!");
+                            loadData(); // Refresh lại bảng
+                        } else {
+                            JOptionPane.showMessageDialog(HoKhauPanel.this, "Xóa thất bại!", "Lỗi",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
+            });
         }
     }
 
     class TableActionCellRender extends DefaultTableCellRenderer {
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
             PanelAction action = new PanelAction();
             if (isSelected) {
                 action.setBackground(new Color(232, 240, 254));
@@ -272,7 +349,8 @@ public class HoKhauPanel extends JPanel {
         }
 
         @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+                int column) {
             PanelAction action = new PanelAction();
             action.initEvent(row);
             action.setBackground(new Color(232, 240, 254));
@@ -283,22 +361,43 @@ public class HoKhauPanel extends JPanel {
     class RoundedPanel extends JPanel {
         private int radius;
         private Color bgColor;
-        public RoundedPanel(int radius, Color bgColor) { this.radius = radius; this.bgColor = bgColor; setOpaque(false); }
-        @Override protected void paintComponent(Graphics g) {
-            super.paintComponent(g); Graphics2D g2 = (Graphics2D) g;
+
+        public RoundedPanel(int radius, Color bgColor) {
+            this.radius = radius;
+            this.bgColor = bgColor;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(bgColor); g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+            g2.setColor(bgColor);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
         }
     }
 
     class RoundedButton extends JButton {
-        public RoundedButton(String text) { super(text); setContentAreaFilled(false); setFocusPainted(false); setBorderPainted(false); }
-        @Override protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create(); g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(getBackground()); g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 30, 30));
-            g2.setColor(getForeground()); FontMetrics fm = g2.getFontMetrics();
+        public RoundedButton(String text) {
+            super(text);
+            setContentAreaFilled(false);
+            setFocusPainted(false);
+            setBorderPainted(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getBackground());
+            g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 30, 30));
+            g2.setColor(getForeground());
+            FontMetrics fm = g2.getFontMetrics();
             int x = (getWidth() - fm.stringWidth(getText())) / 2;
-            int y = (getHeight() + fm.getAscent()) / 2 - 4; g2.drawString(getText(), x, y); g2.dispose();
+            int y = (getHeight() + fm.getAscent()) / 2 - 4;
+            g2.drawString(getText(), x, y);
+            g2.dispose();
         }
     }
 }

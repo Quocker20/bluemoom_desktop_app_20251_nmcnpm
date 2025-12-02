@@ -5,7 +5,7 @@ import com.bluemoon.app.model.HoKhau;
 import java.util.List;
 
 public class HoKhauController {
-
+    static double maxArea = 1000.0; // Diện tích tối đa hợp lệ
     private HoKhauDAO hoKhauDAO;
 
     public HoKhauController() {
@@ -22,7 +22,7 @@ public class HoKhauController {
         // 1. Validate dữ liệu cơ bản
         if (hk.getSoCanHo() == null || hk.getSoCanHo().trim().isEmpty() ||
                 hk.getTenChuHo() == null || hk.getTenChuHo().trim().isEmpty() ||
-                hk.getDienTich() <= 0) {
+                hk.getDienTich() <= 0 || hk.getDienTich() > maxArea) {
             return false; // Dữ liệu không hợp lệ
         }
 
@@ -39,7 +39,7 @@ public class HoKhauController {
     // Cập nhật hộ khẩu
     public boolean updateHoKhau(HoKhau hk) {
         // Validate cơ bản
-        if (hk.getMaHo() <= 0 || hk.getDienTich() <= 0) {
+        if (hk.getMaHo() <= 0 || hk.getDienTich() <= 0 || hk.getDienTich() > maxArea) {
             return false;
         }
         return hoKhauDAO.update(hk);
