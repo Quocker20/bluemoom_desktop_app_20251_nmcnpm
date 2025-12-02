@@ -59,4 +59,9 @@ public class HoKhauController {
         }
         return hoKhauDAO.search(keyword.trim());
     }
+
+    //Lấy số mã hộ lớn nhất
+    public int getMaxMaHo() {
+        return hoKhauDAO.getMaxMaHo();
+    }
 }

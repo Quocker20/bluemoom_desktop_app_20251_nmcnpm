@@ -2,6 +2,10 @@ package com.bluemoon.app.view;
 
 import com.bluemoon.app.controller.HoKhauController;
 import com.bluemoon.app.model.HoKhau;
+import com.bluemoon.app.model.NhanKhau;
+import com.bluemoon.app.controller.NhanKhauController;
+import com.bluemoon.app.view.ThemNhanKhauDialog;
+
 
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
@@ -18,7 +22,8 @@ public class ThemHoKhauDialog extends JDialog {
     private JButton btnCancel;
     private JLabel lblTitle;
 
-    private HoKhauController controller;
+    private HoKhauController hkController;
+    private NhanKhauController nkController;
     private HoKhauPanel parentPanel;
     
     // Biến cờ để xác định chế độ
@@ -28,7 +33,7 @@ public class ThemHoKhauDialog extends JDialog {
     public ThemHoKhauDialog(JFrame parentFrame, HoKhauPanel parentPanel) {
         super(parentFrame, "Quản lý Hộ khẩu", true);
         this.parentPanel = parentPanel;
-        this.controller = new HoKhauController();
+        this.hkController = new HoKhauController();
         initComponents();
     }
 
@@ -179,10 +184,10 @@ public class ThemHoKhauDialog extends JDialog {
     // --- LOGIC RIÊNG CHO THÊM MỚI ---
     private void addHoKhau(String maHo, String ten, double dt, String sdt) {
         HoKhau hk = new HoKhau(maHo, ten, dt, sdt);
-        boolean success = controller.addHoKhau(hk);
+        boolean success = hkController.addHoKhau(hk);
         
         if (success) {
-            JOptionPane.showMessageDialog(this, "Thêm hộ khẩu thành công!");
+            JOptionPane.showMessageDialog(this, "Thêm hộ khẩu thành công!\nVui lòng bổ sung thông tin chủ hộ.");
             closeAndRefresh();
         } else {
             JOptionPane.showMessageDialog(this, "Thêm thất bại! Mã hộ '" + maHo + "' có thể đã tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -197,7 +202,7 @@ public class ThemHoKhauDialog extends JDialog {
         currentHoKhau.setSdt(sdt);
         // Lưu ý: Không setSoCanHo vì đã bị khóa
 
-        boolean success = controller.updateHoKhau(currentHoKhau);
+        boolean success = hkController.updateHoKhau(currentHoKhau);
         
         if (success) {
             JOptionPane.showMessageDialog(this, "Cập nhật thông tin thành công!");

@@ -72,24 +72,30 @@ public class TamTruTamVangDAO {
 
     /**
      * Lay danh sách tất cả bản ghi Tạm trú/Tạm vắng.
+     * 
      * @return List<TamTruTamVang>
      */
     public List<TamTruTamVang> getAll() {
         List<TamTruTamVang> list = new ArrayList<>();
-        String sql = "SELECT * FROM TAM_TRU_TAM_VANG ORDER BY MaTTTV ASC";
+        // JOIN với bảng NHAN_KHAU để lấy tên
+        String sql = "SELECT t.MaTTTV, t.LoaiHinh, t.TuNgay, t.DenNgay, t.LyDo, n.HoTen " +
+                "FROM TAM_TRU_TAM_VANG t " +
+                "JOIN NHAN_KHAU n ON t.MaNhanKhau = n.MaNhanKhau " +
+                "ORDER BY t.MaTTTV ASC";
 
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 TamTruTamVang t = new TamTruTamVang();
                 t.setMaTTTV(rs.getInt("MaTTTV"));
-                t.setMaNhanKhau(rs.getInt("MaNhanKhau"));
                 t.setLoaiHinh(rs.getString("LoaiHinh"));
                 t.setTuNgay(rs.getDate("TuNgay"));
                 t.setDenNgay(rs.getDate("DenNgay"));
                 t.setLyDo(rs.getString("LyDo"));
+                // Thay vì set MaNhanKhau, ta set luôn tên nhân khẩu
+                t.setHoTen(rs.getString("HoTen"));
                 list.add(t);
             }
         } catch (SQLException e) {

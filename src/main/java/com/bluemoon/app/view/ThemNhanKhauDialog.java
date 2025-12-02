@@ -28,6 +28,7 @@ public class ThemNhanKhauDialog extends JDialog {
     private boolean isEditMode = false;
     private NhanKhau currentNK = null;
 
+
     public ThemNhanKhauDialog(JFrame parentFrame, QuanLyNhanKhauDialog parentDialog, HoKhau hoKhau) {
         super(parentFrame, "Thông tin Nhân khẩu", true);
         this.parentDialog = parentDialog;

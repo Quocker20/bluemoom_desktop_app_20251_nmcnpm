@@ -40,6 +40,27 @@ public class HoKhauDAO {
     }
 
     /**
+     * Lấy số mã hộ lớn nhất hiện tại (số căn hộ)
+     * @return String mã hộ lớn nhất, -1 nếu không có
+     *
+     */
+    public int getMaxMaHo() {
+        String sql = "SELECT MAX(MaHo) AS MaxMaHo FROM HO_KHAU";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt("MaxMaHo");
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi lấy Mã hộ lớn nhất: " + e.getMessage());
+        }
+        return -1; // Trả về -1 nếu không có hộ khẩu nào
+    }
+
+    /**
      * Thêm mới một Hộ khẩu.
      * @param hk Đối tượng HoKhau cần thêm
      * @return true nếu thành công

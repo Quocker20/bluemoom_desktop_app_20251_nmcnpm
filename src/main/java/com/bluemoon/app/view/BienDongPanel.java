@@ -175,7 +175,7 @@ public class BienDongPanel extends JPanel {
             
             // Nếu Model chưa có getHoTen(), tạm thời hiển thị Mã Nhân Khẩu
             // String hoTen = item.getHoTen(); 
-            String doiTuong = String.valueOf(item.getMaNhanKhau()); 
+            String doiTuong = item.getHoTen() != null && !item.getHoTen().isEmpty() ? item.getHoTen() : String.valueOf(item.getMaNhanKhau());
 
             String loai = item.getLoaiHinh(); 
             String tuNgay = item.getTuNgay() != null ? sdf.format(item.getTuNgay()) : "";

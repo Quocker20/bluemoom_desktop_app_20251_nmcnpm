@@ -9,6 +9,7 @@ public class TamTruTamVang {
     private Date tuNgay;
     private Date denNgay;
     private String lyDo;
+    private String HoTen; // Tên nhân khẩu, không lưu DB, chỉ để hiển thị
 
     // Constructor mặc định
     public TamTruTamVang() {
@@ -81,6 +82,14 @@ public class TamTruTamVang {
 
     public void setLyDo(String lyDo) {
         this.lyDo = lyDo;
+    }
+
+    public String getHoTen() {
+        return HoTen;
+    }
+
+    public void setHoTen(String hoTen) {
+        HoTen = hoTen;
     }
 
     @Override
