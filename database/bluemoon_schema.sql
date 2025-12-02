@@ -109,23 +109,3 @@ INSERT INTO KHOAN_PHI (TenKhoanPhi, DonGia, DonViTinh, LoaiPhi) VALUES
 ('Phí Quản lý', 3000, 'm2', 0),          -- Bắt buộc, 3k/m2
 ('Quỹ Vì người nghèo', 0, 'ho', 1);      -- Tự nguyện
 
--- 3. Hộ khẩu mẫu
-INSERT INTO HO_KHAU (SoCanHo, TenChuHo, DienTich, SDT) VALUES 
-('A-101', 'Nguyen Van An', 100.0, '0987654321'),
-('B-202', 'Tran Thi Binh', 80.5, '0912345678'),
-('C-303', 'Le Van Cuong', 120.0, '0909090909');
-
--- 4. Nhân khẩu mẫu
-INSERT INTO NHAN_KHAU (MaHo, HoTen, NgaySinh, GioiTinh, CCCD, QuanHe) VALUES 
--- Hộ A-101
-(1, 'Nguyen Van An', '1980-01-01', 'Nam', '001080000001', 'ChuHo'),
-(1, 'Pham Thi Dung', '1982-05-05', 'Nu', '001082000002', 'Vo'),
-(1, 'Nguyen Van Em', '2010-10-10', 'Nam', NULL, 'Con'), -- Trẻ em không có CCCD
--- Hộ B-202
-(2, 'Tran Thi Binh', '1990-10-10', 'Nu', '001090000003', 'ChuHo');
-
--- 5. Công nợ mẫu (Giả sử đã chạy tính phí tháng 11/2025)
--- Hộ A (100m2): Phí DV (7000) = 700k, Phí QL (3000) = 300k
-INSERT INTO CONG_NO (MaHo, MaKhoanPhi, Thang, Nam, SoTienPhaiDong, SoTienDaDong, TrangThai) VALUES 
-(1, 1, 11, 2025, 700000, 0, 0), -- Chưa đóng
-(1, 2, 11, 2025, 300000, 300000, 1); -- Đã đóng đủ
