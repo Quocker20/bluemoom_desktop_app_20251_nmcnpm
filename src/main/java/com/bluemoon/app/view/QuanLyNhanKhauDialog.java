@@ -8,7 +8,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D; // Import thêm để vẽ bo góc
+import java.awt.geom.RoundRectangle2D;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class QuanLyNhanKhauDialog extends JDialog {
     }
 
     private void initComponents() {
-        setSize(900, 550);
+        setSize(950, 550);
         setLocationRelativeTo(getParent());
         setLayout(new BorderLayout());
 
@@ -65,16 +65,20 @@ public class QuanLyNhanKhauDialog extends JDialog {
         table.setRowHeight(35);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setSelectionBackground(new Color(232, 240, 254));
-        table.setSelectionForeground(Color.BLACK); // Đảm bảo chữ đen khi chọn dòng
+        table.setSelectionForeground(Color.BLACK); // Chữ đen khi chọn
         
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         add(scrollPane, BorderLayout.CENTER);
 
-        // 3. Footer (Sửa & Xóa)
+        // 3. Footer (Các nút chức năng)
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         footerPanel.setBorder(new EmptyBorder(10, 20, 20, 20));
         
+        // Nút Đăng ký Biến động (Tím - Chữ đen)
+        ColoredButton btnBienDong = new ColoredButton("Đăng ký Biến động", new Color(155, 89, 182));
+        btnBienDong.addActionListener(e -> handleBienDong());
+
         // Nút Sửa (Cam - Chữ đen)
         ColoredButton btnEdit = new ColoredButton("Sửa thông tin", new Color(243, 156, 18));
         btnEdit.addActionListener(e -> handleEdit());
@@ -87,6 +91,7 @@ public class QuanLyNhanKhauDialog extends JDialog {
         btnClose.setPreferredSize(new Dimension(80, 35));
         btnClose.addActionListener(e -> dispose());
 
+        footerPanel.add(btnBienDong);
         footerPanel.add(btnEdit);
         footerPanel.add(btnDelete);
         footerPanel.add(btnClose);
@@ -111,16 +116,30 @@ public class QuanLyNhanKhauDialog extends JDialog {
         }
     }
 
-    private void handleEdit() {
+    private void handleBienDong() {
         int row = table.getSelectedRow();
         if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân khẩu cần sửa!");
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân khẩu cần đăng ký!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
         NhanKhau selectedNK = currentList.get(row);
         
-        // Mở Dialog Sửa
+        DangKyBienDongDialog dialog = new DangKyBienDongDialog((JFrame) getParent(), selectedNK);
+        dialog.setVisible(true);
+
+        
+    }
+
+    private void handleEdit() {
+        int row = table.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân khẩu cần sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        NhanKhau selectedNK = currentList.get(row);
+        
         ThemNhanKhauDialog dialog = new ThemNhanKhauDialog((JFrame) getParent(), this, hoKhau);
         dialog.setEditData(selectedNK);
         dialog.setVisible(true);
@@ -129,14 +148,14 @@ public class QuanLyNhanKhauDialog extends JDialog {
     private void handleDelete() {
         int row = table.getSelectedRow();
         if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân khẩu cần xóa!");
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân khẩu cần xóa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
         NhanKhau selectedNK = currentList.get(row);
 
         int confirm = JOptionPane.showConfirmDialog(this, 
-            "Bạn có chắc muốn xóa thành viên: " + selectedNK.getHoTen() + "?",
+            "Bạn có chắc muốn xóa thành viên: " + selectedNK.getHoTen() + "?\n(Hành động này không thể hoàn tác)",
             "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
             
         if (confirm == JOptionPane.YES_OPTION) {
@@ -175,7 +194,7 @@ public class QuanLyNhanKhauDialog extends JDialog {
             g2.setColor(getBackground());
             g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10)); // Bo góc nhẹ 10px
             
-            // Vẽ text (Super sẽ vẽ text lên trên nền ta vừa vẽ)
+            // Vẽ text
             super.paintComponent(g);
             g2.dispose();
         }

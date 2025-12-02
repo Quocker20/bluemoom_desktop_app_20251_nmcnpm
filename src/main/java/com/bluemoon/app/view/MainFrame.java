@@ -15,7 +15,7 @@ public class MainFrame extends JFrame {
     // --- BIẾN TOÀN CỤC ---
     private JPanel contentPanel;
     private JPanel mainDashboardPanel;
-    
+
     // Map lưu trữ các nút menu để quản lý trạng thái
     private Map<String, MenuButton> menuButtons = new HashMap<>();
 
@@ -80,6 +80,7 @@ public class MainFrame extends JFrame {
         // Menu Items
         topSidebar.add(createMenuItem("Tổng quan", "/images/icon_overview.png", true));
         topSidebar.add(createMenuItem("Quản lý Cư dân", "/images/icon_resident.png", false));
+        topSidebar.add(createMenuItem("Quản lý Biến động", "/images/icon_change.png", false));
         topSidebar.add(createMenuItem("Quản lý Thu phí", "/images/icon_fee.png", false));
         topSidebar.add(createMenuItem("Báo cáo & Thống kê", "/images/icon_report.png", false));
         topSidebar.add(createMenuItem("Hệ thống", "/images/icon_system.png", false));
@@ -105,9 +106,14 @@ public class MainFrame extends JFrame {
         String username = currentUser != null ? currentUser.getTenDangNhap() : "User";
         String displayRoleName;
         switch (roleName) {
-            case "QuanLy": displayRoleName = "Quản lý"; break;
-            case "KeToan": displayRoleName = "Kế toán"; break;
-            default: displayRoleName = "Thư ký";
+            case "QuanLy":
+                displayRoleName = "Quản lý";
+                break;
+            case "KeToan":
+                displayRoleName = "Kế toán";
+                break;
+            default:
+                displayRoleName = "Thư ký";
         }
         JLabel lblUserInfo = new JLabel("Xin chào, " + displayRoleName + " (" + username + ")  ");
         lblUserInfo.setFont(new Font("Inter", Font.BOLD, 20));
@@ -152,10 +158,14 @@ public class MainFrame extends JFrame {
         gbcCards.weightx = 1.0;
         gbcCards.insets = new Insets(0, 0, 0, 20);
 
-        gbcCards.gridx = 0; cardsPanel.add(createDashboardCard("Hộ cư dân", "150", "/images/icon_house.png"), gbcCards);
-        gbcCards.gridx = 1; cardsPanel.add(createDashboardCard("Nhân khẩu", "450", "/images/icon_people.png"), gbcCards);
-        gbcCards.gridx = 2; cardsPanel.add(createDashboardCard("Tổng thu", "50.0 tr", "/images/icon_money.png"), gbcCards);
-        gbcCards.gridx = 3; gbcCards.insets = new Insets(0, 0, 0, 0);
+        gbcCards.gridx = 0;
+        cardsPanel.add(createDashboardCard("Hộ cư dân", "150", "/images/icon_house.png"), gbcCards);
+        gbcCards.gridx = 1;
+        cardsPanel.add(createDashboardCard("Nhân khẩu", "450", "/images/icon_people.png"), gbcCards);
+        gbcCards.gridx = 2;
+        cardsPanel.add(createDashboardCard("Tổng thu", "50.0 tr", "/images/icon_money.png"), gbcCards);
+        gbcCards.gridx = 3;
+        gbcCards.insets = new Insets(0, 0, 0, 0);
         cardsPanel.add(createDashboardCard("Công nợ", "5.0 tr", "/images/icon_card.png"), gbcCards);
 
         // B. Charts & Notification
@@ -167,10 +177,14 @@ public class MainFrame extends JFrame {
         gbcMain.fill = GridBagConstraints.BOTH;
         gbcMain.weighty = 1.0;
 
-        gbcMain.gridx = 0; gbcMain.weightx = 0.65; gbcMain.insets = new Insets(0, 0, 0, 20);
+        gbcMain.gridx = 0;
+        gbcMain.weightx = 0.65;
+        gbcMain.insets = new Insets(0, 0, 0, 20);
         mainSection.add(createPlaceholderPanel("Biểu đồ thu phí theo tháng", 0, 400), gbcMain);
 
-        gbcMain.gridx = 1; gbcMain.weightx = 0.35; gbcMain.insets = new Insets(0, 0, 0, 0);
+        gbcMain.gridx = 1;
+        gbcMain.weightx = 0.35;
+        gbcMain.insets = new Insets(0, 0, 0, 0);
         mainSection.add(createPlaceholderPanel("Thông báo mới", 0, 400), gbcMain);
 
         dashboard.add(cardsPanel, BorderLayout.NORTH);
@@ -186,7 +200,7 @@ public class MainFrame extends JFrame {
 
         // 2. CHECK LOGIC: Nếu nút đó ĐANG ACTIVE rồi thì return luôn (không làm gì cả)
         if (btn != null && btn.isMenuActive()) {
-            return; 
+            return;
         }
 
         // 3. Nếu chưa active thì mới xử lý chuyển Panel
@@ -197,6 +211,9 @@ public class MainFrame extends JFrame {
                 break;
             case "Quản lý Cư dân":
                 contentPanel.add(new HoKhauPanel(), BorderLayout.CENTER);
+                break;
+            case "Quản lý Biến động":
+                contentPanel.add(new BienDongPanel(), BorderLayout.CENTER);
                 break;
             default:
                 JLabel lbl = new JLabel("Chức năng " + menuTitle + " đang phát triển", SwingConstants.CENTER);
@@ -317,7 +334,7 @@ public class MainFrame extends JFrame {
         public MenuButton(String text, String iconPath, boolean isActive) {
             super(text);
             this.isActive = isActive;
-            
+
             setMaximumSize(new Dimension(260, 50));
             setAlignmentX(Component.LEFT_ALIGNMENT);
             setFont(new Font("Inter", Font.CENTER_BASELINE, 20));
@@ -336,10 +353,13 @@ public class MainFrame extends JFrame {
 
             addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    if (!isActive) setForeground(Color.WHITE);
+                    if (!isActive)
+                        setForeground(Color.WHITE);
                 }
+
                 public void mouseExited(java.awt.event.MouseEvent evt) {
-                    if (!isActive) setForeground(COL_TEXT_SIDEBAR);
+                    if (!isActive)
+                        setForeground(COL_TEXT_SIDEBAR);
                 }
             });
         }

@@ -1,3 +1,4 @@
+C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\dao\TamTruTamVangDAO.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\model\User.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\controller\NhanKhauController.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\view\QuanLyNhanKhauDialog.java
@@ -7,11 +8,15 @@ C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\dao\NhanKhauDAO.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\view\LoginFrame.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\util\DatabaseConnector.java
+C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\view\BienDongPanel.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\view\MainFrame.java
+C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\view\DangKyBienDongDialog.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\controller\LoginController.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\model\HoKhau.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\model\NhanKhau.java
+C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\controller\TamTruTamVangController.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\view\ThemNhanKhauDialog.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\dao\UserDAO.java
+C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\model\TamTruTamVang.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\view\HoKhauPanel.java
 C:\PROJECTS\BTL_NMCNPM\04_Lap_trinh\bluemoon-desktop\src\main\java\com\bluemoon\app\util\SecurityUtil.java
