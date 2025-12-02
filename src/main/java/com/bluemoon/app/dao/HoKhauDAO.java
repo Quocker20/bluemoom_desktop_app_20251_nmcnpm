@@ -125,4 +125,39 @@ public class HoKhauDAO {
         }
         return false;
     }
+
+    /**
+     * Tìm kiếm Hộ khẩu theo từ khóa.
+     * @param keyword Từ khóa (Tên chủ hộ hoặc Số phòng)
+     * @return List<HoKhau> kết quả
+     */
+    public List<HoKhau> search(String keyword) {
+        List<HoKhau> list = new ArrayList<>();
+        // Tìm kiếm gần đúng (LIKE %...%) trên cả 2 cột
+        String sql = "SELECT * FROM HO_KHAU WHERE SoCanHo LIKE ? OR TenChuHo LIKE ?";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            String query = "%" + keyword + "%";
+            pstmt.setString(1, query);
+            pstmt.setString(2, query);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    HoKhau hk = new HoKhau();
+                    hk.setMaHo(rs.getInt("MaHo"));
+                    hk.setSoCanHo(rs.getString("SoCanHo"));
+                    hk.setTenChuHo(rs.getString("TenChuHo"));
+                    hk.setDienTich(rs.getDouble("DienTich"));
+                    hk.setSdt(rs.getString("SDT"));
+                    hk.setNgayTao(rs.getDate("NgayTao"));
+                    list.add(hk);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm Hộ khẩu: " + e.getMessage());
+        }
+        return list;
+    }
 }

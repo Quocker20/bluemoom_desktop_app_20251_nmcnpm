@@ -51,4 +51,12 @@ public class HoKhauController {
             return false;
         return hoKhauDAO.delete(maHo);
     }
+
+    // Tìm kiếm hộ khẩu
+    public List<HoKhau> searchHoKhau(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllHoKhau(); // Nếu từ khóa rỗng, trả về tất cả
+        }
+        return hoKhauDAO.search(keyword.trim());
+    }
 }
