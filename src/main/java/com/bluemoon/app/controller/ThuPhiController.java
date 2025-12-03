@@ -1,22 +1,21 @@
 package com.bluemoon.app.controller;
 
-import com.bluemoon.app.dao.CongNoDAO;
-import com.bluemoon.app.dao.GiaoDichDAO;
-import com.bluemoon.app.dao.HoKhauDAO;
-import com.bluemoon.app.dao.KhoanPhiDAO;
-import com.bluemoon.app.model.CongNo;
-import com.bluemoon.app.model.GiaoDich;
-import com.bluemoon.app.model.HoKhau;
-import com.bluemoon.app.model.KhoanPhi;
+import com.bluemoon.app.dao.*;
+import com.bluemoon.app.model.*;
+import com.bluemoon.app.util.AppConstants;
+import com.bluemoon.app.util.DatabaseConnector;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 
 public class ThuPhiController {
 
-    private CongNoDAO congNoDAO;
-    private KhoanPhiDAO khoanPhiDAO;
-    private GiaoDichDAO giaoDichDAO;
-    private HoKhauDAO hoKhauDAO;
+    private final CongNoDAO congNoDAO;
+    private final KhoanPhiDAO khoanPhiDAO;
+    private final GiaoDichDAO giaoDichDAO;
+    private final HoKhauDAO hoKhauDAO;
 
     public ThuPhiController() {
         this.congNoDAO = new CongNoDAO();
@@ -25,125 +24,243 @@ public class ThuPhiController {
         this.hoKhauDAO = new HoKhauDAO();
     }
 
-    // --- 1. QUẢN LÝ DANH MỤC PHÍ ---
+    public List<CongNo> getDanhSachCongNo(int thang, int nam, String keyword) {
+        return congNoDAO.getAll(thang, nam, keyword);
+    }
 
     public List<KhoanPhi> getAllKhoanPhi() {
         return khoanPhiDAO.getAll();
     }
 
-    public boolean updateKhoanPhi(KhoanPhi kp) {
-        // Validate: Đơn giá không được âm
-        if (kp.getDonGia() < 0) {
-            System.err.println("Lỗi: Đơn giá không hợp lệ");
-            return false;
-        }
-        return khoanPhiDAO.update(kp);
+    public List<KhoanPhi> getListKhoanPhi(String keyword) {
+        return khoanPhiDAO.getAll(keyword);
     }
 
-    public boolean themKhoanThuTuNguyen(String tenKhoanThu, String ghiChu) {
-        if (tenKhoanThu == null || tenKhoanThu.trim().isEmpty()) return false;
-        
-        KhoanPhi kp = new KhoanPhi();
-        kp.setTenKhoanPhi(tenKhoanThu);
-        kp.setDonGia(0); // Tự nguyện không có đơn giá cố định
-        kp.setDonViTinh("Lần");
-        kp.setMandatory(false); // Là tự nguyện
-        
+    public boolean insertKhoanPhi(KhoanPhi kp) {
+        if (kp.getTenKhoanPhi() == null || kp.getTenKhoanPhi().trim().isEmpty())
+            return false;
+        if (kp.getDonGia() < 0)
+            return false;
+        if (kp.getLoaiPhi() == AppConstants.PHI_BAT_BUOC && kp.getDonGia() <= 0)
+            return false;
         return khoanPhiDAO.insert(kp);
     }
 
-    // --- 2. NGHIỆP VỤ TÍNH PHÍ TỰ ĐỘNG (QUAN TRỌNG) ---
+    public boolean updateKhoanPhi(KhoanPhi kp) {
+        if (kp.getDonGia() < 0)
+            return false;
+        return khoanPhiDAO.update(kp);
+    }
 
-    /**
-     * Tính toán và tạo công nợ cho tất cả hộ khẩu trong tháng chỉ định.
-     * @param thang Tháng cần tính
-     * @param nam Năm cần tính
-     * @return Số lượng bản ghi công nợ đã tạo (-1 nếu lỗi hoặc đã tính rồi)
-     */
-    public int tinhPhiTuDong(int thang, int nam) {
-        // 1. Kiểm tra xem tháng này đã tính chưa
-        if (congNoDAO.checkCalculated(thang, nam)) {
-            System.err.println("Tháng " + thang + "/" + nam + " đã được tính phí rồi.");
-            return -1; 
-        }
+    public boolean deleteKhoanPhi(int id) {
+        return khoanPhiDAO.delete(id);
+    }
 
-        // 2. Lấy danh sách tất cả hộ khẩu (để lấy Diện tích)
+    // --- LOGIC TÍNH PHÍ TỰ ĐỘNG CHO 1 KHOẢN PHÍ MỚI (New Feature) ---
+    public void tinhPhiTuDongChoKhoanPhi(int thang, int nam, KhoanPhi kp) {
+        // Chỉ áp dụng cho phí bắt buộc
+        if (kp.getLoaiPhi() != AppConstants.PHI_BAT_BUOC)
+            return;
+
         List<HoKhau> listHoKhau = hoKhauDAO.getAll();
-        
-        // 3. Lấy danh sách các khoản phí BẮT BUỘC
-        List<KhoanPhi> listPhi = khoanPhiDAO.getAll(); 
-        
-        int count = 0;
+        Connection conn = null;
+        try {
+            conn = DatabaseConnector.getConnection();
+            if (conn == null)
+                return;
+            conn.setAutoCommit(false); // Transaction
 
-        // 4. Vòng lặp tính toán
-        for (HoKhau hk : listHoKhau) {
-            for (KhoanPhi kp : listPhi) {
-                if (kp.isMandatory()) { // Chỉ tính phí bắt buộc
-                    double soTienCanDong = 0;
+            // Logic: Insert công nợ cho từng hộ với khoản phí này
+            // Sử dụng INSERT IGNORE hoặc kiểm tra tồn tại để tránh lỗi nếu chạy lại
+            String sql = "INSERT INTO CONG_NO (MaHo, MaKhoanPhi, Thang, Nam, SoTienPhaiDong, SoTienDaDong, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
 
-                    // Logic tính tiền:
-                    // Nếu đơn vị là 'm2' -> nhân với diện tích
-                    // Nếu đơn vị là 'hộ' -> giá cố định
-                    if ("m2".equalsIgnoreCase(kp.getDonViTinh())) {
-                        soTienCanDong = kp.getDonGia() * hk.getDienTich();
-                    } else {
-                        soTienCanDong = kp.getDonGia();
-                    }
-
-                    // Tạo đối tượng Công nợ
-                    CongNo cn = new CongNo();
-                    cn.setMaHo(hk.getMaHo());
-                    cn.setMaKhoanPhi(kp.getMaKhoanPhi());
-                    cn.setThang(thang);
-                    cn.setNam(nam);
-                    cn.setSoTienPhaiDong(soTienCanDong);
-                    cn.setSoTienDaDong(0);
-                    cn.setDone(false);
-
-                    congNoDAO.insert(cn);
-                    count++;
+            for (HoKhau hk : listHoKhau) {
+                double soTien = 0;
+                if ("m2".equalsIgnoreCase(kp.getDonViTinh())) {
+                    soTien = kp.getDonGia() * hk.getDienTich();
+                } else {
+                    soTien = kp.getDonGia();
                 }
+
+                pstmt.setInt(1, hk.getMaHo());
+                pstmt.setInt(2, kp.getMaKhoanPhi());
+                pstmt.setInt(3, thang);
+                pstmt.setInt(4, nam);
+                pstmt.setDouble(5, soTien);
+                pstmt.setDouble(6, 0);
+                pstmt.setInt(7, 0);
+                pstmt.addBatch();
+            }
+            pstmt.executeBatch();
+            conn.commit();
+        } catch (SQLException e) {
+            try {
+                if (conn != null)
+                    conn.rollback();
+            } catch (Exception ex) {
+            }
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    // --- LOGIC TẠO ĐỢT THU ĐỊNH KỲ (Batch Processing) ---
+    public int tinhPhiTuDong(int thang, int nam) {
+        if (congNoDAO.checkCalculated(thang, nam))
+            return -1;
+
+        List<HoKhau> listHoKhau = hoKhauDAO.getAll();
+        List<KhoanPhi> listPhi = khoanPhiDAO.getAll();
+        int count = 0;
+        Connection conn = null;
+
+        try {
+            conn = DatabaseConnector.getConnection();
+            if (conn == null)
+                return -1;
+            conn.setAutoCommit(false);
+
+            String sql = "INSERT INTO CONG_NO (MaHo, MaKhoanPhi, Thang, Nam, SoTienPhaiDong, SoTienDaDong, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            for (HoKhau hk : listHoKhau) {
+                for (KhoanPhi kp : listPhi) {
+                    if (kp.getLoaiPhi() == AppConstants.PHI_BAT_BUOC) {
+                        double soTien = 0;
+                        if ("m2".equalsIgnoreCase(kp.getDonViTinh())) {
+                            soTien = kp.getDonGia() * hk.getDienTich();
+                        } else {
+                            soTien = kp.getDonGia();
+                        }
+                        pstmt.setInt(1, hk.getMaHo());
+                        pstmt.setInt(2, kp.getMaKhoanPhi());
+                        pstmt.setInt(3, thang);
+                        pstmt.setInt(4, nam);
+                        pstmt.setDouble(5, soTien);
+                        pstmt.setDouble(6, 0);
+                        pstmt.setInt(7, 0);
+                        pstmt.addBatch();
+                        count++;
+                    }
+                }
+            }
+            pstmt.executeBatch();
+            conn.commit();
+            pstmt.close();
+        } catch (SQLException e) {
+            try {
+                if (conn != null)
+                    conn.rollback();
+            } catch (SQLException ex) {
+            }
+            return 0;
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (Exception e) {
             }
         }
         return count;
     }
 
-    // --- 3. QUẢN LÝ CÔNG NỢ & THANH TOÁN ---
-
-    public List<CongNo> getDanhSachCongNo(int thang, int nam) {
-        return congNoDAO.getAll(thang, nam);
-    }
-
-    public List<CongNo> getDanhSachCongNo() {
-        return congNoDAO.getAll();
-    }
-
-    /**
-     * Ghi nhận thanh toán cho 1 khoản công nợ.
-     */
     public boolean thanhToan(int maCongNo, double soTienThu, String nguoiNop, String ghiChu) {
-        if (soTienThu <= 0) return false;
+        if (soTienThu <= 0)
+            return false;
+        Connection conn = null;
+        try {
+            conn = DatabaseConnector.getConnection();
+            if (conn == null)
+                return false;
+            conn.setAutoCommit(false);
 
-        // 1. Lấy thông tin công nợ hiện tại
-        CongNo cn = congNoDAO.getById(maCongNo);
-        if (cn == null) return false;
+            CongNo cn = congNoDAO.getById(maCongNo);
+            if (cn == null) {
+                conn.rollback();
+                return false;
+            }
 
-        // 2. Cập nhật số tiền đã đóng trong bảng CONG_NO
-        double tongDaDong = cn.getSoTienDaDong() + soTienThu;
-        boolean updateSuccess = congNoDAO.updatePayment(maCongNo, tongDaDong);
+            double tongDaDong = cn.getSoTienDaDong() + soTienThu;
+            boolean updateSuccess = congNoDAO.updatePayment(maCongNo, tongDaDong);
+            if (!updateSuccess) {
+                conn.rollback();
+                return false;
+            }
 
-        if (updateSuccess) {
-            // 3. Ghi vào lịch sử GIAO_DICH
-            GiaoDich gd = new GiaoDich();
-            gd.setMaHo(cn.getMaHo());
-            gd.setMaKhoanPhi(cn.getMaKhoanPhi());
-            gd.setSoTien(soTienThu);
-            gd.setNguoiNop(nguoiNop);
-            gd.setGhiChu(ghiChu);
-            
-            giaoDichDAO.insert(gd);
-            return true;
+            GiaoDich gd = new GiaoDich(cn.getMaHo(), cn.getMaKhoanPhi(), soTienThu, nguoiNop, ghiChu);
+            if (giaoDichDAO.insert(gd)) {
+                conn.commit();
+                return true;
+            } else {
+                conn.rollback();
+                return false;
+            }
+        } catch (SQLException e) {
+            try {
+                if (conn != null)
+                    conn.rollback();
+            } catch (Exception ex) {
+            }
+            return false;
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (Exception e) {
+            }
         }
-        return false;
+    }
+
+    // Check ràng buộc dữ liệu trước khi Xóa/Sửa
+    public boolean checkKhoanPhiDangSuDung(int maKhoanPhi) {
+        return congNoDAO.checkKhoanPhiInUse(maKhoanPhi);
+    }
+
+    public HoKhau getHoKhauBySoPhong(String soPhong) {
+        return hoKhauDAO.getBySoCanHo(soPhong);
+    }
+
+    // Thêm công nợ đơn lẻ cho 1 hộ
+    public String themCongNoDonLe(String soCanHo, KhoanPhi kp, int thang, int nam) {
+        // 1. Tìm hộ khẩu
+        HoKhau hk = hoKhauDAO.getBySoCanHo(soCanHo);
+        if (hk == null) {
+            return "Không tìm thấy căn hộ số: " + soCanHo;
+        }
+
+        // 2. Check đã tồn tại chưa
+        if (congNoDAO.checkExist(hk.getMaHo(), kp.getMaKhoanPhi(), thang, nam)) {
+            return "Hộ này đã có công nợ '" + kp.getTenKhoanPhi() + "' trong tháng " + thang + "/" + nam;
+        }
+
+        // 3. Tính tiền
+        double soTien = 0;
+        if ("m2".equalsIgnoreCase(kp.getDonViTinh())) {
+            soTien = kp.getDonGia() * hk.getDienTich();
+        } else {
+            soTien = kp.getDonGia();
+        }
+
+        // 4. Tạo đối tượng CongNo
+        CongNo cn = new CongNo();
+        cn.setMaHo(hk.getMaHo());
+        cn.setMaKhoanPhi(kp.getMaKhoanPhi());
+        cn.setThang(thang);
+        cn.setNam(nam);
+        cn.setSoTienPhaiDong(soTien);
+
+        // 5. Insert
+        congNoDAO.insert(cn);
+        return "SUCCESS";
     }
 }

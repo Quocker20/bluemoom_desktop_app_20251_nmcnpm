@@ -1,501 +1,318 @@
 package com.bluemoon.app.view;
 
 import com.bluemoon.app.controller.ThuPhiController;
-
 import com.bluemoon.app.model.CongNo;
 
 import javax.swing.*;
-
 import javax.swing.border.EmptyBorder;
-
 import javax.swing.border.LineBorder;
-
 import javax.swing.table.DefaultTableCellRenderer;
-
 import javax.swing.table.DefaultTableModel;
-
 import javax.swing.table.JTableHeader;
-
 import javax.swing.table.TableColumnModel;
-
-import javax.swing.DefaultCellEditor;
-
 import java.awt.*;
-
 import java.awt.geom.RoundRectangle2D;
-
 import java.net.URL;
-
 import java.text.DecimalFormat;
-
-import java.util.ArrayList;
-
+import java.util.Calendar;
 import java.util.List;
 
 public class ThuPhiPanel extends JPanel {
 
     private JTable table;
-
     private DefaultTableModel tableModel;
-
-    private ThuPhiController controller;
+    private final ThuPhiController Controller;
 
     private JTextField txtSearch;
-
-    // Danh sách lưu trữ dữ liệu hiện tại (CongNo)
-
     private List<CongNo> currentList;
 
-    private final Color COL_PRIMARY = new Color(52, 152, 219);
+    private int currentMonth;
+    private int currentYear;
 
-    private final Color COL_SUCCESS = new Color(46, 204, 113);
+    // Colors
 
+    private final Color COL_WARNING = new Color(230, 126, 34); // Màu cam (Tạo đợt)
+    private final Color COL_PURPLE = new Color(155, 89, 182); // Màu tím (Thêm lẻ)
     private final Color COL_BG = new Color(245, 247, 250);
-
     private final Color COL_HEADER_BG = Color.WHITE;
-
     private final Color COL_TABLE_HEADER = new Color(217, 217, 217);
 
     public ThuPhiPanel() {
+        // [QUAN TRỌNG] Khởi tạo Controller để tránh lỗi NullPointerException
+        this.Controller = new ThuPhiController();
 
-        this.controller = new ThuPhiController();
+        Calendar cal = Calendar.getInstance();
+        this.currentMonth = cal.get(Calendar.MONTH) + 1;
+        this.currentYear = cal.get(Calendar.YEAR);
 
         initComponents();
-
-        loadData(); // Load data thật từ DAO
-
+        loadData();
     }
 
     private void initComponents() {
-
         setLayout(new BorderLayout(0, 20));
-
         setBackground(COL_BG);
-
         setBorder(new EmptyBorder(30, 30, 30, 30));
 
-        // ==================================================================
-
         // 1. HEADER
-
-        // ==================================================================
-
         RoundedPanel headerPanel = new RoundedPanel(20, COL_HEADER_BG);
-
         headerPanel.setLayout(new BorderLayout());
-
         headerPanel.setBorder(new EmptyBorder(15, 25, 15, 25));
-
         headerPanel.setPreferredSize(new Dimension(getWidth(), 80));
 
-        JLabel lblTitle = new JLabel("Quản lý Thu phí & Công nợ");
-
+        JLabel lblTitle = new JLabel("Quản lý Thu phí & Công nợ (Tháng " + currentMonth + "/" + currentYear + ")");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
-
         lblTitle.setForeground(new Color(50, 50, 50));
-
         headerPanel.add(lblTitle, BorderLayout.WEST);
 
         JPanel toolBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-
         toolBox.setOpaque(false);
 
+        // Ô tìm kiếm
         txtSearch = new JTextField(15);
-
         txtSearch.setPreferredSize(new Dimension(250, 40));
-
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
-        txtSearch.setLayout(new BorderLayout());
-
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
-
                 new LineBorder(new Color(220, 220, 220), 1),
-
-                new EmptyBorder(0, 10, 0, 10)
-
-        ));
-
-        JLabel lblIconSearch = new JLabel();
-
-        URL iconUrl = getClass().getResource("/images/icon_search.png");
-
-        if (iconUrl != null) {
-
-            ImageIcon icon = new ImageIcon(
-                    new ImageIcon(iconUrl).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH));
-
-            lblIconSearch.setIcon(icon);
-
-        } else {
-
-            lblIconSearch.setText("🔍");
-
-        }
-
-        lblIconSearch.setBorder(new EmptyBorder(0, 5, 0, 5));
-
-        lblIconSearch.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        txtSearch.add(lblIconSearch, BorderLayout.EAST);
-
+                new EmptyBorder(0, 10, 0, 10)));
+        txtSearch.addActionListener(e -> loadData()); // Enter để tìm
         toolBox.add(txtSearch);
 
-        RoundedButton btnAddFee = new RoundedButton("Thêm đợt thu");
+        // [NÚT 1] Thêm công nợ đơn lẻ (Màu Tím)
+        RoundedButton btnAddSingle = new RoundedButton("Thêm công nợ");
+        btnAddSingle.setPreferredSize(new Dimension(140, 40));
+        btnAddSingle.setBackground(COL_PURPLE);
+        btnAddSingle.setForeground(Color.WHITE);
+        btnAddSingle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnAddSingle.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnAddSingle.addActionListener(e -> {
+            JFrame parent = (JFrame) SwingUtilities.getWindowAncestor(this);
+            ThemCongNoDialog dialog = new ThemCongNoDialog(parent, this, currentMonth, currentYear);
+            dialog.setVisible(true);
+        });
+        toolBox.add(btnAddSingle);
 
-        btnAddFee.setPreferredSize(new Dimension(130, 40));
-
-        btnAddFee.setBackground(COL_PRIMARY);
-
-        btnAddFee.setForeground(Color.WHITE);
-
-        btnAddFee.setFont(new Font("Segoe UI", Font.BOLD, 14));
-
-        btnAddFee.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        btnAddFee.addActionListener(e -> JOptionPane.showMessageDialog(this, "Mở dialog Tạo khoản thu mới"));
-
-        toolBox.add(btnAddFee);
-
-        // Đã bỏ nút Thanh toán ở đây theo yêu cầu cũ
+        // [NÚT 2] Tạo đợt thu mới (Màu Cam)
+        RoundedButton btnCreatePeriod = new RoundedButton("Tạo đợt thu mới");
+        btnCreatePeriod.setPreferredSize(new Dimension(150, 40));
+        btnCreatePeriod.setBackground(COL_WARNING);
+        btnCreatePeriod.setForeground(Color.WHITE);
+        btnCreatePeriod.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnCreatePeriod.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCreatePeriod.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Bạn có chắc muốn tạo công nợ cho TOÀN BỘ hộ dân tháng " + currentMonth + "/" + currentYear + "?",
+                    "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                int recordsCreated = Controller.tinhPhiTuDong(currentMonth, currentYear);
+                if (recordsCreated > 0) {
+                    JOptionPane.showMessageDialog(this, "Thành công! Đã tạo " + recordsCreated + " bản ghi công nợ.");
+                    loadData();
+                } else if (recordsCreated == -1) {
+                    JOptionPane.showMessageDialog(this, "Tháng này đã được tính phí rồi!", "Thông báo",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Không có dữ liệu hộ khẩu hoặc phí bắt buộc để tính.");
+                }
+            }
+        });
+        toolBox.add(btnCreatePeriod);
 
         headerPanel.add(toolBox, BorderLayout.EAST);
-
         add(headerPanel, BorderLayout.NORTH);
 
-        // ==================================================================
-
-        // 2. BẢNG DỮ LIỆU
-
-        // ==================================================================
-
-        // Cấu trúc bảng khớp với CongNo
-
-        String[] columnNames = { "STT", "Mã hộ", "Mã khoản phí", "Số tiền (VNĐ)", "Đợt thu", "Trạng thái", "Thao tác" };
-
+        // 2. TABLE
+        String[] columnNames = { "STT", "Căn hộ", "Tên khoản phí", "Phải đóng", "Đã đóng", "Còn thiếu", "Trạng thái",
+                "Thao tác" };
         tableModel = new DefaultTableModel(columnNames, 0) {
-
             @Override
-
             public boolean isCellEditable(int row, int column) {
-
-                return column == 6;
-
+                return column == 7;
             }
 
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 6)
+                    return Integer.class; // Cột trạng thái dùng INT (0/1)
+                return super.getColumnClass(columnIndex);
+            }
         };
 
         table = new JTable(tableModel);
-
         TableColumnModel cm = table.getColumnModel();
-
         cm.getColumn(0).setPreferredWidth(50);
-
         cm.getColumn(1).setPreferredWidth(80);
-
-        cm.getColumn(2).setPreferredWidth(200); // Mã khoản phí (hoặc tên nếu join)
-
-        cm.getColumn(3).setPreferredWidth(120); // Số tiền
-
-        cm.getColumn(4).setPreferredWidth(100); // Đợt thu
-
-        cm.getColumn(5).setPreferredWidth(100); // Trạng thái
-
-        cm.getColumn(6).setMinWidth(120);
+        cm.getColumn(2).setPreferredWidth(200);
+        cm.getColumn(7).setMinWidth(120);
 
         JTableHeader header = table.getTableHeader();
-
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));
-
         header.setBackground(COL_TABLE_HEADER);
-
         header.setPreferredSize(new Dimension(header.getWidth(), 40));
-
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
         table.setRowHeight(45);
-
         table.setSelectionBackground(new Color(232, 240, 254));
-
         table.setSelectionForeground(Color.BLACK);
-
         table.setShowVerticalLines(false);
 
-        DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();
-
-        leftRenderer.setHorizontalAlignment(JLabel.LEFT);
-
-        leftRenderer.setBorder(new EmptyBorder(0, 20, 0, 0));
-
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
-
         rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
-
         rightRenderer.setBorder(new EmptyBorder(0, 0, 0, 20));
 
-        cm.getColumn(0).setCellRenderer(leftRenderer);
-
-        cm.getColumn(1).setCellRenderer(leftRenderer);
-
-        cm.getColumn(2).setCellRenderer(leftRenderer);
-
         cm.getColumn(3).setCellRenderer(rightRenderer);
-
-        cm.getColumn(4).setCellRenderer(leftRenderer);
-
-        cm.getColumn(5).setCellRenderer(new StatusCellRenderer());
-
-        cm.getColumn(6).setCellRenderer(new TableActionCellRender());
-
-        cm.getColumn(6).setCellEditor(new TableActionCellEditor());
+        cm.getColumn(4).setCellRenderer(rightRenderer);
+        cm.getColumn(5).setCellRenderer(rightRenderer);
+        cm.getColumn(6).setCellRenderer(new StatusCellRenderer());
+        cm.getColumn(7).setCellRenderer(new TableActionCellRender());
+        cm.getColumn(7).setCellEditor(new TableActionCellEditor());
 
         JScrollPane scrollPane = new JScrollPane(table);
-
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
-
         scrollPane.getViewport().setBackground(Color.WHITE);
-
         add(scrollPane, BorderLayout.CENTER);
-
-        // 3. Footer
-
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
-        footerPanel.setOpaque(false);
-
-        JLabel lblPage = new JLabel("Hiển thị tất cả kết quả   ");
-
-        lblPage.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-
-        footerPanel.add(lblPage);
-
-        add(footerPanel, BorderLayout.SOUTH);
-
     }
 
     public void loadData() {
-
         tableModel.setRowCount(0);
-
-        // Gọi Controller lấy danh sách CongNo (DAO trả về List<CongNo>)
-
-        currentList = controller.getDanhSachCongNo();
+        String keyword = txtSearch.getText().trim();
+        currentList = Controller.getDanhSachCongNo(currentMonth, currentYear, keyword);
 
         DecimalFormat df = new DecimalFormat("#,###");
-
         int stt = 1;
 
         for (CongNo item : currentList) {
-
-            String dotThu = item.getThang() + "/" + item.getNam();
-
-            // Vì DAO chỉ trả về Mã khoản phí (int), ta hiển thị mã hoặc cần join bảng để
-            // lấy tên
-
-            // Tạm thời hiển thị Mã khoản phí + ID
-
-            String tenKhoan = item.getTenKhoanPhi();
+            // [ĐÃ SỬA] Lấy trực tiếp từ Model CongNo (nhanh và chính xác hơn)
+            String soCanHo = item.getSoCanHo();
+            if (soCanHo == null)
+                soCanHo = "N/A";
 
             tableModel.addRow(new Object[] {
-
                     stt++,
-
-                    item.getMaHo(),
-
-                    tenKhoan,
-
+                    soCanHo,
+                    item.getTenKhoanPhi(),
                     df.format(item.getSoTienPhaiDong()),
-
-                    dotThu,
-
-                    item.getDone(), // Trạng thái boolean (mapped to Text/Color in Renderer)
-
-                    "" // Button panel
-
+                    df.format(item.getSoTienDaDong()),
+                    df.format(item.getSoTienConThieu()),
+                    item.getTrangThai(),
+                    ""
             });
-
         }
-
     }
 
     // ==================================================================
-
-    // CÁC CLASS UI CUSTOM (Giữ nguyên logic hiển thị nút theo trạng thái)
-
+    // UI COMPONENTS & RENDERERS
     // ==================================================================
 
     class PanelAction extends JPanel {
-
         private JButton btnPay, btnPrint;
 
         public PanelAction() {
-
             setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
-
             setOpaque(false);
-
             btnPay = createBtn("/images/icon_pay.png", new Color(46, 204, 113));
-
             btnPrint = createBtn("/images/icon_print.png", Color.GRAY);
-
             add(btnPay);
-
             add(btnPrint);
+        }
 
+        // Load Icon an toàn (tránh lỗi URL null)
+        private Icon loadIcon(String path) {
+            try {
+                URL url = getClass().getResource(path);
+                if (url != null) {
+                    return new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+                }
+            } catch (Exception e) {
+            }
+            return null;
         }
 
         private JButton createBtn(String iconPath, Color color) {
-
             JButton btn = new JButton();
-
             btn.setPreferredSize(new Dimension(30, 30));
-
             btn.setContentAreaFilled(false);
-
             btn.setFocusPainted(false);
-
             btn.setBorder(new LineBorder(color, 1));
-
             btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-            URL url = getClass().getResource(iconPath);
-
-            if (url != null) {
-
-                ImageIcon icon = new ImageIcon(
-                        new ImageIcon(url).getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
-
+            Icon icon = loadIcon(iconPath);
+            if (icon != null)
                 btn.setIcon(icon);
-
-            } else {
-
+            else {
                 btn.setText("$");
-
                 btn.setForeground(color);
-
             }
-
             return btn;
-
         }
 
-        public void updateStatus(boolean isPaid) {
-
+        public void updateStatus(int trangThai) {
             this.removeAll();
-
-            if (isPaid) {
-
-                this.add(btnPrint);
-
-            } else {
-
-                this.add(btnPay);
-
-            }
-
+            if (trangThai == 1)
+                this.add(btnPrint); // Đã đóng -> Hiện nút In
+            else
+                this.add(btnPay); // Chưa đóng -> Hiện nút Thu tiền
             this.revalidate();
-
             this.repaint();
-
         }
 
         public void initEvent(int row) {
-
             btnPay.addActionListener(e -> {
-
                 if (row >= 0 && row < currentList.size()) {
-
                     CongNo item = currentList.get(row);
-
                     JFrame parent = (JFrame) SwingUtilities.getWindowAncestor(ThuPhiPanel.this);
-
                     ThanhToanDialog dialog = new ThanhToanDialog(parent, ThuPhiPanel.this, item);
-
                     dialog.setVisible(true);
 
+                    // Dừng edit để tránh lỗi table
                     if (table.getCellEditor() != null)
                         table.getCellEditor().stopCellEditing();
-
+                    loadData();
                 }
-
             });
-
             btnPrint.addActionListener(
-                    e -> JOptionPane.showMessageDialog(ThuPhiPanel.this, "In biên lai dòng " + (row + 1)));
-
+                    e -> JOptionPane.showMessageDialog(ThuPhiPanel.this, "Chức năng In biên lai đang phát triển..."));
         }
-
     }
 
     class StatusCellRenderer extends DefaultTableCellRenderer {
-
         @Override
-
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                 int row, int column) {
-
             JLabel lbl = new JLabel();
-
-            boolean isPaid = (boolean) value;
-
-            if (isPaid) {
-
+            int trangThai = (value instanceof Integer) ? (int) value : 0;
+            if (trangThai == 1) {
                 lbl.setText("●  Đã đóng");
-
                 lbl.setForeground(new Color(46, 204, 113));
-
             } else {
-
                 lbl.setText("●  Chưa đóng");
-
                 lbl.setForeground(new Color(231, 76, 60));
-
             }
-
             lbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
-
             lbl.setHorizontalAlignment(JLabel.CENTER);
-
             if (isSelected) {
-
                 lbl.setOpaque(true);
-
                 lbl.setBackground(table.getSelectionBackground());
-
             }
-
             return lbl;
-
         }
-
     }
 
     class TableActionCellRender extends DefaultTableCellRenderer {
-
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                 int row, int column) {
-
             PanelAction action = new PanelAction();
-
-            boolean isPaid = (boolean) table.getValueAt(row, 5);
-
-            action.updateStatus(isPaid);
-
+            int trangThai = (int) table.getValueAt(row, 6);
+            action.updateStatus(trangThai);
             if (isSelected)
                 action.setBackground(table.getSelectionBackground());
-
             else
                 action.setBackground(Color.WHITE);
-
             return action;
-
         }
-
     }
 
     class TableActionCellEditor extends DefaultCellEditor {
-
         public TableActionCellEditor() {
             super(new JCheckBox());
         }
@@ -503,25 +320,16 @@ public class ThuPhiPanel extends JPanel {
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
                 int column) {
-
             PanelAction action = new PanelAction();
-
-            boolean isPaid = (boolean) table.getValueAt(row, 5);
-
-            action.updateStatus(isPaid);
-
+            int trangThai = (int) table.getValueAt(row, 6);
+            action.updateStatus(trangThai);
             action.initEvent(row);
-
             action.setBackground(table.getSelectionBackground());
-
             return action;
-
         }
-
     }
 
     class RoundedPanel extends JPanel {
-
         private int radius;
         private Color bgColor;
 
@@ -539,11 +347,9 @@ public class ThuPhiPanel extends JPanel {
             g2.setColor(bgColor);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
         }
-
     }
 
     class RoundedButton extends JButton {
-
         public RoundedButton(String text) {
             super(text);
             setContentAreaFilled(false);
@@ -564,7 +370,5 @@ public class ThuPhiPanel extends JPanel {
             g2.drawString(getText(), x, y);
             g2.dispose();
         }
-
     }
-
 }

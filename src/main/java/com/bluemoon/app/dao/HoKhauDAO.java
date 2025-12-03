@@ -16,8 +16,8 @@ public class HoKhauDAO {
         String sql = "SELECT * FROM HO_KHAU ORDER BY SoCanHo ASC";
 
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 HoKhau hk = new HoKhau();
@@ -46,7 +46,8 @@ public class HoKhauDAO {
 
         try {
             conn = DatabaseConnector.getConnection();
-            if (conn == null) return false;
+            if (conn == null)
+                return false;
 
             // 1. Start Transaction
             conn.setAutoCommit(false);
@@ -100,15 +101,24 @@ public class HoKhauDAO {
 
         } catch (SQLException e) {
             if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
             e.printStackTrace();
         } finally {
             try {
-                if (pstmtHk != null) pstmtHk.close();
-                if (pstmtNk != null) pstmtNk.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) { e.printStackTrace(); }
+                if (pstmtHk != null)
+                    pstmtHk.close();
+                if (pstmtNk != null)
+                    pstmtNk.close();
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return result;
     }
@@ -116,14 +126,14 @@ public class HoKhauDAO {
     public boolean update(HoKhau hk) {
         String sql = "UPDATE HO_KHAU SET SoCanHo=?, TenChuHo=?, DienTich=?, SDT=? WHERE MaHo=?";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, hk.getSoCanHo());
             pstmt.setString(2, hk.getTenChuHo());
             pstmt.setDouble(3, hk.getDienTich());
             pstmt.setString(4, hk.getSdt());
             pstmt.setInt(5, hk.getMaHo());
-            
+
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -134,7 +144,7 @@ public class HoKhauDAO {
     public boolean delete(int maHo) {
         String sql = "DELETE FROM HO_KHAU WHERE MaHo=?";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, maHo);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -146,12 +156,15 @@ public class HoKhauDAO {
     public boolean checkExist(String soCanHo) {
         String sql = "SELECT COUNT(*) FROM HO_KHAU WHERE SoCanHo = ?";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, soCanHo);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
+                if (rs.next())
+                    return rs.getInt(1) > 0;
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
@@ -159,12 +172,12 @@ public class HoKhauDAO {
         List<HoKhau> list = new ArrayList<>();
         String sql = "SELECT * FROM HO_KHAU WHERE SoCanHo LIKE ? OR TenChuHo LIKE ?";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             String query = "%" + keyword + "%";
             pstmt.setString(1, query);
             pstmt.setString(2, query);
-            
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     HoKhau hk = new HoKhau();
@@ -177,7 +190,61 @@ public class HoKhauDAO {
                     list.add(hk);
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
+    }
+
+    /**
+     * Lấy hộ khẩu từ mã hộ
+     * 
+     * @param maHo int
+     *             return hoKhau HoKhau
+     */
+    public HoKhau getById(int id) {
+        String sql = "SELECT * FROM HO_KHAU WHERE MaHo = ?";
+        HoKhau hk = new HoKhau();
+
+        try (Connection conn = DatabaseConnector.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                hk.setMaHo(rs.getInt("MaHo"));
+                hk.setSoCanHo(rs.getString("SoCanHo"));
+                hk.setTenChuHo(rs.getString("TenChuHo"));
+                hk.setDienTich(rs.getDouble("DienTich"));
+                hk.setSdt(rs.getString("SDT"));
+                hk.setNgayTao(rs.getDate("NgayTao"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return hk;
+    }
+
+    // Lấy Hộ khẩu bằng Số căn hộ (String)
+    public HoKhau getBySoCanHo(String soCanHo) {
+        String sql = "SELECT * FROM HO_KHAU WHERE SoCanHo = ?";
+        try (Connection conn = DatabaseConnector.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, soCanHo);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    HoKhau hk = new HoKhau();
+                    hk.setMaHo(rs.getInt("MaHo"));
+                    hk.setSoCanHo(rs.getString("SoCanHo"));
+                    hk.setTenChuHo(rs.getString("TenChuHo"));
+                    hk.setDienTich(rs.getDouble("DienTich"));
+                    hk.setSdt(rs.getString("SDT"));
+                    return hk;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -73,6 +73,7 @@ public class MainFrame extends JFrame {
         topSidebar.add(createMenuItem("Quản lý Cư dân", "/images/icon_resident.png", false));
         topSidebar.add(createMenuItem("Quản lý Biến động", "/images/icon_change.png", false));
         topSidebar.add(createMenuItem("Quản lý Thu phí", "/images/icon_fee.png", false));
+        topSidebar.add(createMenuItem("Cấu hình Phí", "/images/icon_settings.png", false));
         topSidebar.add(createMenuItem("Báo cáo & Thống kê", "/images/icon_report.png", false));
         topSidebar.add(createMenuItem("Hệ thống", "/images/icon_system.png", false));
 
@@ -96,9 +97,10 @@ public class MainFrame extends JFrame {
         lblUserInfo.setFont(new Font("Inter", Font.BOLD, 20));
 
         URL avatarUrl = getClass().getResource("/images/avatar.png");
-        if(avatarUrl != null) {
-             Icon avatarIcon = new ImageIcon(new ImageIcon(avatarUrl).getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
-             lblUserInfo.setIcon(avatarIcon);
+        if (avatarUrl != null) {
+            Icon avatarIcon = new ImageIcon(
+                    new ImageIcon(avatarUrl).getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+            lblUserInfo.setIcon(avatarIcon);
         }
         lblUserInfo.setBorder(new EmptyBorder(0, 0, 0, 20));
         headerPanel.add(lblUserInfo, BorderLayout.EAST);
@@ -165,6 +167,8 @@ public class MainFrame extends JFrame {
     }
 
     private void handleMenuClick(String menuTitle) {
+        String userRole = currentUser.getVaiTro();
+
         MenuButton btn = menuButtons.get(menuTitle);
         if (btn != null && btn.isMenuActive()) {
             return;
@@ -175,18 +179,51 @@ public class MainFrame extends JFrame {
             case "Tổng quan":
                 contentPanel.add(mainDashboardPanel, BorderLayout.CENTER);
                 break;
-            case "Quản lý Cư dân":
+            case "Quản lý Cư dân": {
+                if (userRole.equals("KeToan")) {
+                    JLabel lblDef = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
+                    lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
+                    lblDef.setForeground(Color.GRAY);
+                    contentPanel.add(lblDef, BorderLayout.CENTER);
+                    break;
+                }
                 contentPanel.add(new HoKhauPanel(), BorderLayout.CENTER);
+            }
                 break;
-            case "Quản lý Biến động":
+            case "Quản lý Biến động": {
+                if (userRole.equals("KeToan")) {
+                    JLabel lblDef = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
+                    lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
+                    lblDef.setForeground(Color.GRAY);
+                    contentPanel.add(lblDef, BorderLayout.CENTER);
+                    break;
+                }
                 contentPanel.add(new BienDongPanel(), BorderLayout.CENTER);
+            }
                 break;
-            case "Quản lý Thu phí":
-                // contentPanel.add(new ThuPhiPanel(), BorderLayout.CENTER);
-                JLabel lbl = new JLabel("Chức năng đang bảo trì", SwingConstants.CENTER);
-                lbl.setFont(new Font("Segoe UI", Font.ITALIC, 24));
-                contentPanel.add(lbl, BorderLayout.CENTER);
+            case "Quản lý Thu phí": {
+                if (userRole.equals("ThuKy")) {
+                    JLabel lblDef = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
+                    lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
+                    lblDef.setForeground(Color.GRAY);
+                    contentPanel.add(lblDef, BorderLayout.CENTER);
+                    break;
+                }
+                contentPanel.add(new ThuPhiPanel(), BorderLayout.CENTER);
+            }
                 break;
+            case "Cấu hình Phí": {
+                if (userRole.equals("ThuKy")) {
+                    JLabel lblDef = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
+                    lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
+                    lblDef.setForeground(Color.GRAY);
+                    contentPanel.add(lblDef, BorderLayout.CENTER);
+                    break;
+                }
+                contentPanel.add(new CauHinhPhiPanel(), BorderLayout.CENTER);
+            }
+                break;
+
             default:
                 JLabel lblDef = new JLabel("Chức năng " + menuTitle + " đang phát triển", SwingConstants.CENTER);
                 lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
@@ -229,12 +266,13 @@ public class MainFrame extends JFrame {
         btn.setIconTextGap(10);
         try {
             URL url = getClass().getResource("/images/icon_logout.png");
-            if(url != null) {
+            if (url != null) {
                 ImageIcon icon = new ImageIcon(url);
                 Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
                 btn.setIcon(new ImageIcon(img));
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         btn.addActionListener(e -> logout());
         return btn;
     }
@@ -291,6 +329,7 @@ public class MainFrame extends JFrame {
 
     class MenuButton extends JButton {
         private boolean isActive;
+
         public MenuButton(String text, String iconPath, boolean isActive) {
             super(text);
             this.isActive = isActive;
@@ -312,19 +351,27 @@ public class MainFrame extends JFrame {
 
             addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    if (!isActive) setForeground(Color.WHITE);
+                    if (!isActive)
+                        setForeground(Color.WHITE);
                 }
+
                 public void mouseExited(java.awt.event.MouseEvent evt) {
-                    if (!isActive) setForeground(COL_TEXT_SIDEBAR);
+                    if (!isActive)
+                        setForeground(COL_TEXT_SIDEBAR);
                 }
             });
         }
-        public boolean isMenuActive() { return this.isActive; }
+
+        public boolean isMenuActive() {
+            return this.isActive;
+        }
+
         public void setActive(boolean active) {
             this.isActive = active;
             this.setForeground(active ? Color.WHITE : COL_TEXT_SIDEBAR);
             this.repaint();
         }
+
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2d = (Graphics2D) g.create();
@@ -343,11 +390,13 @@ public class MainFrame extends JFrame {
     class RoundedPanel extends JPanel {
         private int radius;
         private Color bgColor;
+
         public RoundedPanel(int radius, Color bgColor) {
             this.radius = radius;
             this.bgColor = bgColor;
             setOpaque(false);
         }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -359,7 +408,10 @@ public class MainFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception ex) { }
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ex) {
+        }
         java.awt.EventQueue.invokeLater(() -> {
             User dummyUser = new User(1, "admin_test", "", "QuanLy");
             new MainFrame(dummyUser).setVisible(true);

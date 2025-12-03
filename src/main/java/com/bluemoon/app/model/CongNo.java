@@ -4,17 +4,40 @@ public class CongNo {
     private int maCongNo;
     private int maHo;
     private int maKhoanPhi;
-    private String tenKhoanPhi; // (Thêm để hiển thị cho tiện, lấy từ JOIN)
+
+    // Các trường hiển thị (DTO)
+    private String tenKhoanPhi;
+    private String soCanHo; // [MỚI] Thêm trường này
+
     private int thang;
     private int nam;
     private double soTienPhaiDong;
     private double soTienDaDong;
-    boolean isDone; // true nếu đã đóng đủ, false nếu chưa đóng đủ
+    private int trangThai; // 0: Chưa xong, 1: Đã xong
 
     public CongNo() {
     }
 
-    // Getter/Setter...
+    // Constructor đầy đủ (Cập nhật thêm soCanHo)
+    public CongNo(int maCongNo, int maHo, String soCanHo, int maKhoanPhi, String tenKhoanPhi, int thang, int nam,
+            double soTienPhaiDong, double soTienDaDong, int trangThai) {
+        this.maCongNo = maCongNo;
+        this.maHo = maHo;
+        this.soCanHo = soCanHo;
+        this.maKhoanPhi = maKhoanPhi;
+        this.tenKhoanPhi = tenKhoanPhi;
+        this.thang = thang;
+        this.nam = nam;
+        this.soTienPhaiDong = soTienPhaiDong;
+        this.soTienDaDong = soTienDaDong;
+        this.trangThai = trangThai;
+    }
+
+    public double getSoTienConThieu() {
+        return Math.max(0, soTienPhaiDong - soTienDaDong);
+    }
+
+    // Getters & Setters
     public int getMaCongNo() {
         return maCongNo;
     }
@@ -30,6 +53,14 @@ public class CongNo {
     public void setMaHo(int maHo) {
         this.maHo = maHo;
     }
+
+    public String getSoCanHo() {
+        return soCanHo;
+    } // [MỚI]
+
+    public void setSoCanHo(String soCanHo) {
+        this.soCanHo = soCanHo;
+    } // [MỚI]
 
     public int getMaKhoanPhi() {
         return maKhoanPhi;
@@ -79,11 +110,11 @@ public class CongNo {
         this.soTienDaDong = soTienDaDong;
     }
 
-    public boolean getDone() {
-        return isDone;
+    public int getTrangThai() {
+        return trangThai;
     }
 
-    public void setDone(boolean isDone) {
-        this.isDone = isDone;
+    public void setTrangThai(int trangThai) {
+        this.trangThai = trangThai;
     }
 }

@@ -5,20 +5,19 @@ public class KhoanPhi {
     private String tenKhoanPhi;
     private double donGia;
     private String donViTinh;
-    private boolean isMandatory; // true nếu là phí bắt buộc, false nếu là phí tự nguyện
+    private int loaiPhi; // 0: Bắt buộc, 1: Tự nguyện
 
     public KhoanPhi() {
     }
 
-    public KhoanPhi(int maKhoanPhi, String tenKhoanPhi, double donGia, String donViTinh, boolean isMandatory) {
-        this.maKhoanPhi = maKhoanPhi;
+    public KhoanPhi(String tenKhoanPhi, double donGia, String donViTinh, int loaiPhi) {
         this.tenKhoanPhi = tenKhoanPhi;
         this.donGia = donGia;
         this.donViTinh = donViTinh;
-        this.isMandatory = isMandatory;
+        this.loaiPhi = loaiPhi;
     }
 
-    // Các getter/setter...
+    // Getters and Setters...
     public int getMaKhoanPhi() {
         return maKhoanPhi;
     }
@@ -51,12 +50,12 @@ public class KhoanPhi {
         this.donViTinh = donViTinh;
     }
 
-    public boolean isMandatory() {
-        return isMandatory;
+    public int getLoaiPhi() {
+        return loaiPhi;
     }
 
-    public void setMandatory(boolean isMandatory) {
-        this.isMandatory = isMandatory;
+    public void setLoaiPhi(int loaiPhi) {
+        this.loaiPhi = loaiPhi;
     }
 
     @Override

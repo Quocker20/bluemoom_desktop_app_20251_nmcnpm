@@ -22,18 +22,19 @@ public class HoKhauController {
      * Bắt buộc phải có thông tin Chủ hộ đi kèm.
      */
     public boolean addHoKhauWithChuHo(HoKhau hk, NhanKhau chuHo) {
-        if (!validateHoKhau(hk)) return false;
-        
+        if (!validateHoKhau(hk))
+            return false;
+
         if (chuHo == null || chuHo.getHoTen() == null || chuHo.getHoTen().isEmpty()) {
-             System.err.println("Lỗi: Thông tin chủ hộ không hợp lệ!");
-             return false;
+            System.err.println("Lỗi: Thông tin chủ hộ không hợp lệ!");
+            return false;
         }
 
         if (hoKhauDAO.checkExist(hk.getSoCanHo())) {
-             System.err.println("Lỗi: Số căn hộ " + hk.getSoCanHo() + " đã tồn tại!");
-             return false;
+            System.err.println("Lỗi: Số căn hộ " + hk.getSoCanHo() + " đã tồn tại!");
+            return false;
         }
-        
+
         return hoKhauDAO.addHoKhauWithChuHo(hk, chuHo);
     }
 
@@ -43,9 +44,10 @@ public class HoKhauController {
         }
         return hoKhauDAO.update(hk);
     }
-    
+
     public boolean deleteHoKhau(int maHo) {
-        if (maHo <= 0) return false;
+        if (maHo <= 0)
+            return false;
         return hoKhauDAO.delete(maHo);
     }
 
@@ -55,12 +57,16 @@ public class HoKhauController {
         }
         return hoKhauDAO.search(keyword.trim());
     }
-    
+
     // Helper validation
     private boolean validateHoKhau(HoKhau hk) {
-        return hk != null 
-            && hk.getSoCanHo() != null && !hk.getSoCanHo().trim().isEmpty()
-            && hk.getTenChuHo() != null && !hk.getTenChuHo().trim().isEmpty()
-            && hk.getDienTich() > 0 && hk.getDienTich() < MAX_AREA;
+        return hk != null
+                && hk.getSoCanHo() != null && !hk.getSoCanHo().trim().isEmpty()
+                && hk.getTenChuHo() != null && !hk.getTenChuHo().trim().isEmpty()
+                && hk.getDienTich() > 0 && hk.getDienTich() < MAX_AREA;
+    }
+
+    public HoKhau getById(int id) {
+        return hoKhauDAO.getById(id);
     }
 }

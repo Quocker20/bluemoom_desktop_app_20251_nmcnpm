@@ -11,10 +11,34 @@ public class GiaoDich {
     private String nguoiNop;
     private String ghiChu;
 
+    // Trường hiển thị (optional - dùng khi hiển thị lịch sử)
+    private String tenKhoanPhi;
+
     public GiaoDich() {
     }
 
-    // Getter/Setter... 
+    // Constructor đầy đủ
+    public GiaoDich(int maGiaoDich, int maHo, int maKhoanPhi, Date ngayNop, double soTien, String nguoiNop,
+            String ghiChu) {
+        this.maGiaoDich = maGiaoDich;
+        this.maHo = maHo;
+        this.maKhoanPhi = maKhoanPhi;
+        this.ngayNop = ngayNop;
+        this.soTien = soTien;
+        this.nguoiNop = nguoiNop;
+        this.ghiChu = ghiChu;
+    }
+
+    // Constructor ngắn (dùng khi tạo giao dịch mới)
+    public GiaoDich(int maHo, int maKhoanPhi, double soTien, String nguoiNop, String ghiChu) {
+        this.maHo = maHo;
+        this.maKhoanPhi = maKhoanPhi;
+        this.soTien = soTien;
+        this.nguoiNop = nguoiNop;
+        this.ghiChu = ghiChu;
+        this.ngayNop = new Date(); // Mặc định là hiện tại
+    }
+
     public int getMaGiaoDich() {
         return maGiaoDich;
     }
@@ -69,5 +93,13 @@ public class GiaoDich {
 
     public void setGhiChu(String ghiChu) {
         this.ghiChu = ghiChu;
+    }
+
+    public String getTenKhoanPhi() {
+        return tenKhoanPhi;
+    }
+
+    public void setTenKhoanPhi(String tenKhoanPhi) {
+        this.tenKhoanPhi = tenKhoanPhi;
     }
 }

@@ -7,7 +7,6 @@ import javax.swing.*;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 import java.text.DecimalFormat;
 
 public class ThanhToanDialog extends JDialog {
@@ -17,11 +16,9 @@ public class ThanhToanDialog extends JDialog {
     private JComboBox<String> cbHinhThuc;
     private JTextArea txtGhiChu;
     private JButton btnConfirm;
-    private JButton btnCancel;
-
-    private CongNo congNo; // Khoản nợ đang được thanh toán
     private ThuPhiController controller;
     private ThuPhiPanel parentPanel;
+    private CongNo congNo; 
 
     public ThanhToanDialog(JFrame parentFrame, ThuPhiPanel parentPanel, CongNo congNo) {
         super(parentFrame, "Ghi nhận thanh toán", true);
@@ -44,7 +41,7 @@ public class ThanhToanDialog extends JDialog {
         // Tiêu đề
         JLabel lblTitle = new JLabel("GHI NHẬN THANH TOÁN", SwingConstants.CENTER);
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        lblTitle.setForeground(new Color(46, 204, 113)); // Màu xanh lá (Tiền)
+        lblTitle.setForeground(new Color(46, 204, 113)); 
         lblTitle.setBounds(0, 15, 480, 30);
         mainPanel.add(lblTitle);
 
@@ -58,20 +55,15 @@ public class ThanhToanDialog extends JDialog {
         lblMaHo.setBounds(20, 15, 300, 20);
         infoPanel.add(lblMaHo);
 
-        // Giả sử model có getter này hoặc bạn đã join để lấy tên
-        String tenKhoan = "Khoản thu #" + congNo.getMaKhoanPhi();
-        // Nếu model CongNo có field tenKhoanPhi thì dùng: congNo.getTenKhoanPhi()
-        
-        JLabel lblKhoanThu = new JLabel(tenKhoan);
+        JLabel lblKhoanThu = new JLabel("Khoản thu: " + congNo.getTenKhoanPhi());
         lblKhoanThu.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblKhoanThu.setBounds(20, 40, 360, 20);
         infoPanel.add(lblKhoanThu);
 
-        // Định dạng tiền
         DecimalFormat df = new DecimalFormat("#,###");
         JLabel lblSoTien = new JLabel("Phải thu: " + df.format(congNo.getSoTienPhaiDong()) + " VNĐ");
         lblSoTien.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblSoTien.setForeground(new Color(231, 76, 60)); // Màu đỏ
+        lblSoTien.setForeground(new Color(231, 76, 60)); 
         lblSoTien.setBounds(20, 70, 360, 25);
         infoPanel.add(lblSoTien);
 
@@ -79,11 +71,9 @@ public class ThanhToanDialog extends JDialog {
 
         // --- PHẦN NHẬP LIỆU ---
 
-        // 1. Người nộp
         addLabel(mainPanel, "Họ và tên người nộp *", 190);
         txtNguoiNop = addTextField(mainPanel, 215);
 
-        // 2. Hình thức & Số tiền thực thu
         JLabel lblHinhThuc = new JLabel("Hình thức *");
         lblHinhThuc.setBounds(40, 270, 150, 20);
         lblHinhThuc.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -103,10 +93,10 @@ public class ThanhToanDialog extends JDialog {
         txtSoTien.setBounds(250, 295, 190, 40);
         txtSoTien.setFont(new Font("Segoe UI", Font.BOLD, 14));
         txtSoTien.setBorder(new RoundedBorder(8));
-        txtSoTien.setText(String.valueOf((int)congNo.getSoTienPhaiDong())); // Điền sẵn số tiền
+        // Đã sửa: Điền sẵn số tiền còn thiếu (để người dùng dễ thanh toán nốt)
+        txtSoTien.setText(String.valueOf((int)congNo.getSoTienConThieu())); 
         mainPanel.add(txtSoTien);
 
-        // 3. Ghi chú
         addLabel(mainPanel, "Ghi chú giao dịch", 350);
         txtGhiChu = new JTextArea();
         txtGhiChu.setBounds(40, 375, 400, 50);
@@ -120,7 +110,7 @@ public class ThanhToanDialog extends JDialog {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(46, 204, 113)); // Xanh lá
+                g2.setColor(new Color(46, 204, 113)); 
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
                 g2.dispose();
                 super.paintComponent(g);
@@ -135,7 +125,7 @@ public class ThanhToanDialog extends JDialog {
         btnConfirm.addActionListener(e -> handlePayment());
         mainPanel.add(btnConfirm);
 
-        btnCancel = new JButton("Hủy bỏ");
+        JButton btnCancel = new JButton("Hủy bỏ");
         btnCancel.setBounds(40, 505, 400, 30);
         btnCancel.setForeground(Color.GRAY);
         btnCancel.setContentAreaFilled(false);
@@ -154,37 +144,28 @@ public class ThanhToanDialog extends JDialog {
             String ghiChu = txtGhiChu.getText().trim();
 
             if (nguoiNop.isEmpty() || soTienStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập tên người nộp và số tiền!", "Thiếu thông tin", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập tên người nộp và số tiền!");
                 return;
             }
 
             double soTien = Double.parseDouble(soTienStr);
             if (soTien <= 0) throw new NumberFormatException();
 
-            // Gộp ghi chú
-            String fullGhiChu = hinhThuc + " - " + ghiChu;
+            String fullGhiChu = hinhThuc + (ghiChu.isEmpty() ? "" : " - " + ghiChu);
 
-            // Gọi Controller
             boolean success = controller.thanhToan(congNo.getMaCongNo(), soTien, nguoiNop, fullGhiChu);
 
             if (success) {
-                JOptionPane.showMessageDialog(this, "Thanh toán thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                closeAndRefresh(); // Gọi hàm làm mới và đóng
+                JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+                parentPanel.loadData(); 
+                dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Lỗi khi lưu giao dịch!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Lỗi khi lưu giao dịch! (Kiểm tra Log CSDL)", "Lỗi Transaction", JOptionPane.ERROR_MESSAGE);
             }
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Số tiền không hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    // --- PHƯƠNG THỨC MỚI ---
-    private void closeAndRefresh() {
-        if (parentPanel != null) {
-            parentPanel.loadData(); // Load lại dữ liệu trên bảng cha
-        }
-        dispose(); // Đóng dialog
     }
 
     // Helpers UI
@@ -204,7 +185,7 @@ public class ThanhToanDialog extends JDialog {
         return t;
     }
 
-    // Classes con
+    // Inner UI Classes (Giữ nguyên)
     static class RoundedPanel extends JPanel {
         private int radius; private Color bgColor;
         public RoundedPanel(int radius, Color bgColor) { this.radius = radius; this.bgColor = bgColor; setOpaque(false); }

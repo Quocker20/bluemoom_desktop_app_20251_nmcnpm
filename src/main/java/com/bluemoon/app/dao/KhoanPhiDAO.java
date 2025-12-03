@@ -8,25 +8,28 @@ import java.util.List;
 
 public class KhoanPhiDAO {
 
+    // [MỚI] Hàm lấy tất cả không cần keyword (Dùng cho Controller tính phí tự động)
     public List<KhoanPhi> getAll() {
+        return getAll("");
+    }
+
+    // Hàm tìm kiếm (Gộp logic để tránh lặp code)
+    public List<KhoanPhi> getAll(String keyword) {
         List<KhoanPhi> list = new ArrayList<>();
-        String sql = "SELECT * FROM KHOAN_PHI";
+        String sql = "SELECT * FROM KHOAN_PHI WHERE TenKhoanPhi LIKE ? ORDER BY MaKhoanPhi DESC";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-            while (rs.next()) {
-                KhoanPhi kp = new KhoanPhi();
-                kp.setMaKhoanPhi(rs.getInt("MaKhoanPhi"));
-                kp.setTenKhoanPhi(rs.getString("TenKhoanPhi"));
-                kp.setDonGia(rs.getDouble("DonGia"));
-                kp.setDonViTinh(rs.getString("DonViTinh"));
-                
-                // Convert int (DB) -> boolean (Java)
-                // DB: 0 là Bắt buộc (True), 1 là Tự nguyện (False)
-                // Logic: Nếu LoaiPhi == 0 thì isMandatory = true
-                kp.setMandatory(rs.getInt("LoaiPhi") == 0);
-                
-                list.add(kp);
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, "%" + keyword + "%");
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    KhoanPhi kp = new KhoanPhi();
+                    kp.setMaKhoanPhi(rs.getInt("MaKhoanPhi"));
+                    kp.setTenKhoanPhi(rs.getString("TenKhoanPhi"));
+                    kp.setDonGia(rs.getDouble("DonGia"));
+                    kp.setDonViTinh(rs.getString("DonViTinh"));
+                    kp.setLoaiPhi(rs.getInt("LoaiPhi"));
+                    list.add(kp);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -34,18 +37,29 @@ public class KhoanPhiDAO {
         return list;
     }
 
-    public boolean update(KhoanPhi kp) {
-        String sql = "UPDATE KHOAN_PHI SET TenKhoanPhi=?, DonGia=?, DonViTinh=?, LoaiPhi=? WHERE MaKhoanPhi=?";
+    public boolean insert(KhoanPhi kp) {
+        String sql = "INSERT INTO KHOAN_PHI (TenKhoanPhi, DonGia, DonViTinh, LoaiPhi) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, kp.getTenKhoanPhi());
             pstmt.setDouble(2, kp.getDonGia());
             pstmt.setString(3, kp.getDonViTinh());
-            
-            // Convert boolean (Java) -> int (DB)
-            // True (Bắt buộc) -> 0, False (Tự nguyện) -> 1
-            pstmt.setInt(4, kp.isMandatory() ? 0 : 1);
-            
+            pstmt.setInt(4, kp.getLoaiPhi());
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean update(KhoanPhi kp) {
+        String sql = "UPDATE KHOAN_PHI SET TenKhoanPhi=?, DonGia=?, DonViTinh=?, LoaiPhi=? WHERE MaKhoanPhi=?";
+        try (Connection conn = DatabaseConnector.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, kp.getTenKhoanPhi());
+            pstmt.setDouble(2, kp.getDonGia());
+            pstmt.setString(3, kp.getDonViTinh());
+            pstmt.setInt(4, kp.getLoaiPhi());
             pstmt.setInt(5, kp.getMaKhoanPhi());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -53,19 +67,14 @@ public class KhoanPhiDAO {
             return false;
         }
     }
-    
-    // Thêm khoản thu tự nguyện mới
-    public boolean insert(KhoanPhi kp) {
-        String sql = "INSERT INTO KHOAN_PHI (TenKhoanPhi, DonGia, DonViTinh, LoaiPhi) VALUES (?, ?, ?, ?)";
+
+    public boolean delete(int id) {
+        String sql = "DELETE FROM KHOAN_PHI WHERE MaKhoanPhi=?";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, kp.getTenKhoanPhi());
-            pstmt.setDouble(2, kp.getDonGia());
-            pstmt.setString(3, kp.getDonViTinh());
-            pstmt.setInt(4, kp.isMandatory() ? 0 : 1);
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
             return false;
         }
     }
