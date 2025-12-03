@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.text.DecimalFormat;
 
 public class ThanhToanDialog extends JDialog {
@@ -52,12 +53,16 @@ public class ThanhToanDialog extends JDialog {
         infoPanel.setBounds(40, 60, 400, 110);
         infoPanel.setLayout(null);
 
-        JLabel lblMaHo = new JLabel("Mã hộ: " + congNo.getMaHo()); // (Thực tế nên query lấy số phòng: A-101)
+        JLabel lblMaHo = new JLabel("Mã hộ: " + congNo.getMaHo()); 
         lblMaHo.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblMaHo.setBounds(20, 15, 300, 20);
         infoPanel.add(lblMaHo);
 
-        JLabel lblKhoanThu = new JLabel("Khoản thu: " + congNo.getTenKhoanPhi());
+        // Giả sử model có getter này hoặc bạn đã join để lấy tên
+        String tenKhoan = "Khoản thu #" + congNo.getMaKhoanPhi();
+        // Nếu model CongNo có field tenKhoanPhi thì dùng: congNo.getTenKhoanPhi()
+        
+        JLabel lblKhoanThu = new JLabel(tenKhoan);
         lblKhoanThu.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblKhoanThu.setBounds(20, 40, 360, 20);
         infoPanel.add(lblKhoanThu);
@@ -164,8 +169,7 @@ public class ThanhToanDialog extends JDialog {
 
             if (success) {
                 JOptionPane.showMessageDialog(this, "Thanh toán thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                // parentPanel.loadData(); // Refresh bảng thu phí (nếu có hàm này)
-                dispose();
+                closeAndRefresh(); // Gọi hàm làm mới và đóng
             } else {
                 JOptionPane.showMessageDialog(this, "Lỗi khi lưu giao dịch!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
@@ -173,6 +177,14 @@ public class ThanhToanDialog extends JDialog {
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Số tiền không hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    // --- PHƯƠNG THỨC MỚI ---
+    private void closeAndRefresh() {
+        if (parentPanel != null) {
+            parentPanel.loadData(); // Load lại dữ liệu trên bảng cha
+        }
+        dispose(); // Đóng dialog
     }
 
     // Helpers UI
@@ -192,7 +204,7 @@ public class ThanhToanDialog extends JDialog {
         return t;
     }
 
-    // Classes con (RoundedPanel, RoundedBorder) - Copy từ LoginFrame hoặc tạo file Utils dùng chung
+    // Classes con
     static class RoundedPanel extends JPanel {
         private int radius; private Color bgColor;
         public RoundedPanel(int radius, Color bgColor) { this.radius = radius; this.bgColor = bgColor; setOpaque(false); }

@@ -114,6 +114,10 @@ public class ThuPhiController {
         return congNoDAO.getAll(thang, nam);
     }
 
+    public List<CongNo> getDanhSachCongNo() {
+        return congNoDAO.getAll();
+    }
+
     /**
      * Ghi nhận thanh toán cho 1 khoản công nợ.
      */
