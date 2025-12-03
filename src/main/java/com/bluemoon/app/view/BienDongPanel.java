@@ -2,6 +2,8 @@ package com.bluemoon.app.view;
 
 import com.bluemoon.app.controller.TamTruTamVangController;
 import com.bluemoon.app.model.TamTruTamVang;
+import com.bluemoon.app.util.AppConstants;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -19,10 +21,8 @@ public class BienDongPanel extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cbFilter;
-
     private TamTruTamVangController controller;
 
-    private final Color COL_PRIMARY = new Color(52, 152, 219);
     private final Color COL_BG = new Color(245, 247, 250);
     private final Color COL_HEADER_BG = Color.WHITE;
     private final Color COL_TABLE_HEADER = new Color(217, 217, 217);
@@ -51,46 +51,22 @@ public class BienDongPanel extends JPanel {
         JPanel toolBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         toolBox.setOpaque(false);
 
-        cbFilter = new JComboBox<>(new String[]{"Tất cả", "Tạm trú", "Tạm vắng", "Khai tử"});
+        cbFilter = new JComboBox<>(new String[] { "Tất cả", "Tạm trú", "Tạm vắng", "Khai tử" });
         cbFilter.setPreferredSize(new Dimension(150, 40));
         cbFilter.setFont(new Font("Inter", Font.PLAIN, 14));
         cbFilter.setBackground(Color.WHITE);
         cbFilter.setFocusable(false);
-        
-        cbFilter.addActionListener(e -> {
-            String selected = (String) cbFilter.getSelectedItem();
-            List<TamTruTamVang> list;
-            
-            if (selected == null || selected.equals("Tất cả")) {
-                list = controller.getAllTamTruTamVang();
-            } else {
-                String loaiHinh = "";
-                switch (selected) {
-                    case "Tạm trú": loaiHinh = "TamTru"; break;
-                    case "Tạm vắng": loaiHinh = "TamVang"; break;
-                    case "Khai tử": loaiHinh = "KhaiTu"; break;
-                }
-                list = controller.getByLoaiHinh(loaiHinh);
-            }
-            updateTable(list);
-            // Reset text search khi lọc combobox để tránh nhầm lẫn
-            txtSearch.setText("");
-        });
-
+        cbFilter.addActionListener(e -> handleFilter());
         toolBox.add(cbFilter);
 
         txtSearch = new JTextField(15);
         txtSearch.setPreferredSize(new Dimension(200, 40));
         txtSearch.setFont(new Font("Inter", Font.PLAIN, 14));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(new Color(220, 220, 220), 1),
-            new EmptyBorder(0, 10, 0, 0)
-        ));
+                new LineBorder(new Color(220, 220, 220), 1),
+                new EmptyBorder(0, 10, 0, 0)));
         txtSearch.putClientProperty("JTextField.placeholderText", "Tìm tên nhân khẩu...");
-        
-        // Logic tìm kiếm khi nhấn Enter
         txtSearch.addActionListener(e -> handleSearch());
-
         toolBox.add(txtSearch);
 
         JButton btnSearch = new JButton("Tìm");
@@ -99,16 +75,13 @@ public class BienDongPanel extends JPanel {
         btnSearch.setFocusPainted(false);
         btnSearch.setBorderPainted(false);
         btnSearch.setFont(new Font("Inter", Font.PLAIN, 14));
-        
-        // Logic tìm kiếm khi nhấn nút
         btnSearch.addActionListener(e -> handleSearch());
-
         toolBox.add(btnSearch);
 
         headerPanel.add(toolBox, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
 
-        String[] columnNames = {"STT", "Mã giấy", "Mã NK/Tên", "Loại hình", "Từ ngày", "Đến ngày", "Lý do"};
+        String[] columnNames = { "STT", "Mã giấy", "Mã NK/Tên", "Loại hình", "Từ ngày", "Đến ngày", "Lý do" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -117,48 +90,7 @@ public class BienDongPanel extends JPanel {
         };
 
         table = new JTable(tableModel);
-
-        JTableHeader header = table.getTableHeader();
-        header.setFont(new Font("Inter", Font.BOLD, 16));
-        header.setBackground(COL_TABLE_HEADER);
-        header.setPreferredSize(new Dimension(header.getWidth(), 50));
-        ((DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
-
-        table.setFont(new Font("Inter", Font.PLAIN, 16));
-        table.setRowHeight(50);
-        table.setSelectionBackground(new Color(232, 240, 254));
-        table.setSelectionForeground(Color.BLACK);
-        table.setShowVerticalLines(false);
-
-        TableColumnModel columnModel = table.getColumnModel();
-
-        DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();
-        leftRenderer.setHorizontalAlignment(JLabel.LEFT);
-        leftRenderer.setBorder(new EmptyBorder(0, 15, 0, 0));
-
-        columnModel.getColumn(0).setCellRenderer(leftRenderer);
-        columnModel.getColumn(0).setMaxWidth(60);
-
-        columnModel.getColumn(1).setCellRenderer(leftRenderer);
-        columnModel.getColumn(1).setPreferredWidth(100);
-        columnModel.getColumn(1).setMaxWidth(150);
-
-        columnModel.getColumn(2).setCellRenderer(leftRenderer);
-        columnModel.getColumn(2).setPreferredWidth(200);
-
-        columnModel.getColumn(3).setCellRenderer(new TypeCellRenderer());
-        columnModel.getColumn(3).setMinWidth(150);
-        columnModel.getColumn(3).setMaxWidth(180);
-
-        columnModel.getColumn(4).setCellRenderer(leftRenderer);
-        columnModel.getColumn(4).setPreferredWidth(110);
-        columnModel.getColumn(4).setMaxWidth(130);
-
-        columnModel.getColumn(5).setCellRenderer(leftRenderer);
-        columnModel.getColumn(5).setPreferredWidth(110);
-        columnModel.getColumn(5).setMaxWidth(130);
-
-        columnModel.getColumn(6).setCellRenderer(leftRenderer);
+        setupTableStyle();
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
@@ -166,8 +98,81 @@ public class BienDongPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
+    private void setupTableStyle() {
+        JTableHeader header = table.getTableHeader();
+        header.setFont(new Font("Inter", Font.BOLD, 16));
+        header.setBackground(COL_TABLE_HEADER);
+        header.setPreferredSize(new Dimension(header.getWidth(), 50));
+        ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
+
+        table.setFont(new Font("Inter", Font.PLAIN, 16));
+        table.setRowHeight(50);
+        table.setSelectionBackground(new Color(232, 240, 254));
+        table.setSelectionForeground(Color.BLACK);
+        table.setShowVerticalLines(false);
+
+        TableColumnModel colModel = table.getColumnModel();
+        DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();
+        leftRenderer.setHorizontalAlignment(JLabel.LEFT);
+        leftRenderer.setBorder(new EmptyBorder(0, 15, 0, 0));
+
+        int[] leftCols = { 0, 1, 2, 4, 5, 6 };
+        for (int i : leftCols)
+            colModel.getColumn(i).setCellRenderer(leftRenderer);
+
+        leftRenderer.setHorizontalAlignment(JLabel.LEFT);
+        leftRenderer.setBorder(new EmptyBorder(0, 15, 0, 0));
+
+        colModel.getColumn(0).setCellRenderer(leftRenderer);
+        colModel.getColumn(0).setMaxWidth(60);
+
+        colModel.getColumn(1).setCellRenderer(leftRenderer);
+        colModel.getColumn(1).setPreferredWidth(100);
+        colModel.getColumn(1).setMaxWidth(150);
+
+        colModel.getColumn(2).setCellRenderer(leftRenderer);
+        colModel.getColumn(2).setPreferredWidth(200);
+
+        colModel.getColumn(3).setCellRenderer(new TypeCellRenderer());
+        colModel.getColumn(3).setMinWidth(150);
+        colModel.getColumn(3).setMaxWidth(180);
+
+        colModel.getColumn(4).setCellRenderer(leftRenderer);
+        colModel.getColumn(4).setPreferredWidth(110);
+        colModel.getColumn(4).setMaxWidth(130);
+
+        colModel.getColumn(5).setCellRenderer(leftRenderer);
+        colModel.getColumn(5).setPreferredWidth(110);
+        colModel.getColumn(5).setMaxWidth(130);
+
+    }
+
     public void loadData() {
         updateTable(controller.getAllTamTruTamVang());
+    }
+
+    private void handleFilter() {
+        String selected = (String) cbFilter.getSelectedItem();
+        List<TamTruTamVang> list;
+        if (selected == null || selected.equals("Tất cả")) {
+            list = controller.getAllTamTruTamVang();
+        } else {
+            String loaiHinh = "";
+            switch (selected) {
+                case "Tạm trú":
+                    loaiHinh = AppConstants.TAM_TRU;
+                    break;
+                case "Tạm vắng":
+                    loaiHinh = AppConstants.TAM_VANG;
+                    break;
+                case "Khai tử":
+                    loaiHinh = AppConstants.KHAI_TU;
+                    break;
+            }
+            list = controller.getByLoaiHinh(loaiHinh);
+        }
+        updateTable(list);
+        txtSearch.setText("");
     }
 
     private void handleSearch() {
@@ -175,8 +180,7 @@ public class BienDongPanel extends JPanel {
         List<TamTruTamVang> list;
         if (keyword.isEmpty()) {
             list = controller.getAllTamTruTamVang();
-            // Reset combo box về tất cả nếu ô tìm kiếm rỗng
-            cbFilter.setSelectedIndex(0); 
+            cbFilter.setSelectedIndex(0);
         } else {
             list = controller.getByHoTen(keyword);
         }
@@ -187,69 +191,54 @@ public class BienDongPanel extends JPanel {
         tableModel.setRowCount(0);
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         int stt = 1;
-
         for (TamTruTamVang item : list) {
-            int maTTTV = item.getMaTTTV();
-            String doiTuong = item.getHoTen() != null && !item.getHoTen().isEmpty() ? item.getHoTen() : String.valueOf(item.getMaNhanKhau());
-            String loai = item.getLoaiHinh();
-            String loaiStr;
+            String tenHienThi = item.getHoTenNhanKhau() != null ? item.getHoTenNhanKhau()
+                    : "Mã NK: " + item.getMaNhanKhau();
 
-            if (loai.equalsIgnoreCase("TamTru")) {
-                loaiStr = "Tạm trú";
-            } else if (loai.equalsIgnoreCase("TamVang")) {
-                loaiStr = "Tạm vắng";
-            } else if (loai.equalsIgnoreCase("KhaiTu")) {
-                loaiStr = "Khai tử";
-            } else {
-                loaiStr = loai;
-            }
+            String loaiHienThi = item.getLoaiHinh();
+            if (AppConstants.TAM_TRU.equalsIgnoreCase(loaiHienThi))
+                loaiHienThi = "Tạm trú";
+            else if (AppConstants.TAM_VANG.equalsIgnoreCase(loaiHienThi))
+                loaiHienThi = "Tạm vắng";
+            else if (AppConstants.KHAI_TU.equalsIgnoreCase(loaiHienThi))
+                loaiHienThi = "Khai tử";
 
-            String tuNgay = item.getTuNgay() != null ? sdf.format(item.getTuNgay()) : "";
-            String denNgay = item.getDenNgay() != null ? sdf.format(item.getDenNgay()) : "";
-            String lyDo = item.getLyDo();
-
-            tableModel.addRow(new Object[]{
-                stt++,
-                maTTTV,
-                doiTuong,
-                loaiStr,
-                tuNgay,
-                denNgay,
-                lyDo
+            tableModel.addRow(new Object[] {
+                    stt++, item.getMaTTTV(), tenHienThi, loaiHienThi,
+                    (item.getTuNgay() != null ? sdf.format(item.getTuNgay()) : ""),
+                    (item.getDenNgay() != null ? sdf.format(item.getDenNgay()) : ""),
+                    item.getLyDo()
             });
         }
     }
 
-    class TypeCellRenderer extends DefaultTableCellRenderer {
+    static class TypeCellRenderer extends DefaultTableCellRenderer {
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             String type = (String) value;
             setFont(new Font("Inter", Font.BOLD, 14));
-            
             setHorizontalAlignment(JLabel.LEFT);
             setBorder(new EmptyBorder(0, 15, 0, 0));
 
-            if (type != null) {
-                if (type.toLowerCase().contains("tạm trú")) {
+            if (type != null && !isSelected) {
+                if (type.contains("Tạm trú"))
                     setForeground(new Color(46, 204, 113));
-                } else if (type.toLowerCase().contains("tạm vắng")) {
+                else if (type.contains("Tạm vắng"))
                     setForeground(new Color(243, 156, 18));
-                } else if (type.toLowerCase().contains("khai tử")) {
+                else if (type.contains("Khai tử"))
                     setForeground(Color.RED);
-                } else {
+                else
                     setForeground(Color.BLACK);
-                }
-            }
-
-            if (isSelected) {
+            } else if (isSelected) {
                 setForeground(Color.BLACK);
             }
             return c;
         }
     }
 
-    class RoundedPanel extends JPanel {
+    static class RoundedPanel extends JPanel {
         private int radius;
         private Color bgColor;
 

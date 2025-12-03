@@ -11,15 +11,10 @@ import java.util.Map;
 public class MainFrame extends JFrame {
 
     private User currentUser;
-
-    // --- BIẾN TOÀN CỤC ---
     private JPanel contentPanel;
     private JPanel mainDashboardPanel;
-
-    // Map lưu trữ các nút menu để quản lý trạng thái
     private Map<String, MenuButton> menuButtons = new HashMap<>();
 
-    // --- MÀU SẮC & UI ---
     private final Color COL_SIDEBAR_BG = new Color(44, 62, 80);
     private final Color COL_MENU_ACTIVE = new Color(52, 152, 219);
     private final Color COL_MAIN_BG = new Color(245, 247, 250);
@@ -38,9 +33,6 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // ==================================================================
-        // 1. SIDEBAR
-        // ==================================================================
         JPanel sidebarPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -77,7 +69,6 @@ public class MainFrame extends JFrame {
         lblLogo.setAlignmentX(Component.LEFT_ALIGNMENT);
         topSidebar.add(lblLogo);
 
-        // Menu Items
         topSidebar.add(createMenuItem("Tổng quan", "/images/icon_overview.png", true));
         topSidebar.add(createMenuItem("Quản lý Cư dân", "/images/icon_resident.png", false));
         topSidebar.add(createMenuItem("Quản lý Biến động", "/images/icon_change.png", false));
@@ -94,9 +85,6 @@ public class MainFrame extends JFrame {
         bottomSidebar.add(btnLogout);
         sidebarPanel.add(bottomSidebar, BorderLayout.SOUTH);
 
-        // ==================================================================
-        // 2. HEADER
-        // ==================================================================
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setPreferredSize(new Dimension(getWidth(), 80));
         headerPanel.setBackground(Color.WHITE);
@@ -104,29 +92,17 @@ public class MainFrame extends JFrame {
 
         String roleName = currentUser != null ? currentUser.getVaiTro() : "Admin";
         String username = currentUser != null ? currentUser.getTenDangNhap() : "User";
-        String displayRoleName;
-        switch (roleName) {
-            case "QuanLy":
-                displayRoleName = "Quản lý";
-                break;
-            case "KeToan":
-                displayRoleName = "Kế toán";
-                break;
-            default:
-                displayRoleName = "Thư ký";
-        }
-        JLabel lblUserInfo = new JLabel("Xin chào, " + displayRoleName + " (" + username + ")  ");
+        JLabel lblUserInfo = new JLabel("Xin chào, " + roleName + " (" + username + ")  ");
         lblUserInfo.setFont(new Font("Inter", Font.BOLD, 20));
 
-        Icon avatarIcon = new ImageIcon(new ImageIcon(getClass().getResource("/images/avatar.png")).getImage()
-                .getScaledInstance(50, 50, Image.SCALE_SMOOTH));
-        lblUserInfo.setIcon(avatarIcon);
+        URL avatarUrl = getClass().getResource("/images/avatar.png");
+        if(avatarUrl != null) {
+             Icon avatarIcon = new ImageIcon(new ImageIcon(avatarUrl).getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+             lblUserInfo.setIcon(avatarIcon);
+        }
         lblUserInfo.setBorder(new EmptyBorder(0, 0, 0, 20));
         headerPanel.add(lblUserInfo, BorderLayout.EAST);
 
-        // ==================================================================
-        // 3. BODY CONTENT
-        // ==================================================================
         contentPanel = new JPanel();
         contentPanel.setBackground(COL_MAIN_BG);
         contentPanel.setLayout(new BorderLayout());
@@ -135,9 +111,6 @@ public class MainFrame extends JFrame {
         mainDashboardPanel = createDashboardUI();
         contentPanel.add(mainDashboardPanel, BorderLayout.CENTER);
 
-        // ==================================================================
-        // 4. LẮP RÁP
-        // ==================================================================
         JPanel centerContainer = new JPanel(new BorderLayout());
         centerContainer.add(headerPanel, BorderLayout.NORTH);
         centerContainer.add(contentPanel, BorderLayout.CENTER);
@@ -150,7 +123,6 @@ public class MainFrame extends JFrame {
         JPanel dashboard = new JPanel(new BorderLayout());
         dashboard.setOpaque(false);
 
-        // A. Cards
         JPanel cardsPanel = new JPanel(new GridBagLayout());
         cardsPanel.setOpaque(false);
         GridBagConstraints gbcCards = new GridBagConstraints();
@@ -168,7 +140,6 @@ public class MainFrame extends JFrame {
         gbcCards.insets = new Insets(0, 0, 0, 0);
         cardsPanel.add(createDashboardCard("Công nợ", "5.0 tr", "/images/icon_card.png"), gbcCards);
 
-        // B. Charts & Notification
         JPanel mainSection = new JPanel(new GridBagLayout());
         mainSection.setOpaque(false);
         mainSection.setBorder(new EmptyBorder(30, 0, 0, 0));
@@ -193,17 +164,12 @@ public class MainFrame extends JFrame {
         return dashboard;
     }
 
-    // --- LOGIC CHUYỂN TRANG (ĐÃ TỐI ƯU THEO YÊU CẦU CỦA BẠN) ---
     private void handleMenuClick(String menuTitle) {
-        // 1. Lấy nút đang được click từ Map
         MenuButton btn = menuButtons.get(menuTitle);
-
-        // 2. CHECK LOGIC: Nếu nút đó ĐANG ACTIVE rồi thì return luôn (không làm gì cả)
         if (btn != null && btn.isMenuActive()) {
             return;
         }
 
-        // 3. Nếu chưa active thì mới xử lý chuyển Panel
         contentPanel.removeAll();
         switch (menuTitle) {
             case "Tổng quan":
@@ -216,19 +182,20 @@ public class MainFrame extends JFrame {
                 contentPanel.add(new BienDongPanel(), BorderLayout.CENTER);
                 break;
             case "Quản lý Thu phí":
-                contentPanel.add(new ThuPhiPanel(), BorderLayout.CENTER);
+                // contentPanel.add(new ThuPhiPanel(), BorderLayout.CENTER);
+                JLabel lbl = new JLabel("Chức năng đang bảo trì", SwingConstants.CENTER);
+                lbl.setFont(new Font("Segoe UI", Font.ITALIC, 24));
+                contentPanel.add(lbl, BorderLayout.CENTER);
                 break;
             default:
-                JLabel lbl = new JLabel("Chức năng " + menuTitle + " đang phát triển", SwingConstants.CENTER);
-                lbl.setFont(new Font("Segoe UI", Font.ITALIC, 24));
-                lbl.setForeground(Color.GRAY);
-                contentPanel.add(lbl, BorderLayout.CENTER);
+                JLabel lblDef = new JLabel("Chức năng " + menuTitle + " đang phát triển", SwingConstants.CENTER);
+                lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
+                lblDef.setForeground(Color.GRAY);
+                contentPanel.add(lblDef, BorderLayout.CENTER);
                 break;
         }
         contentPanel.revalidate();
         contentPanel.repaint();
-
-        // 4. Cập nhật giao diện nút (để nút vừa bấm sáng lên)
         updateActiveMenu(menuTitle);
     }
 
@@ -241,10 +208,6 @@ public class MainFrame extends JFrame {
             }
         }
     }
-
-    // ==================================================================
-    // CÁC HÀM HELPER
-    // ==================================================================
 
     private JButton createMenuItem(String text, String iconPath, boolean initActive) {
         MenuButton btn = new MenuButton(text, iconPath, initActive);
@@ -264,18 +227,14 @@ public class MainFrame extends JFrame {
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setIconTextGap(10);
-
         try {
             URL url = getClass().getResource("/images/icon_logout.png");
-            if (url == null) {
-                url = new URL("https://img.icons8.com/ios-glyphs/30/ffffff/exit.png");
+            if(url != null) {
+                ImageIcon icon = new ImageIcon(url);
+                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                btn.setIcon(new ImageIcon(img));
             }
-            ImageIcon icon = new ImageIcon(url);
-            Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-            btn.setIcon(new ImageIcon(img));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) {}
         btn.addActionListener(e -> logout());
         return btn;
     }
@@ -330,14 +289,11 @@ public class MainFrame extends JFrame {
         new LoginFrame().setVisible(true);
     }
 
-    // --- INNER CLASS MENU BUTTON (ĐÃ CẬP NHẬT GETTER) ---
     class MenuButton extends JButton {
         private boolean isActive;
-
         public MenuButton(String text, String iconPath, boolean isActive) {
             super(text);
             this.isActive = isActive;
-
             setMaximumSize(new Dimension(260, 50));
             setAlignmentX(Component.LEFT_ALIGNMENT);
             setFont(new Font("Inter", Font.CENTER_BASELINE, 20));
@@ -356,28 +312,19 @@ public class MainFrame extends JFrame {
 
             addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    if (!isActive)
-                        setForeground(Color.WHITE);
+                    if (!isActive) setForeground(Color.WHITE);
                 }
-
                 public void mouseExited(java.awt.event.MouseEvent evt) {
-                    if (!isActive)
-                        setForeground(COL_TEXT_SIDEBAR);
+                    if (!isActive) setForeground(COL_TEXT_SIDEBAR);
                 }
             });
         }
-
-        // --- HÀM MỚI THÊM: GETTER ĐỂ KIỂM TRA TRẠNG THÁI ---
-        public boolean isMenuActive() {
-            return this.isActive;
-        }
-
+        public boolean isMenuActive() { return this.isActive; }
         public void setActive(boolean active) {
             this.isActive = active;
             this.setForeground(active ? Color.WHITE : COL_TEXT_SIDEBAR);
             this.repaint();
         }
-
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2d = (Graphics2D) g.create();
@@ -396,13 +343,11 @@ public class MainFrame extends JFrame {
     class RoundedPanel extends JPanel {
         private int radius;
         private Color bgColor;
-
         public RoundedPanel(int radius, Color bgColor) {
             this.radius = radius;
             this.bgColor = bgColor;
             setOpaque(false);
         }
-
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -414,10 +359,7 @@ public class MainFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ex) {
-        }
+        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception ex) { }
         java.awt.EventQueue.invokeLater(() -> {
             User dummyUser = new User(1, "admin_test", "", "QuanLy");
             new MainFrame(dummyUser).setVisible(true);

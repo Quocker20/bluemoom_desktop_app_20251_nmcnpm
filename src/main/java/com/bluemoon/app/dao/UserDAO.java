@@ -10,38 +10,35 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Lớp truy cập dữ liệu (DAO) cho thực thể User (Tài khoản).
- * Chứa các phương thức thao tác với bảng TAI_KHOAN.
+ * Xử lý truy vấn liên quan đến Tài khoản người dùng.
  */
 public class UserDAO {
 
     /**
-     * Kiểm tra thông tin đăng nhập của người dùng.
-     * (Phục vụ chức năng UC-3.1.1: Đăng nhập)
-     * @param username Tên đăng nhập do người dùng nhập.
-     * @param password Mật khẩu do người dùng nhập.
-     * @return Đối tượng User nếu thông tin đúng, hoặc null nếu sai.
+     * Kiểm tra đăng nhập.
+     * 
+     * @param username Tên đăng nhập
+     * @param password Mật khẩu gốc (chưa mã hóa)
+     * @return User object nếu đúng, null nếu sai
      */
     public User checkLogin(String username, String password) {
         User user = null;
-        // Câu lệnh SQL sử dụng tham số (?) để tránh SQL Injection
         String sql = "SELECT * FROM TAI_KHOAN WHERE TenDangNhap = ? AND MatKhau = ?";
-        
-        // Sử dụng try-with-resources để tự động đóng Connection, PreparedStatement, ResultSet
+
         try (Connection conn = DatabaseConnector.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            // Gán giá trị cho các tham số (?)
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            if (conn == null)
+                return null;
+
             pstmt.setString(1, username);
+            // Mã hóa mật khẩu với Salt trước khi so sánh
             String hashedPassword = SecurityUtil.hashPassword(password);
             pstmt.setString(2, hashedPassword);
-            
-            // Thực thi truy vấn
+
             try (ResultSet rs = pstmt.executeQuery()) {
-                // Nếu có kết quả trả về (tức là đăng nhập đúng)
                 if (rs.next()) {
                     user = new User();
-                    // Ánh xạ dữ liệu từ ResultSet sang đối tượng User
                     user.setMaTK(rs.getInt("MaTK"));
                     user.setTenDangNhap(rs.getString("TenDangNhap"));
                     user.setMatKhau(rs.getString("MatKhau"));
@@ -49,7 +46,6 @@ public class UserDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("[UserDAO] Lỗi truy vấn đăng nhập: " + e.getMessage());
             e.printStackTrace();
         }
         return user;

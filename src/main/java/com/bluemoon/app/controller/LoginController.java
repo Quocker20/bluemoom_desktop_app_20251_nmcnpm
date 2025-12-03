@@ -1,34 +1,34 @@
 package com.bluemoon.app.controller;
 
-import com.bluemoon.app.model.User;
 import com.bluemoon.app.dao.UserDAO;
-
-/**
- * Controller xử lý logic cho màn hình Đăng nhập.
- */
+import com.bluemoon.app.model.User;
+import com.bluemoon.app.util.DatabaseConnector;
+import javax.swing.JOptionPane;
 
 public class LoginController {
-    private UserDAO userDAO;
+    private final UserDAO userDAO;
 
     public LoginController() {
         this.userDAO = new UserDAO();
     }
 
-    /**
-     * Xử lý đăng nhập.
-     * @param username Tên đăng nhập
-     * @param password Mật khẩu (chưa mã hóa)
-     * @return User object nếu thành công, null nếu thất bại.
-     */
     public User login(String username, String password) {
-        // 1. Kiểm tra dữ liệu đầu vào cơ bản
+        // 1. Validate Input
         if (username == null || username.trim().isEmpty() || 
             password == null || password.trim().isEmpty()) {
             return null;
         }
 
-        // 2. Gọi DAO để kiểm tra trong CSDL
-        // (DAO sẽ tự động băm mật khẩu để so sánh)
+        // 2. Check Connection (UX Improvement)
+        if (DatabaseConnector.getConnection() == null) {
+            JOptionPane.showMessageDialog(null, 
+                "Không thể kết nối đến Cơ sở dữ liệu!\nVui lòng kiểm tra lại mạng hoặc cấu hình MySQL.", 
+                "Lỗi Kết Nối", 
+                JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        // 3. Call DAO
         return userDAO.checkLogin(username, password);
     }
 }

@@ -18,8 +18,6 @@ public class QuanLyNhanKhauDialog extends JDialog {
     private NhanKhauController controller;
     private JTable table;
     private DefaultTableModel tableModel;
-    
-    // Lưu danh sách để truy xuất khi Sửa/Xóa
     private List<NhanKhau> currentList;
 
     public QuanLyNhanKhauDialog(JFrame parent, HoKhau hoKhau) {
@@ -35,7 +33,6 @@ public class QuanLyNhanKhauDialog extends JDialog {
         setLocationRelativeTo(getParent());
         setLayout(new BorderLayout());
 
-        // 1. Header
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(245, 247, 250));
         headerPanel.setBorder(new EmptyBorder(15, 20, 15, 20));
@@ -45,7 +42,6 @@ public class QuanLyNhanKhauDialog extends JDialog {
         lblTitle.setForeground(new Color(52, 152, 219));
         headerPanel.add(lblTitle, BorderLayout.WEST);
 
-        // Nút Thêm (Xanh lá - Chữ đen)
         ColoredButton btnAdd = new ColoredButton("+ Thêm thành viên", new Color(46, 204, 113));
         btnAdd.addActionListener(e -> {
              ThemNhanKhauDialog dialog = new ThemNhanKhauDialog((JFrame) getParent(), this, hoKhau);
@@ -55,7 +51,6 @@ public class QuanLyNhanKhauDialog extends JDialog {
 
         add(headerPanel, BorderLayout.NORTH);
 
-        // 2. Table
         String[] columns = {"STT", "Họ tên", "Ngày sinh", "Giới tính", "Quan hệ", "CCCD"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -65,25 +60,21 @@ public class QuanLyNhanKhauDialog extends JDialog {
         table.setRowHeight(35);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setSelectionBackground(new Color(232, 240, 254));
-        table.setSelectionForeground(Color.BLACK); // Chữ đen khi chọn
+        table.setSelectionForeground(Color.BLACK); 
         
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         add(scrollPane, BorderLayout.CENTER);
 
-        // 3. Footer (Các nút chức năng)
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         footerPanel.setBorder(new EmptyBorder(10, 20, 20, 20));
         
-        // Nút Đăng ký Biến động (Tím - Chữ đen)
         ColoredButton btnBienDong = new ColoredButton("Đăng ký Biến động", new Color(155, 89, 182));
         btnBienDong.addActionListener(e -> handleBienDong());
 
-        // Nút Sửa (Cam - Chữ đen)
         ColoredButton btnEdit = new ColoredButton("Sửa thông tin", new Color(243, 156, 18));
         btnEdit.addActionListener(e -> handleEdit());
         
-        // Nút Xóa (Đỏ - Chữ đen)
         ColoredButton btnDelete = new ColoredButton("Xóa thành viên", new Color(231, 76, 60));
         btnDelete.addActionListener(e -> handleDelete());
         
@@ -122,13 +113,9 @@ public class QuanLyNhanKhauDialog extends JDialog {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân khẩu cần đăng ký!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
         NhanKhau selectedNK = currentList.get(row);
-        
         DangKyBienDongDialog dialog = new DangKyBienDongDialog((JFrame) getParent(), selectedNK);
         dialog.setVisible(true);
-
-        
     }
 
     private void handleEdit() {
@@ -137,9 +124,7 @@ public class QuanLyNhanKhauDialog extends JDialog {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân khẩu cần sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
         NhanKhau selectedNK = currentList.get(row);
-        
         ThemNhanKhauDialog dialog = new ThemNhanKhauDialog((JFrame) getParent(), this, hoKhau);
         dialog.setEditData(selectedNK);
         dialog.setVisible(true);
@@ -151,11 +136,9 @@ public class QuanLyNhanKhauDialog extends JDialog {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân khẩu cần xóa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
         NhanKhau selectedNK = currentList.get(row);
-
         int confirm = JOptionPane.showConfirmDialog(this, 
-            "Bạn có chắc muốn xóa thành viên: " + selectedNK.getHoTen() + "?\n(Hành động này không thể hoàn tác)",
+            "Bạn có chắc muốn xóa thành viên: " + selectedNK.getHoTen() + "?",
             "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
             
         if (confirm == JOptionPane.YES_OPTION) {
@@ -168,33 +151,24 @@ public class QuanLyNhanKhauDialog extends JDialog {
         }
     }
 
-    // --- INNER CLASS: Nút màu tùy chỉnh (Chữ đen, nền đặc) ---
     class ColoredButton extends JButton {
         public ColoredButton(String text, Color bgColor) {
             super(text);
             setBackground(bgColor);
-            setForeground(Color.BLACK); // Yêu cầu: Chữ màu đen
+            setForeground(Color.BLACK);
             setFont(new Font("Segoe UI", Font.BOLD, 14));
-            
-            setContentAreaFilled(false); // Tắt vẽ mặc định để tự vẽ nền
+            setContentAreaFilled(false);
             setFocusPainted(false);
             setBorderPainted(false);
             setCursor(new Cursor(Cursor.HAND_CURSOR));
-            
-            // Padding cho nút rộng rãi
             setBorder(new EmptyBorder(8, 15, 8, 15));
         }
-
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            
-            // Vẽ nền màu
             g2.setColor(getBackground());
-            g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10)); // Bo góc nhẹ 10px
-            
-            // Vẽ text
+            g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10));
             super.paintComponent(g);
             g2.dispose();
         }

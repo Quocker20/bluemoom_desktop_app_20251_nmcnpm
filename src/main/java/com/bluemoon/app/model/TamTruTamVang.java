@@ -5,27 +5,17 @@ import java.util.Date;
 public class TamTruTamVang {
     private int maTTTV;
     private int maNhanKhau;
-    private String loaiHinh; // "TamTru" hoặc "TamVang"
+    private String loaiHinh; // 'TamTru', 'TamVang', 'KhaiTu'
     private Date tuNgay;
     private Date denNgay;
     private String lyDo;
-    private String HoTen; // Tên nhân khẩu, không lưu DB, chỉ để hiển thị
 
-    // Constructor mặc định
+    // Trường hiển thị (không lưu trong bảng DB này)
+    private String hoTenNhanKhau;
+
     public TamTruTamVang() {
     }
 
-    // Constructor đầy đủ (đọc từ DB)
-    public TamTruTamVang(int maTTTV, int maNhanKhau, String loaiHinh, Date tuNgay, Date denNgay, String lyDo) {
-        this.maTTTV = maTTTV;
-        this.maNhanKhau = maNhanKhau;
-        this.loaiHinh = loaiHinh;
-        this.tuNgay = tuNgay;
-        this.denNgay = denNgay;
-        this.lyDo = lyDo;
-    }
-
-    // Constructor ngắn (tạo mới)
     public TamTruTamVang(int maNhanKhau, String loaiHinh, Date tuNgay, Date denNgay, String lyDo) {
         this.maNhanKhau = maNhanKhau;
         this.loaiHinh = loaiHinh;
@@ -33,8 +23,6 @@ public class TamTruTamVang {
         this.denNgay = denNgay;
         this.lyDo = lyDo;
     }
-
-    // --- Getters & Setters ---
 
     public int getMaTTTV() {
         return maTTTV;
@@ -84,16 +72,11 @@ public class TamTruTamVang {
         this.lyDo = lyDo;
     }
 
-    public String getHoTen() {
-        return HoTen;
+    public String getHoTenNhanKhau() {
+        return hoTenNhanKhau;
     }
 
-    public void setHoTen(String hoTen) {
-        HoTen = hoTen;
-    }
-
-    @Override
-    public String toString() {
-        return loaiHinh + ": " + lyDo;
+    public void setHoTenNhanKhau(String hoTenNhanKhau) {
+        this.hoTenNhanKhau = hoTenNhanKhau;
     }
 }

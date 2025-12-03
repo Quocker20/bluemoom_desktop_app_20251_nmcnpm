@@ -3,6 +3,7 @@ package com.bluemoon.app.view;
 import com.bluemoon.app.controller.NhanKhauController;
 import com.bluemoon.app.model.HoKhau;
 import com.bluemoon.app.model.NhanKhau;
+import com.bluemoon.app.util.AppConstants;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,11 +14,8 @@ import java.util.Date;
 
 public class ThemNhanKhauDialog extends JDialog {
 
-    private JTextField txtHoTen;
-    private JTextField txtNgaySinh; 
-    private JTextField txtCCCD;
-    private JComboBox<String> cbGioiTinh;
-    private JComboBox<String> cbQuanHe;
+    private JTextField txtHoTen, txtNgaySinh, txtCCCD;
+    private JComboBox<String> cbGioiTinh, cbQuanHe;
     private JButton btnSave;
     private JLabel lblTitle;
 
@@ -27,7 +25,6 @@ public class ThemNhanKhauDialog extends JDialog {
     
     private boolean isEditMode = false;
     private NhanKhau currentNK = null;
-
 
     public ThemNhanKhauDialog(JFrame parentFrame, QuanLyNhanKhauDialog parentDialog, HoKhau hoKhau) {
         super(parentFrame, "Thông tin Nhân khẩu", true);
@@ -63,7 +60,9 @@ public class ThemNhanKhauDialog extends JDialog {
         lblGT.setBounds(40, 220, 100, 20);
         mainPanel.add(lblGT);
         
-        cbGioiTinh = new JComboBox<>(new String[]{"Nam", "Nữ", "Khác"});
+        cbGioiTinh = new JComboBox<>(new String[]{
+            AppConstants.GIOI_TINH_NAM, AppConstants.GIOI_TINH_NU, AppConstants.GIOI_TINH_KHAC
+        });
         cbGioiTinh.setBounds(40, 245, 190, 35);
         cbGioiTinh.setBackground(Color.WHITE);
         mainPanel.add(cbGioiTinh);
@@ -72,7 +71,10 @@ public class ThemNhanKhauDialog extends JDialog {
         lblQH.setBounds(250, 220, 150, 20);
         mainPanel.add(lblQH);
 
-        cbQuanHe = new JComboBox<>(new String[]{"Chủ hộ", "Vợ", "Chồng", "Con", "Bố", "Mẹ", "Anh/Chị/Em", "Khác"});
+        cbQuanHe = new JComboBox<>(new String[]{
+            AppConstants.QH_CHU_HO, AppConstants.QH_VO, AppConstants.QH_CHONG, 
+            AppConstants.QH_CON, AppConstants.QH_BO_ME, AppConstants.QH_ANH_CHI_EM, AppConstants.QH_KHAC
+        });
         cbQuanHe.setBounds(250, 245, 190, 35);
         cbQuanHe.setBackground(Color.WHITE);
         mainPanel.add(cbQuanHe);
@@ -98,15 +100,12 @@ public class ThemNhanKhauDialog extends JDialog {
     public void setEditData(NhanKhau nk) {
         this.isEditMode = true;
         this.currentNK = nk;
-        
         lblTitle.setText("CẬP NHẬT NHÂN KHẨU");
         btnSave.setText("Lưu thay đổi");
-        
         txtHoTen.setText(nk.getHoTen());
         txtCCCD.setText(nk.getCccd());
         cbGioiTinh.setSelectedItem(nk.getGioiTinh());
         cbQuanHe.setSelectedItem(nk.getQuanHe());
-        
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             txtNgaySinh.setText(sdf.format(nk.getNgaySinh()));
@@ -122,14 +121,13 @@ public class ThemNhanKhauDialog extends JDialog {
             String quanHe = cbQuanHe.getSelectedItem().toString();
             
             if (hoTen.isEmpty() || ngaySinhStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập tên và ngày sinh!", "Thiếu thông tin", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập tên và ngày sinh!");
                 return;
             }
             
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             sdf.setLenient(false); 
             Date ngaySinh = sdf.parse(ngaySinhStr);
-            
             if (cccd.isEmpty()) cccd = null;
 
             if (isEditMode) {
@@ -144,7 +142,7 @@ public class ThemNhanKhauDialog extends JDialog {
                     parentDialog.loadData();
                     dispose();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Cập nhật thất bại (Có thể lỗi CSDL hoặc trùng CCCD)!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Cập nhật thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 NhanKhau nk = new NhanKhau(hoKhauHienTai.getMaHo(), hoTen, ngaySinh, gioiTinh, cccd, quanHe);
@@ -156,10 +154,8 @@ public class ThemNhanKhauDialog extends JDialog {
                     JOptionPane.showMessageDialog(this, "Thêm thất bại (Có thể trùng CCCD)!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             }
-
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Ngày sinh không hợp lệ (dd/MM/yyyy) hoặc lỗi hệ thống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Ngày sinh không hợp lệ (dd/MM/yyyy)!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -183,21 +179,17 @@ public class ThemNhanKhauDialog extends JDialog {
             setBackground(bgColor);
             setForeground(Color.BLACK);
             setFont(new Font("Segoe UI", Font.BOLD, 14));
-            
             setContentAreaFilled(false);
             setFocusPainted(false);
             setBorderPainted(false);
             setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
-
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            
             g2.setColor(getBackground());
             g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10));
-            
             super.paintComponent(g);
             g2.dispose();
         }

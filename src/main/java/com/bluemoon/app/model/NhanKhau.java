@@ -4,30 +4,17 @@ import java.util.Date;
 
 public class NhanKhau {
     private int maNhanKhau;
-    private int maHo; // Khóa ngoại liên kết với HoKhau
+    private int maHo;
     private String hoTen;
     private Date ngaySinh;
-    private String gioiTinh; // 'Nam', 'Nu', 'Khac'
-    private String cccd; // Có thể null (trẻ em)
-    private String quanHe; // 'ChuHo', 'Vo', 'Con', ...
+    private String gioiTinh;
+    private String cccd; // Có thể null
+    private String quanHe;
 
-    // Constructor mặc định
     public NhanKhau() {
     }
 
-    // Constructor đầy đủ (khi đọc từ DB)
-    public NhanKhau(int maNhanKhau, int maHo, String hoTen, Date ngaySinh, String gioiTinh, String cccd,
-            String quanHe) {
-        this.maNhanKhau = maNhanKhau;
-        this.maHo = maHo;
-        this.hoTen = hoTen;
-        this.ngaySinh = ngaySinh;
-        this.gioiTinh = gioiTinh;
-        this.cccd = cccd;
-        this.quanHe = quanHe;
-    }
-
-    // Constructor ngắn gọn (khi thêm mới)
+    // Constructor thêm mới
     public NhanKhau(int maHo, String hoTen, Date ngaySinh, String gioiTinh, String cccd, String quanHe) {
         this.maHo = maHo;
         this.hoTen = hoTen;
@@ -36,8 +23,6 @@ public class NhanKhau {
         this.cccd = cccd;
         this.quanHe = quanHe;
     }
-
-    // --- Getters và Setters ---
 
     public int getMaNhanKhau() {
         return maNhanKhau;
@@ -93,10 +78,5 @@ public class NhanKhau {
 
     public void setQuanHe(String quanHe) {
         this.quanHe = quanHe;
-    }
-
-    @Override
-    public String toString() {
-        return hoTen + " (" + quanHe + ")";
     }
 }

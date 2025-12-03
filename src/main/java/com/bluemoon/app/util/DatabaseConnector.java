@@ -5,29 +5,21 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * Lớp tiện ích quản lý kết nối đến Cơ sở dữ liệu MySQL.
- * (Phục vụ toàn bộ hệ thống)
+ * Quản lý kết nối tới MySQL Database.
  */
 public class DatabaseConnector {
-    // Thông tin kết nối
-    private static final String URL = "jdbc:mysql://localhost:3306/bluemoon_db";
-    private static final String USER = "root"; 
-    private static final String PASS = "";
+    // Thêm useSSL=false và characterEncoding=UTF-8 để tránh lỗi font và cảnh báo SSL
+    private static final String URL = "jdbc:mysql://localhost:3306/bluemoon_db?useSSL=false&characterEncoding=UTF-8";
+    private static final String USER = "root";
+    private static final String PASSWORD = ""; // Cập nhật mật khẩu MySQL của bạn tại đây
 
-
-    /**
-     * Thiết lập và lấy một đối tượng kết nối (Connection) đến CSDL.
-     * * @return Connection - Đối tượng kết nối nếu thành công, hoặc null nếu thất bại.
-     */
     public static Connection getConnection() {
-        Connection conn = null;
         try {
-            // Kết nối tới MySQL
-            conn = DriverManager.getConnection(URL, USER, PASS);
-            System.out.println("Kết nối CSDL thành công!");
+            return DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (SQLException e) {
-            System.err.println("Lỗi kết nối CSDL: " + e.getMessage());
+            // Trong dự án thực tế, nên dùng Logger thay vì System.err
+            System.err.println("[DB Error] Không thể kết nối CSDL: " + e.getMessage());
+            return null;
         }
-        return conn;
     }
 }

@@ -22,10 +22,8 @@ public class HoKhauPanel extends JPanel {
     private DefaultTableModel tableModel;
     private HoKhauController controller;
     private JTextField txtSearch;
-
     private List<HoKhau> currentList;
 
-    // Màu sắc
     private final Color COL_PRIMARY = new Color(52, 152, 219);
     private final Color COL_BG = new Color(245, 247, 250);
     private final Color COL_HEADER_BG = Color.WHITE;
@@ -42,7 +40,6 @@ public class HoKhauPanel extends JPanel {
         setBackground(COL_BG);
         setBorder(new EmptyBorder(30, 30, 30, 30));
 
-        // --- 1. HEADER ---
         RoundedPanel headerPanel = new RoundedPanel(20, COL_HEADER_BG);
         headerPanel.setLayout(new BorderLayout());
         headerPanel.setBorder(new EmptyBorder(15, 25, 15, 25));
@@ -62,11 +59,7 @@ public class HoKhauPanel extends JPanel {
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(new Color(220, 220, 220), 1),
                 new EmptyBorder(0, 10, 0, 0)));
-        
-        // --- THÊM LOGIC ENTER TẠI ĐÂY ---
-        // Khi đang focus vào ô tìm kiếm và nhấn Enter, sẽ gọi hàm handleSearch()
         txtSearch.addActionListener(e -> handleSearch());
-        
         toolBox.add(txtSearch);
 
         JButton btnSearch = new JButton("Tìm");
@@ -93,9 +86,7 @@ public class HoKhauPanel extends JPanel {
         headerPanel.add(toolBox, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
 
-        // --- 2. TABLE ---
         String[] columnNames = { "STT", "Mã hộ", "Tên chủ hộ", "Diện tích (m2)", "Số điện thoại", "Thao tác" };
-
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -104,12 +95,10 @@ public class HoKhauPanel extends JPanel {
         };
 
         table = new JTable(tableModel);
-
         TableColumnModel columnModel = table.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(60);
         columnModel.getColumn(1).setPreferredWidth(100);
         columnModel.getColumn(2).setPreferredWidth(200);
-        // Cột thao tác cần rộng hơn để chứa 3 nút
         columnModel.getColumn(5).setMinWidth(180);
 
         JTableHeader header = table.getTableHeader();
@@ -119,11 +108,8 @@ public class HoKhauPanel extends JPanel {
 
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setRowHeight(45);
-
-        // --- FIX LỖI MÀU CHỮ KHI CHỌN ---
-        table.setSelectionBackground(new Color(232, 240, 254)); // Nền xanh nhạt
-        table.setSelectionForeground(Color.BLACK); // [QUAN TRỌNG] Chữ màu đen khi chọn
-
+        table.setSelectionBackground(new Color(232, 240, 254));
+        table.setSelectionForeground(Color.BLACK);
         table.setShowVerticalLines(false);
 
         table.getColumnModel().getColumn(5).setCellRenderer(new TableActionCellRender());
@@ -134,7 +120,6 @@ public class HoKhauPanel extends JPanel {
         scrollPane.getViewport().setBackground(Color.WHITE);
         add(scrollPane, BorderLayout.CENTER);
 
-        // --- 3. FOOTER ---
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footerPanel.setOpaque(false);
         JLabel lblPage = new JLabel("Hiển thị tất cả kết quả   ");
@@ -146,17 +131,10 @@ public class HoKhauPanel extends JPanel {
     public void loadData() {
         tableModel.setRowCount(0);
         currentList = controller.getAllHoKhau();
-
         int stt = 1;
         for (HoKhau hk : currentList) {
-            tableModel.addRow(new Object[] {
-                    stt++,
-                    hk.getSoCanHo(),
-                    hk.getTenChuHo(),
-                    hk.getDienTich(),
-                    hk.getSdt(),
-                    ""
-            });
+            tableModel.addRow(
+                    new Object[] { stt++, hk.getSoCanHo(), hk.getTenChuHo(), hk.getDienTich(), hk.getSdt(), "" });
         }
     }
 
@@ -166,34 +144,20 @@ public class HoKhauPanel extends JPanel {
         tableModel.setRowCount(0);
         int stt = 1;
         for (HoKhau hk : currentList) {
-            tableModel.addRow(new Object[] {
-                    stt++,
-                    hk.getSoCanHo(),
-                    hk.getTenChuHo(),
-                    hk.getDienTich(),
-                    hk.getSdt(),
-                    ""
-            });
+            tableModel.addRow(
+                    new Object[] { stt++, hk.getSoCanHo(), hk.getTenChuHo(), hk.getDienTich(), hk.getSdt(), "" });
         }
     }
 
-    // --- CUSTOM UI CLASSES ---
-
-    // Panel chứa 3 nút: Thêm Nhân khẩu, Sửa, Xóa
     class PanelAction extends JPanel {
         private JButton btnShowResidentList, btnEdit, btnDelete;
 
         public PanelAction() {
             setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
             setOpaque(false);
-
-            // 1. Nút Thêm Nhân khẩu (Xanh lá)
             btnShowResidentList = createBtn("/images/icon_information.png", new Color(46, 204, 113));
-            // 2. Nút Sửa (Cam)
             btnEdit = createBtn("/images/icon_edit.png", new Color(243, 156, 18));
-            // 3. Nút Xóa (Đỏ)
             btnDelete = createBtn("/images/icon_delete.png", new Color(231, 76, 60));
-
             add(btnShowResidentList);
             add(btnEdit);
             add(btnDelete);
@@ -207,7 +171,6 @@ public class HoKhauPanel extends JPanel {
             btn.setBorder(BorderFactory.createLineBorder(color, 1));
             btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
             btn.setToolTipText("Thao tác");
-
             URL url = getClass().getResource(iconPath);
             if (url != null) {
                 ImageIcon icon = new ImageIcon(
@@ -221,19 +184,14 @@ public class HoKhauPanel extends JPanel {
         }
 
         public void initEvent(int row) {
-            // Sự kiện Thêm Nhân khẩu
             btnShowResidentList.addActionListener(e -> {
                 if (row >= 0 && row < currentList.size()) {
                     HoKhau selectedHk = currentList.get(row);
-
-                    // Mở Dialog Quản lý Nhân khẩu
                     JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(HoKhauPanel.this);
                     QuanLyNhanKhauDialog dialog = new QuanLyNhanKhauDialog(parentFrame, selectedHk);
                     dialog.setVisible(true);
                 }
             });
-
-            // Sự kiện Sửa
             btnEdit.addActionListener(e -> {
                 if (row >= 0 && row < currentList.size()) {
                     HoKhau selectedHk = currentList.get(row);
@@ -245,15 +203,14 @@ public class HoKhauPanel extends JPanel {
                         table.getCellEditor().stopCellEditing();
                 }
             });
-
-            // Sự kiện Xóa
             btnDelete.addActionListener(e -> {
                 if (row >= 0 && row < currentList.size()) {
+                    if (table.getCellEditor() != null)
+                        table.getCellEditor().stopCellEditing();
                     HoKhau selectedHk = currentList.get(row);
                     int confirm = JOptionPane.showConfirmDialog(HoKhauPanel.this,
-                            "Bạn có chắc chắn muốn xóa hộ " + selectedHk.getSoCanHo() + " không?",
+                            "Bạn có chắc chắn muốn xóa hộ " + selectedHk.getSoCanHo() + "?",
                             "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-
                     if (confirm == JOptionPane.YES_OPTION) {
                         boolean deleted = controller.deleteHoKhau(selectedHk.getMaHo());
                         if (deleted) {
@@ -264,8 +221,6 @@ public class HoKhauPanel extends JPanel {
                                     JOptionPane.ERROR_MESSAGE);
                         }
                     }
-                    if (table.getCellEditor() != null)
-                        table.getCellEditor().stopCellEditing();
                 }
             });
         }
