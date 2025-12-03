@@ -3,16 +3,14 @@ package com.bluemoon.app.view;
 import com.bluemoon.app.controller.HoKhauController;
 import com.bluemoon.app.controller.NhanKhauController;
 import com.bluemoon.app.model.HoKhau;
+import com.bluemoon.app.model.NhanKhau;
 
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
-
 import java.awt.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import com.bluemoon.app.model.NhanKhau;
+import java.util.List;
 
 public class ThemHoKhauDialog extends JDialog {
 
@@ -21,17 +19,17 @@ public class ThemHoKhauDialog extends JDialog {
     private JTextField txtDienTich;
     private JTextField txtSDT;
     
-    // --- CÁC TRƯỜNG MỚI (UI ONLY) ---
+    // --- CÁC TRƯỜNG MỚI ---
     private JTextField txtNgaySinh;
-    private JTextField txtCCCD;
     private JComboBox<String> cbGioiTinh;
+    private JTextField txtCCCD;
 
     private JButton btnSave;
     private JButton btnCancel;
     private JLabel lblTitle;
 
     private HoKhauController hkController;
-    private NhanKhauController nkcontroller = new NhanKhauController();
+    private NhanKhauController nkController;
     private HoKhauPanel parentPanel;
     
     private boolean isEditMode = false;
@@ -41,11 +39,12 @@ public class ThemHoKhauDialog extends JDialog {
         super(parentFrame, "Quản lý Hộ khẩu", true);
         this.parentPanel = parentPanel;
         this.hkController = new HoKhauController();
+        this.nkController = new NhanKhauController();
         initComponents();
     }
 
     private void initComponents() {
-        setSize(550, 650); // Tăng chiều cao để chứa thêm trường
+        setSize(550, 680);
         setLocationRelativeTo(getParent());
         setResizable(false);
         setLayout(new BorderLayout());
@@ -61,78 +60,39 @@ public class ThemHoKhauDialog extends JDialog {
         lblTitle.setBounds(0, 15, 530, 40);
         mainPanel.add(lblTitle);
 
-        // --- CÁC TRƯỜNG NHẬP LIỆU (SẮP XẾP LẠI VỊ TRÍ) ---
+        // --- CÁC TRƯỜNG NHẬP LIỆU ---
         
         // Hàng 1: Mã hộ & Diện tích
-        JLabel lblMaHo = new JLabel("Mã hộ *");
-        lblMaHo.setBounds(40, 70, 200, 20);
-        mainPanel.add(lblMaHo);
+        addLabel(mainPanel, "Mã hộ *", 40, 70);
+        txtMaHo = addTextField(mainPanel, 40, 95, 210);
 
-        txtMaHo = new JTextField();
-        txtMaHo.setBounds(40, 95, 210, 40);
-        setupTextField(txtMaHo);
-        mainPanel.add(txtMaHo);
+        addLabel(mainPanel, "Diện tích (m2) *", 280, 70);
+        txtDienTich = addTextField(mainPanel, 280, 95, 210);
 
-        JLabel lblDienTich = new JLabel("Diện tích (m2) *");
-        lblDienTich.setBounds(280, 70, 200, 20);
-        mainPanel.add(lblDienTich);
+        // Hàng 2: Tên chủ hộ & Số điện thoại
+        addLabel(mainPanel, "Họ và Tên chủ hộ *", 40, 150);
+        txtTenChuHo = addTextField(mainPanel, 40, 175, 210);
 
-        txtDienTich = new JTextField();
-        txtDienTich.setBounds(280, 95, 210, 40);
-        setupTextField(txtDienTich);
-        mainPanel.add(txtDienTich);
+        addLabel(mainPanel, "Số điện thoại", 280, 150);
+        txtSDT = addTextField(mainPanel, 280, 175, 210);
 
-        // Hàng 2: Họ tên chủ hộ & Số điện thoại
-        JLabel lblTen = new JLabel("Họ và Tên chủ hộ *");
-        lblTen.setBounds(40, 150, 200, 20);
-        mainPanel.add(lblTen);
-
-        txtTenChuHo = new JTextField();
-        txtTenChuHo.setBounds(40, 175, 210, 40);
-        setupTextField(txtTenChuHo);
-        mainPanel.add(txtTenChuHo);
-
-        JLabel lblSDT = new JLabel("Số điện thoại");
-        lblSDT.setBounds(280, 150, 200, 20);
-        mainPanel.add(lblSDT);
-
-        txtSDT = new JTextField();
-        txtSDT.setBounds(280, 175, 210, 40);
-        setupTextField(txtSDT);
-        mainPanel.add(txtSDT);
-
-        // Hàng 3: Giới tính & Ngày sinh (MỚI)
-        JLabel lblGioiTinh = new JLabel("Giới tính *");
-        lblGioiTinh.setBounds(40, 230, 200, 20);
-        mainPanel.add(lblGioiTinh);
-
+        // Hàng 3: Giới tính & Ngày sinh
+        addLabel(mainPanel, "Giới tính *", 40, 230);
         cbGioiTinh = new JComboBox<>(new String[]{"Nam", "Nữ", "Khác"});
         cbGioiTinh.setBounds(40, 255, 210, 40);
         cbGioiTinh.setBackground(Color.WHITE);
         mainPanel.add(cbGioiTinh);
 
-        JLabel lblNgaySinh = new JLabel("Nhập Ngày sinh (dd/MM/yyyy)*");
-        lblNgaySinh.setBounds(280, 230, 200, 20);
-        mainPanel.add(lblNgaySinh);
+        addLabel(mainPanel, "Nhập Ngày sinh (dd/MM/yyyy)*", 280, 230);
+        txtNgaySinh = addTextField(mainPanel, 280, 255, 210);
 
-        txtNgaySinh = new JTextField();
-        txtNgaySinh.setBounds(280, 255, 210, 40);
-        setupTextField(txtNgaySinh);
-        mainPanel.add(txtNgaySinh);
-
-        // Hàng 4: Số CCCD (MỚI - Full width)
-        JLabel lblCCCD = new JLabel("Số CCCD/CMND");
-        lblCCCD.setBounds(40, 310, 200, 20);
-        mainPanel.add(lblCCCD);
-
-        txtCCCD = new JTextField();
-        txtCCCD.setBounds(40, 335, 450, 40);
-        setupTextField(txtCCCD);
+        // Hàng 4: Số CCCD
+        addLabel(mainPanel, "Số CCCD/CMND", 40, 310);
+        txtCCCD = addTextField(mainPanel, 40, 335, 450);
         txtCCCD.putClientProperty("JTextField.placeholderText", "Nhập Số CCCD/CMND (nếu có)");
-        mainPanel.add(txtCCCD);
 
-        // --- Nút Lưu ---
-        btnSave = new JButton("Thêm hộ khẩu mới") {
+        // --- Buttons ---
+        btnSave = new JButton("Lưu thông tin") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -143,19 +103,17 @@ public class ThemHoKhauDialog extends JDialog {
                 super.paintComponent(g);
             }
         };
-        btnSave.setBounds(40, 410, 450, 45); // Dời xuống dưới
+        btnSave.setBounds(40, 430, 450, 45);
         btnSave.setForeground(Color.WHITE);
         btnSave.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnSave.setContentAreaFilled(false);
         btnSave.setBorderPainted(false);
         btnSave.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
         btnSave.addActionListener(e -> handleSaveAction());
         mainPanel.add(btnSave);
 
-        // Nút Hủy
         btnCancel = new JButton("Quay lại");
-        btnCancel.setBounds(40, 470, 450, 30); // Dời xuống dưới
+        btnCancel.setBounds(40, 490, 450, 30);
         btnCancel.setForeground(Color.GRAY);
         btnCancel.setContentAreaFilled(false);
         btnCancel.setBorderPainted(false);
@@ -166,62 +124,82 @@ public class ThemHoKhauDialog extends JDialog {
         add(mainPanel, BorderLayout.CENTER);
     }
 
+    // --- LOGIC CHUYỂN CHẾ ĐỘ SỬA (ĐÃ CẬP NHẬT) ---
     public void setEditData(HoKhau hk) {
         this.isEditMode = true;
         this.currentHoKhau = hk;
 
+        // 1. Điền dữ liệu cơ bản
         txtMaHo.setText(hk.getSoCanHo());
-        txtMaHo.setEditable(false);
-        txtMaHo.setForeground(Color.GRAY);
-        
         txtTenChuHo.setText(hk.getTenChuHo());
         txtDienTich.setText(String.valueOf(hk.getDienTich()));
         txtSDT.setText(hk.getSdt());
 
-        // Các trường mới chưa có data từ model cũ nên để trống hoặc logic khác tùy bạn sau này
+        // 2. Điền dữ liệu bổ sung (Ngày sinh, CCCD...)
+        fillChuHoData(hk.getMaHo());
+
+        // 3. Cấu hình trạng thái Edit (FIX Mã hộ & Diện tích)
         
-        lblTitle.setText("CẬP NHẬT THÔNG TIN");
+        // --- Fixed Fields (Không cho sửa) ---
+        txtMaHo.setEditable(false);
+        txtMaHo.setForeground(Color.GRAY);
+        
+        txtDienTich.setEditable(false); 
+        txtDienTich.setForeground(Color.GRAY);
+
+        // --- Editable Fields (Cho phép sửa) ---
+        txtTenChuHo.setEditable(true);
+        txtSDT.setEditable(true);
+        txtNgaySinh.setEditable(true);
+        txtCCCD.setEditable(true);
+        cbGioiTinh.setEnabled(true);
+
+        // Đổi tiêu đề
+        lblTitle.setText("CẬP NHẬT THÔNG TIN HỘ");
         btnSave.setText("Lưu thay đổi");
         setTitle("Cập nhật Hộ khẩu");
     }
 
+    private void fillChuHoData(int maHo) {
+        List<NhanKhau> listNK = nkController.getNhanKhauByHoKhau(maHo);
+        for (NhanKhau nk : listNK) {
+            if (nk.getQuanHe().equalsIgnoreCase("Chủ hộ") || nk.getQuanHe().equalsIgnoreCase("ChuHo")) {
+                txtCCCD.setText(nk.getCccd());
+                cbGioiTinh.setSelectedItem(nk.getGioiTinh());
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    txtNgaySinh.setText(sdf.format(nk.getNgaySinh()));
+                } catch (Exception e) {
+                    txtNgaySinh.setText("");
+                }
+                break;
+            }
+        }
+    }
+
+    // --- LOGIC XỬ LÝ CHÍNH (GIỮ NGUYÊN) ---
     private void handleSaveAction() {
-        // LOGIC CŨ GIỮ NGUYÊN (Chưa validate/xử lý các trường mới)
         String maHo = txtMaHo.getText().trim();
         String tenChuHo = txtTenChuHo.getText().trim();
         String sdt = txtSDT.getText().trim();
         String dienTichStr = txtDienTich.getText().trim();
-        String gioiTinh = (String) cbGioiTinh.getSelectedItem();
-        String ngaySinhStr = txtNgaySinh.getText().trim();
-        String cccd = txtCCCD.getText().trim();
 
-        if (maHo.isEmpty() || tenChuHo.isEmpty() || dienTichStr.isEmpty() || gioiTinh.isEmpty() || ngaySinhStr.isEmpty()) {
+        if (maHo.isEmpty() || tenChuHo.isEmpty() || dienTichStr.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập đủ thông tin bắt buộc (*)", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
             double dienTich = Double.parseDouble(dienTichStr);
-            
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            sdf.setLenient(false); 
-            Date ngaySinh = sdf.parse(ngaySinhStr);
-            
 
             if (isEditMode) {
                 updateHoKhau(tenChuHo, dienTich, sdt);
             } else {
                 addHoKhau(maHo, tenChuHo, dienTich, sdt);
-                NhanKhau chuHo = new NhanKhau(hkController.getMaxMaHo(), tenChuHo, ngaySinh, gioiTinh, cccd, "Chủ hộ");
-                boolean isAddingSuccessed = nkcontroller.addNhanKhau(chuHo);
-                if (!isAddingSuccessed) {
-                    JOptionPane.showMessageDialog(this, "Thêm chủ hộ thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                }
             }
 
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "da loi" + ex.getMessage(), "loi", JOptionPane.ERROR_MESSAGE);
-            
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Diện tích phải là số hợp lệ!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -245,7 +223,7 @@ public class ThemHoKhauDialog extends JDialog {
         boolean success = hkController.updateHoKhau(currentHoKhau);
         
         if (success) {
-            JOptionPane.showMessageDialog(this, "Cập nhật thông tin thành công!");
+            JOptionPane.showMessageDialog(this, "Cập nhật thông tin thành công!\nVui lòng cập nhật lại thông tin nhân khẩu nếu cần.");
             closeAndRefresh();
         } else {
             JOptionPane.showMessageDialog(this, "Cập nhật thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -255,6 +233,22 @@ public class ThemHoKhauDialog extends JDialog {
     private void closeAndRefresh() {
         parentPanel.loadData();
         dispose();
+    }
+
+    // --- Helper UI ---
+    private void addLabel(JPanel p, String text, int x, int y) {
+        JLabel l = new JLabel(text);
+        l.setBounds(x, y, 200, 20);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        p.add(l);
+    }
+
+    private JTextField addTextField(JPanel p, int x, int y, int width) {
+        JTextField txt = new JTextField();
+        txt.setBounds(x, y, width, 40);
+        setupTextField(txt);
+        p.add(txt);
+        return txt;
     }
 
     private void setupTextField(JTextField txt) {

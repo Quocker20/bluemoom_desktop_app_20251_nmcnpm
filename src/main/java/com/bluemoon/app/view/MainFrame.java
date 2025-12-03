@@ -215,6 +215,9 @@ public class MainFrame extends JFrame {
             case "Quản lý Biến động":
                 contentPanel.add(new BienDongPanel(), BorderLayout.CENTER);
                 break;
+            case "Quản lý Thu phí":
+                contentPanel.add(new ThuPhiPanel(), BorderLayout.CENTER);
+                break;
             default:
                 JLabel lbl = new JLabel("Chức năng " + menuTitle + " đang phát triển", SwingConstants.CENTER);
                 lbl.setFont(new Font("Segoe UI", Font.ITALIC, 24));

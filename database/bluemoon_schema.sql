@@ -109,3 +109,6 @@ INSERT INTO KHOAN_PHI (TenKhoanPhi, DonGia, DonViTinh, LoaiPhi) VALUES
 ('Phí Quản lý', 3000, 'm2', 0),          -- Bắt buộc, 3k/m2
 ('Quỹ Vì người nghèo', 0, 'ho', 1);      -- Tự nguyện
 
+
+
+

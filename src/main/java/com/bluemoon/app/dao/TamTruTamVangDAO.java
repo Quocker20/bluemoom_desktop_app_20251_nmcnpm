@@ -103,4 +103,76 @@ public class TamTruTamVangDAO {
         }
         return list;
     }
+
+    /**
+     * Lấy danh sách tạm trú tạm vắng theo loại hình (TamTru/ TamVang/KhaiTu)
+     * @param loaiHinh
+     * @return List<TamTruTamVang>
+     */
+    public List<TamTruTamVang> getByLoaiHinh(String loaiHinh) {
+        List<TamTruTamVang> list = new ArrayList<>();
+        String sql = "SELECT t.MaTTTV, t.LoaiHinh, t.TuNgay, t.DenNgay, t.LyDo, n.HoTen " +
+                "FROM TAM_TRU_TAM_VANG t " +
+                "JOIN NHAN_KHAU n ON t.MaNhanKhau = n.MaNhanKhau " +
+                "WHERE t.LoaiHinh = ? " +
+                "ORDER BY t.MaTTTV ASC";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, loaiHinh);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    TamTruTamVang t = new TamTruTamVang();
+                    t.setMaTTTV(rs.getInt("MaTTTV"));
+                    t.setLoaiHinh(rs.getString("LoaiHinh"));
+                    t.setTuNgay(rs.getDate("TuNgay"));
+                    t.setDenNgay(rs.getDate("DenNgay"));
+                    t.setLyDo(rs.getString("LyDo"));
+                    t.setHoTen(rs.getString("HoTen"));
+                    list.add(t);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi lấy danh sách Tạm trú/Tạm vắng theo loại hình: " + e.getMessage());
+        }
+        return list;
+    }
+
+    /**
+     * Lấy danh sách theo tên nhân khẩu (Dùng cho chức năng tìm kiếm)
+     * @param tenNhanKhau
+     * @return List<TamTruTamVang>
+     */
+    public List<TamTruTamVang> getByHoTen(String tenNhanKhau) {
+        List<TamTruTamVang> list = new ArrayList<>();
+        String sql = "SELECT t.MaTTTV, t.LoaiHinh, t.TuNgay, t.DenNgay, t.LyDo, n.HoTen " +
+                "FROM TAM_TRU_TAM_VANG t " +
+                "JOIN NHAN_KHAU n ON t.MaNhanKhau = n.MaNhanKhau " +
+                "WHERE n.HoTen LIKE ? " +
+                "ORDER BY t.MaTTTV ASC";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, "%" + tenNhanKhau + "%");
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    TamTruTamVang t = new TamTruTamVang();
+                    t.setMaTTTV(rs.getInt("MaTTTV"));
+                    t.setLoaiHinh(rs.getString("LoaiHinh"));
+                    t.setTuNgay(rs.getDate("TuNgay"));
+                    t.setDenNgay(rs.getDate("DenNgay"));
+                    t.setLyDo(rs.getString("LyDo"));
+                    t.setHoTen(rs.getString("HoTen"));
+                    list.add(t);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm Tạm trú/Tạm vắng theo tên nhân khẩu: " + e.getMessage());
+        }
+        return list;
+    }
 }

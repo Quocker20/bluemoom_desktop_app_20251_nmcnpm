@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "MainFrame",
+      "request": "launch",
+      "mainClass": "com.bluemoon.app.view.MainFrame",
+      "projectName": "bluemoon-desktop"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/PROJECTS/BTL_NMCNPM/04_Lap_trinh/bluemoon-desktop",
+      "program": "c:/PROJECTS/BTL_NMCNPM/04_Lap_trinh/bluemoon-desktop/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

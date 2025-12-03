@@ -62,6 +62,11 @@ public class HoKhauPanel extends JPanel {
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(new Color(220, 220, 220), 1),
                 new EmptyBorder(0, 10, 0, 0)));
+        
+        // --- THÊM LOGIC ENTER TẠI ĐÂY ---
+        // Khi đang focus vào ô tìm kiếm và nhấn Enter, sẽ gọi hàm handleSearch()
+        txtSearch.addActionListener(e -> handleSearch());
+        
         toolBox.add(txtSearch);
 
         JButton btnSearch = new JButton("Tìm");
