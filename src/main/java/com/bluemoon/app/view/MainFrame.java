@@ -1,5 +1,6 @@
 package com.bluemoon.app.view;
 
+import com.bluemoon.app.controller.DashboardController;
 import com.bluemoon.app.model.User;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,6 +16,13 @@ public class MainFrame extends JFrame {
     private JPanel mainDashboardPanel;
     private Map<String, MenuButton> menuButtons = new HashMap<>();
 
+    // Controller cho Dashboard
+    private final DashboardController dashboardController;
+
+    // Các Label hiển thị số liệu (Để cập nhật động)
+    private JLabel lblValHoKhau, lblValNhanKhau, lblValTongThu, lblValCongNo;
+
+    // Colors
     private final Color COL_SIDEBAR_BG = new Color(44, 62, 80);
     private final Color COL_MENU_ACTIVE = new Color(52, 152, 219);
     private final Color COL_MAIN_BG = new Color(245, 247, 250);
@@ -22,7 +30,9 @@ public class MainFrame extends JFrame {
 
     public MainFrame(User user) {
         this.currentUser = user;
+        this.dashboardController = new DashboardController();
         initComponents();
+        refreshDashboardData(); // Load dữ liệu ngay khi mở
     }
 
     private void initComponents() {
@@ -33,22 +43,19 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        // 1. SIDEBAR
         JPanel sidebarPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 g.setColor(COL_SIDEBAR_BG);
                 g.fillRect(0, 0, getWidth(), getHeight());
-
                 URL bgUrl = getClass().getResource("/images/bg_sidebar.png");
                 if (bgUrl != null) {
                     ImageIcon icon = new ImageIcon(bgUrl);
                     Graphics2D g2d = (Graphics2D) g.create();
-                    int iconWidth = icon.getIconWidth();
-                    int panelWidth = getWidth();
-                    int x = (panelWidth - iconWidth) / 2;
-
-                    g2d.setClip(0, 0, panelWidth, getHeight());
+                    int x = (getWidth() - icon.getIconWidth()) / 2;
+                    g2d.setClip(0, 0, getWidth(), getHeight());
                     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.15f));
                     g2d.drawImage(icon.getImage(), x, 0, this);
                     g2d.dispose();
@@ -86,6 +93,7 @@ public class MainFrame extends JFrame {
         bottomSidebar.add(btnLogout);
         sidebarPanel.add(bottomSidebar, BorderLayout.SOUTH);
 
+        // 2. HEADER
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setPreferredSize(new Dimension(getWidth(), 80));
         headerPanel.setBackground(Color.WHITE);
@@ -95,7 +103,6 @@ public class MainFrame extends JFrame {
         String username = currentUser != null ? currentUser.getTenDangNhap() : "User";
         JLabel lblUserInfo = new JLabel("Xin chào, " + roleName + " (" + username + ")  ");
         lblUserInfo.setFont(new Font("Inter", Font.BOLD, 20));
-
         URL avatarUrl = getClass().getResource("/images/avatar.png");
         if (avatarUrl != null) {
             Icon avatarIcon = new ImageIcon(
@@ -105,6 +112,7 @@ public class MainFrame extends JFrame {
         lblUserInfo.setBorder(new EmptyBorder(0, 0, 0, 20));
         headerPanel.add(lblUserInfo, BorderLayout.EAST);
 
+        // 3. BODY
         contentPanel = new JPanel();
         contentPanel.setBackground(COL_MAIN_BG);
         contentPanel.setLayout(new BorderLayout());
@@ -113,6 +121,7 @@ public class MainFrame extends JFrame {
         mainDashboardPanel = createDashboardUI();
         contentPanel.add(mainDashboardPanel, BorderLayout.CENTER);
 
+        // 4. LẮP RÁP
         JPanel centerContainer = new JPanel(new BorderLayout());
         centerContainer.add(headerPanel, BorderLayout.NORTH);
         centerContainer.add(contentPanel, BorderLayout.CENTER);
@@ -121,27 +130,47 @@ public class MainFrame extends JFrame {
         this.add(centerContainer, BorderLayout.CENTER);
     }
 
+    // --- LOGIC LẤY DỮ LIỆU THẬT ---
+    private void refreshDashboardData() {
+        if (lblValHoKhau != null)
+            lblValHoKhau.setText(String.valueOf(dashboardController.getSoLuongHo()));
+        if (lblValNhanKhau != null)
+            lblValNhanKhau.setText(String.valueOf(dashboardController.getSoLuongNguoi()));
+        if (lblValTongThu != null)
+            lblValTongThu.setText(dashboardController.getTongThuThangNay());
+        if (lblValCongNo != null)
+            lblValCongNo.setText(dashboardController.getCongNoThangNay());
+    }
+
     private JPanel createDashboardUI() {
         JPanel dashboard = new JPanel(new BorderLayout());
         dashboard.setOpaque(false);
 
+        // A. Cards Panel (Hiển thị số liệu thật)
         JPanel cardsPanel = new JPanel(new GridBagLayout());
         cardsPanel.setOpaque(false);
-        GridBagConstraints gbcCards = new GridBagConstraints();
-        gbcCards.fill = GridBagConstraints.BOTH;
-        gbcCards.weightx = 1.0;
-        gbcCards.insets = new Insets(0, 0, 0, 20);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.insets = new Insets(0, 0, 0, 20);
 
-        gbcCards.gridx = 0;
-        cardsPanel.add(createDashboardCard("Hộ cư dân", "150", "/images/icon_house.png"), gbcCards);
-        gbcCards.gridx = 1;
-        cardsPanel.add(createDashboardCard("Nhân khẩu", "450", "/images/icon_people.png"), gbcCards);
-        gbcCards.gridx = 2;
-        cardsPanel.add(createDashboardCard("Tổng thu", "50.0 tr", "/images/icon_money.png"), gbcCards);
-        gbcCards.gridx = 3;
-        gbcCards.insets = new Insets(0, 0, 0, 0);
-        cardsPanel.add(createDashboardCard("Công nợ", "5.0 tr", "/images/icon_card.png"), gbcCards);
+        // Khởi tạo các Label giá trị
+        lblValHoKhau = new JLabel("...", SwingConstants.RIGHT);
+        lblValNhanKhau = new JLabel("...", SwingConstants.RIGHT);
+        lblValTongThu = new JLabel("...", SwingConstants.RIGHT);
+        lblValCongNo = new JLabel("...", SwingConstants.RIGHT);
 
+        gbc.gridx = 0;
+        cardsPanel.add(createDashboardCard("Hộ cư dân", lblValHoKhau, "/images/icon_house.png"), gbc);
+        gbc.gridx = 1;
+        cardsPanel.add(createDashboardCard("Nhân khẩu", lblValNhanKhau, "/images/icon_people.png"), gbc);
+        gbc.gridx = 2;
+        cardsPanel.add(createDashboardCard("Tổng thu (T)", lblValTongThu, "/images/icon_money.png"), gbc);
+        gbc.gridx = 3;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        cardsPanel.add(createDashboardCard("Công nợ (T)", lblValCongNo, "/images/icon_card.png"), gbc);
+
+        // B. Charts Area
         JPanel mainSection = new JPanel(new GridBagLayout());
         mainSection.setOpaque(false);
         mainSection.setBorder(new EmptyBorder(30, 0, 0, 0));
@@ -150,15 +179,17 @@ public class MainFrame extends JFrame {
         gbcMain.fill = GridBagConstraints.BOTH;
         gbcMain.weighty = 1.0;
 
+        // Placeholder for Charts (Sẽ được thay bằng BaoCaoPanel khi click menu)
         gbcMain.gridx = 0;
         gbcMain.weightx = 0.65;
         gbcMain.insets = new Insets(0, 0, 0, 20);
-        mainSection.add(createPlaceholderPanel("Biểu đồ thu phí theo tháng", 0, 400), gbcMain);
+        mainSection.add(createPlaceholderPanel("Truy cập 'Báo cáo & Thống kê' để xem biểu đồ chi tiết", 0, 400),
+                gbcMain);
 
         gbcMain.gridx = 1;
         gbcMain.weightx = 0.35;
         gbcMain.insets = new Insets(0, 0, 0, 0);
-        mainSection.add(createPlaceholderPanel("Thông báo mới", 0, 400), gbcMain);
+        mainSection.add(createPlaceholderPanel("Hệ thống hoạt động ổn định", 0, 400), gbcMain);
 
         dashboard.add(cardsPanel, BorderLayout.NORTH);
         dashboard.add(mainSection, BorderLayout.CENTER);
@@ -168,70 +199,52 @@ public class MainFrame extends JFrame {
 
     private void handleMenuClick(String menuTitle) {
         String userRole = currentUser.getVaiTro();
-
         MenuButton btn = menuButtons.get(menuTitle);
-        if (btn != null && btn.isMenuActive()) {
+        if (btn != null && btn.isMenuActive())
             return;
-        }
 
         contentPanel.removeAll();
         switch (menuTitle) {
             case "Tổng quan":
+                refreshDashboardData(); // Refresh số liệu khi quay lại Dashboard
                 contentPanel.add(mainDashboardPanel, BorderLayout.CENTER);
                 break;
-            case "Quản lý Cư dân": {
+            case "Quản lý Cư dân":
                 if (userRole.equals("KeToan")) {
-                    JLabel lblDef = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
-                    lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
-                    lblDef.setForeground(Color.GRAY);
-                    contentPanel.add(lblDef, BorderLayout.CENTER);
+                    showAccessDenied();
                     break;
                 }
                 contentPanel.add(new HoKhauPanel(), BorderLayout.CENTER);
-            }
                 break;
-            case "Quản lý Biến động": {
+            case "Quản lý Biến động":
                 if (userRole.equals("KeToan")) {
-                    JLabel lblDef = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
-                    lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
-                    lblDef.setForeground(Color.GRAY);
-                    contentPanel.add(lblDef, BorderLayout.CENTER);
+                    showAccessDenied();
                     break;
                 }
                 contentPanel.add(new BienDongPanel(), BorderLayout.CENTER);
-            }
                 break;
-            case "Quản lý Thu phí": {
+            case "Quản lý Thu phí":
                 if (userRole.equals("ThuKy")) {
-                    JLabel lblDef = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
-                    lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
-                    lblDef.setForeground(Color.GRAY);
-                    contentPanel.add(lblDef, BorderLayout.CENTER);
+                    showAccessDenied();
                     break;
                 }
                 contentPanel.add(new ThuPhiPanel(), BorderLayout.CENTER);
-            }
                 break;
-            case "Cấu hình Phí": {
+            case "Cấu hình Phí":
                 if (userRole.equals("ThuKy")) {
-                    JLabel lblDef = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
-                    lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
-                    lblDef.setForeground(Color.GRAY);
-                    contentPanel.add(lblDef, BorderLayout.CENTER);
+                    showAccessDenied();
                     break;
                 }
                 contentPanel.add(new CauHinhPhiPanel(), BorderLayout.CENTER);
-            }
+                break;
+            case "Báo cáo & Thống kê":
+                contentPanel.add(new BaoCaoPanel(), BorderLayout.CENTER);
                 break;
             case "Hệ thống":
                 contentPanel.add(new DoiMatKhauPanel(currentUser), BorderLayout.CENTER);
                 break;
-
             default:
-                JLabel lblDef = new JLabel("Chức năng " + menuTitle + " đang phát triển", SwingConstants.CENTER);
-                lblDef.setFont(new Font("Segoe UI", Font.ITALIC, 24));
-                lblDef.setForeground(Color.GRAY);
-                contentPanel.add(lblDef, BorderLayout.CENTER);
+                showDevelopingFeature(menuTitle);
                 break;
         }
         contentPanel.revalidate();
@@ -239,13 +252,64 @@ public class MainFrame extends JFrame {
         updateActiveMenu(menuTitle);
     }
 
+    // --- Helpers UI ---
+
+    // Sửa hàm này để nhận JLabel thay vì String value cứng
+    private JPanel createDashboardCard(String title, JLabel lblValueObj, String iconPath) {
+        RoundedPanel card = new RoundedPanel(15, new Color(225, 225, 225));
+        card.setPreferredSize(new Dimension(200, 100));
+        card.setLayout(new BorderLayout());
+        card.setBorder(new EmptyBorder(15, 20, 15, 15));
+
+        JLabel lblIcon = new JLabel();
+        lblIcon.setPreferredSize(new Dimension(50, 50));
+        try {
+            URL url = getClass().getResource(iconPath);
+            if (url != null)
+                lblIcon.setIcon(
+                        new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)));
+        } catch (Exception e) {
+        }
+
+        JPanel textPanel = new JPanel(new GridLayout(2, 1));
+        textPanel.setOpaque(false);
+
+        // Setup font cho Label giá trị
+        lblValueObj.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        lblValueObj.setForeground(Color.BLACK);
+
+        JLabel lblTitle = new JLabel(title, SwingConstants.RIGHT);
+        lblTitle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        lblTitle.setForeground(new Color(80, 80, 80));
+
+        textPanel.add(lblValueObj);
+        textPanel.add(lblTitle);
+        card.add(lblIcon, BorderLayout.WEST);
+        card.add(textPanel, BorderLayout.CENTER);
+        return card;
+    }
+
+    // Các hàm phụ trợ khác (giữ nguyên)
+    private void showAccessDenied() {
+        JLabel lbl = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
+        lbl.setFont(new Font("Segoe UI", Font.ITALIC, 24));
+        lbl.setForeground(Color.GRAY);
+        contentPanel.add(lbl, BorderLayout.CENTER);
+    }
+
+    private void showDevelopingFeature(String title) {
+        JLabel lbl = new JLabel("Chức năng " + title + " đang phát triển", SwingConstants.CENTER);
+        lbl.setFont(new Font("Segoe UI", Font.ITALIC, 24));
+        lbl.setForeground(Color.GRAY);
+        contentPanel.add(lbl, BorderLayout.CENTER);
+    }
+
     private void updateActiveMenu(String activeTitle) {
         for (Map.Entry<String, MenuButton> entry : menuButtons.entrySet()) {
-            if (entry.getKey().equals(activeTitle)) {
+            if (entry.getKey().equals(activeTitle))
                 entry.getValue().setActive(true);
-            } else {
+            else
                 entry.getValue().setActive(false);
-            }
         }
     }
 
@@ -269,67 +333,28 @@ public class MainFrame extends JFrame {
         btn.setIconTextGap(10);
         try {
             URL url = getClass().getResource("/images/icon_logout.png");
-            if (url != null) {
-                ImageIcon icon = new ImageIcon(url);
-                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-                btn.setIcon(new ImageIcon(img));
-            }
+            if (url != null)
+                btn.setIcon(new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
         } catch (Exception e) {
         }
-        btn.addActionListener(e -> logout());
+        btn.addActionListener(e -> {
+            this.dispose();
+            new LoginFrame().setVisible(true);
+        });
         return btn;
-    }
-
-    private JPanel createDashboardCard(String title, String value, String iconPath) {
-        RoundedPanel card = new RoundedPanel(15, new Color(225, 225, 225));
-        card.setPreferredSize(new Dimension(200, 100));
-        card.setLayout(new BorderLayout());
-        card.setBorder(new EmptyBorder(15, 20, 15, 15));
-
-        JLabel lblIcon = new JLabel();
-        lblIcon.setPreferredSize(new Dimension(50, 50));
-        URL url = getClass().getResource(iconPath);
-        if (url != null) {
-            ImageIcon icon = new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
-            lblIcon.setIcon(icon);
-        } else {
-            lblIcon.setText("Icon");
-            lblIcon.setHorizontalAlignment(SwingConstants.CENTER);
-            lblIcon.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        }
-
-        JPanel textPanel = new JPanel(new GridLayout(2, 1));
-        textPanel.setOpaque(false);
-        JLabel lblValue = new JLabel(value, SwingConstants.RIGHT);
-        lblValue.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        lblValue.setForeground(Color.BLACK);
-        JLabel lblTitle = new JLabel(title, SwingConstants.RIGHT);
-        lblTitle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        lblTitle.setForeground(new Color(80, 80, 80));
-
-        textPanel.add(lblValue);
-        textPanel.add(lblTitle);
-        card.add(lblIcon, BorderLayout.WEST);
-        card.add(textPanel, BorderLayout.CENTER);
-        return card;
     }
 
     private JPanel createPlaceholderPanel(String text, int width, int height) {
         RoundedPanel panel = new RoundedPanel(15, new Color(225, 225, 225));
         panel.setPreferredSize(new Dimension(width, height));
         panel.setLayout(new BorderLayout());
-        JLabel lblHeader = new JLabel(text);
+        JLabel lblHeader = new JLabel(text, SwingConstants.CENTER);
         lblHeader.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblHeader.setBorder(new EmptyBorder(15, 20, 0, 0));
-        panel.add(lblHeader, BorderLayout.NORTH);
+        panel.add(lblHeader, BorderLayout.CENTER);
         return panel;
     }
 
-    private void logout() {
-        this.dispose();
-        new LoginFrame().setVisible(true);
-    }
-
+    // Inner Classes (MenuButton, RoundedPanel) - Giữ nguyên như cũ
     class MenuButton extends JButton {
         private boolean isActive;
 
@@ -347,11 +372,12 @@ public class MainFrame extends JFrame {
             setBorder(new EmptyBorder(10, 25, 10, 0));
             setIconTextGap(15);
             setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-            URL url = getClass().getResource(iconPath);
-            if (url != null)
-                setIcon(new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
-
+            try {
+                URL url = getClass().getResource(iconPath);
+                if (url != null)
+                    setIcon(new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+            } catch (Exception e) {
+            }
             addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseEntered(java.awt.event.MouseEvent evt) {
                     if (!isActive)
@@ -415,7 +441,7 @@ public class MainFrame extends JFrame {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
         }
-        java.awt.EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             User dummyUser = new User(1, "admin_test", "", "QuanLy");
             new MainFrame(dummyUser).setVisible(true);
         });
