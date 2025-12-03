@@ -223,6 +223,9 @@ public class MainFrame extends JFrame {
                 contentPanel.add(new CauHinhPhiPanel(), BorderLayout.CENTER);
             }
                 break;
+            case "Hệ thống":
+                contentPanel.add(new DoiMatKhauPanel(currentUser), BorderLayout.CENTER);
+                break;
 
             default:
                 JLabel lblDef = new JLabel("Chức năng " + menuTitle + " đang phát triển", SwingConstants.CENTER);
