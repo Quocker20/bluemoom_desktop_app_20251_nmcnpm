@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "App",
+      "request": "launch",
+      "mainClass": "com.bluemoon.app.App",
+      "projectName": "bluemoon-desktop"
+    },
+    {
+      "type": "java",
       "name": "MainFrame",
       "request": "launch",
       "mainClass": "com.bluemoon.app.view.MainFrame",

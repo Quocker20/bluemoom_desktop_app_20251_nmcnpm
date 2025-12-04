@@ -435,15 +435,4 @@ public class MainFrame extends JFrame {
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
         }
     }
-
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ex) {
-        }
-        SwingUtilities.invokeLater(() -> {
-            User dummyUser = new User(1, "admin_test", "", "QuanLy");
-            new MainFrame(dummyUser).setVisible(true);
-        });
-    }
 }
