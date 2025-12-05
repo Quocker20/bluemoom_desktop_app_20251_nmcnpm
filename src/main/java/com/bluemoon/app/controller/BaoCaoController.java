@@ -57,7 +57,7 @@ public class BaoCaoController {
                     String data = (value == null) ? "" : value.toString();
 
                     // Xử lý nếu dữ liệu có dấu phẩy (bọc trong ngoặc kép)
-                    if (data.contains(",")) {
+                    if (data.contains(";")) {
                         data = "\"" + data + "\"";
                     }
                     // Xử lý xóa các ký tự HTML nếu có (do renderer)
@@ -65,7 +65,7 @@ public class BaoCaoController {
 
                     bw.write(data);
                     if (j < model.getColumnCount() - 1)
-                        bw.write(",");
+                        bw.write(";");
                 }
                 bw.newLine();
             }
