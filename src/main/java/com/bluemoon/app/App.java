@@ -39,9 +39,6 @@ public class App {
             } else {
                 System.out.println("Kết nối CSDL thành công.");
 
-                // =========================================================================
-                // BƯỚC CẢI TIẾN QUAN TRỌNG: CHẠY DỌN DẸP TRONG LUỒNG NỀN
-                // =========================================================================
                 runCleanupInBackground();
 
                 System.out.println("Đang mở giao diện...");

@@ -22,6 +22,8 @@ public class BienDongPanel extends JPanel {
     private JTextField txtSearch;
     private JComboBox<String> cbFilter;
     private TamTruTamVangController controller;
+    
+    JButton btnCleanup = new JButton("Dọn dẹp");
 
     private final Color COL_BG = new Color(245, 247, 250);
     private final Color COL_HEADER_BG = Color.WHITE;
@@ -77,6 +79,15 @@ public class BienDongPanel extends JPanel {
         btnSearch.setFont(new Font("Inter", Font.PLAIN, 14));
         btnSearch.addActionListener(e -> handleSearch());
         toolBox.add(btnSearch);
+
+        btnCleanup.setPreferredSize(new Dimension(90, 40));
+        btnCleanup.setBackground(new Color(240, 240, 240));
+        btnCleanup.setFocusPainted(false);
+        btnCleanup.setBorderPainted(false);
+        btnCleanup.setFont(new Font("Inter", Font.BOLD, 14));
+        btnCleanup.setForeground(new Color(192, 57, 43));
+        btnCleanup.addActionListener(e -> handleDeleteCleanup());
+        toolBox.add(btnCleanup);
 
         headerPanel.add(toolBox, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
@@ -144,7 +155,6 @@ public class BienDongPanel extends JPanel {
         colModel.getColumn(5).setCellRenderer(leftRenderer);
         colModel.getColumn(5).setPreferredWidth(110);
         colModel.getColumn(5).setMaxWidth(130);
-
     }
 
     public void loadData() {
@@ -173,6 +183,18 @@ public class BienDongPanel extends JPanel {
         }
         updateTable(list);
         txtSearch.setText("");
+    }
+
+    private void handleDeleteCleanup() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn xóa tất cả các hồ sơ Tạm trú/Tạm vắng đã HẾT HẠN không?",
+                "Xác nhận Dọn dẹp Dữ liệu",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            new CleanupWorker().execute();
+        }
     }
 
     private void handleSearch() {
@@ -255,6 +277,80 @@ public class BienDongPanel extends JPanel {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(bgColor);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+        }
+    }
+
+    /**
+     * SwingWorker thực hiện thao tác xóa CSDL trong luồng nền
+     * và quản lý hiển thị hộp thoại chờ trên EDT một cách an toàn.
+     */
+    private class CleanupWorker extends SwingWorker<Boolean, Void> {
+        
+        private JDialog loadingDialog; 
+
+        public CleanupWorker() {
+            // Chuẩn bị hộp thoại chờ (chạy trên EDT)
+            loadingDialog = new JDialog(SwingUtilities.getWindowAncestor(BienDongPanel.this), "Đang dọn dẹp...");
+            loadingDialog.setLayout(new FlowLayout());
+            loadingDialog.add(new JLabel("Đang xử lý. Vui lòng chờ..."));
+            loadingDialog.pack();
+            loadingDialog.setLocationRelativeTo(BienDongPanel.this);
+            loadingDialog.setResizable(false);
+            loadingDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        }
+                
+        @Override
+        protected Boolean doInBackground() {
+            // 1. Vô hiệu hóa nút và hiển thị Dialog
+            // CHẠY TÁC VỤ UI TRÊN EDT TRƯỚC KHI THỰC HIỆN LOGIC NỀN
+            SwingUtilities.invokeLater(() -> {
+                btnCleanup.setEnabled(false);
+                loadingDialog.setVisible(true); // Dòng này sẽ chặn EDT, nhưng không sao vì luồng nền đã bắt đầu
+            });
+            
+            // 2. Thao tác nặng (DAO) chạy trong luồng nền
+            // Nó chạy ngay sau khi lệnh hiển thị dialog được đẩy lên EDT.
+            Boolean result = controller.deleteExpiredRecordsToday();
+            
+            // 3. Đóng dialog ngay sau khi tác vụ nền xong, để giải phóng EDT
+            SwingUtilities.invokeLater(() -> {
+                if (loadingDialog != null) {
+                    loadingDialog.dispose();
+                }
+            });
+
+            return result;
+        }
+        
+        @Override
+        protected void done() {
+            // Luôn chạy trên EDT
+            
+            // Kích hoạt lại nút (Sau khi dialog đã được đóng)
+            btnCleanup.setEnabled(true); 
+            
+            try {
+                boolean result = get();
+                
+                if (result) {
+                    JOptionPane.showMessageDialog(BienDongPanel.this, 
+                        "Dọn dẹp thành công! Đã xóa các hồ sơ Tạm trú/Tạm vắng hết hạn.", 
+                        "Thành công", 
+                        JOptionPane.INFORMATION_MESSAGE);
+                    loadData(); // Tải lại dữ liệu để cập nhật bảng
+                } else {
+                    JOptionPane.showMessageDialog(BienDongPanel.this, 
+                        "Dọn dẹp hoàn tất. Có thể không có hồ sơ nào hết hạn hoặc đã xảy ra lỗi CSDL.", 
+                        "Thông báo", 
+                        JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(BienDongPanel.this, 
+                    "Lỗi nghiêm trọng khi dọn dẹp dữ liệu: " + e.getMessage(), 
+                    "Lỗi CSDL", 
+                    JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         }
     }
 }
