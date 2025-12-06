@@ -204,15 +204,13 @@ public class ThuPhiPanel extends JPanel {
     // ==================================================================
 
     class PanelAction extends JPanel {
-        private JButton btnPay, btnPrint;
+        private JButton btnPay;
 
         public PanelAction() {
             setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
             setOpaque(false);
             btnPay = createBtn("/images/icon_pay.png", new Color(46, 204, 113));
-            btnPrint = createBtn("/images/icon_print.png", Color.GRAY);
             add(btnPay);
-            add(btnPrint);
         }
 
         // Load Icon an toàn (tránh lỗi URL null)
@@ -247,9 +245,7 @@ public class ThuPhiPanel extends JPanel {
 
         public void updateStatus(int trangThai) {
             this.removeAll();
-            if (trangThai == 1)
-                this.add(btnPrint); // Đã đóng -> Hiện nút In
-            else
+            if (trangThai == 0)
                 this.add(btnPay); // Chưa đóng -> Hiện nút Thu tiền
             this.revalidate();
             this.repaint();
@@ -269,8 +265,7 @@ public class ThuPhiPanel extends JPanel {
                     loadData();
                 }
             });
-            btnPrint.addActionListener(
-                    e -> JOptionPane.showMessageDialog(ThuPhiPanel.this, "Chức năng In biên lai đang phát triển..."));
+
         }
     }
 
