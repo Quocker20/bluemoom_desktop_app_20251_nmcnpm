@@ -19,11 +19,11 @@ public class ThemHoKhauDialog extends JDialog {
     private JTextField txtMaHo, txtTenChuHo, txtDienTich, txtSDT;
     private JTextField txtNgaySinh, txtCCCD;
     private JComboBox<String> cbGioiTinh;
-    
+
     private final HoKhauController hkController;
     private final NhanKhauController nkController;
     private final HoKhauPanel parentPanel;
-    
+
     private boolean isEditMode = false;
     private HoKhau currentHoKhau = null;
 
@@ -62,13 +62,13 @@ public class ThemHoKhauDialog extends JDialog {
 
         addLabel(mainPanel, "Số điện thoại", 300, 140);
         txtSDT = addTextField(mainPanel, 300, 165, 240);
-        
+
         addLabel(mainPanel, "Ngày sinh (dd/MM/yyyy) *", 40, 220);
         txtNgaySinh = addTextField(mainPanel, 40, 245, 240);
 
         addLabel(mainPanel, "Giới tính *", 300, 220);
-        cbGioiTinh = new JComboBox<>(new String[]{
-            AppConstants.GIOI_TINH_NAM, AppConstants.GIOI_TINH_NU, AppConstants.GIOI_TINH_KHAC
+        cbGioiTinh = new JComboBox<>(new String[] {
+                AppConstants.GIOI_TINH_NAM, AppConstants.GIOI_TINH_NU, AppConstants.GIOI_TINH_KHAC
         });
         cbGioiTinh.setBounds(300, 245, 240, 35);
         cbGioiTinh.setBackground(Color.WHITE);
@@ -95,7 +95,7 @@ public class ThemHoKhauDialog extends JDialog {
     public void setEditData(HoKhau hk) {
         this.isEditMode = true;
         this.currentHoKhau = hk;
-        
+
         txtMaHo.setText(hk.getSoCanHo());
         txtTenChuHo.setText(hk.getTenChuHo());
         txtDienTich.setText(String.valueOf(hk.getDienTich()));
@@ -104,10 +104,10 @@ public class ThemHoKhauDialog extends JDialog {
         fillChuHoData(hk.getMaHo());
 
         txtMaHo.setEditable(false);
-        
-        txtNgaySinh.setEnabled(false);
+        txtDienTich.setEditable(false);
+        txtNgaySinh.setEnabled(true);
         cbGioiTinh.setEnabled(false);
-        txtCCCD.setEnabled(false);
+        txtCCCD.setEnabled(true);
     }
 
     private void fillChuHoData(int maHo) {
@@ -119,7 +119,8 @@ public class ThemHoKhauDialog extends JDialog {
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                     txtNgaySinh.setText(sdf.format(nk.getNgaySinh()));
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
                 break;
             }
         }
@@ -198,7 +199,7 @@ public class ThemHoKhauDialog extends JDialog {
             setBackground(bgColor);
             setForeground(Color.BLACK);
             setFont(new Font("Segoe UI", Font.BOLD, 14));
-            
+
             setContentAreaFilled(false);
             setFocusPainted(false);
             setBorderPainted(false);
@@ -209,10 +210,10 @@ public class ThemHoKhauDialog extends JDialog {
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            
+
             g2.setColor(getBackground());
             g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10));
-            
+
             super.paintComponent(g);
             g2.dispose();
         }
