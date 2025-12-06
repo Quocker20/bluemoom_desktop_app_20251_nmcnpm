@@ -3,6 +3,8 @@ package com.bluemoon.app.controller;
 import com.bluemoon.app.dao.TamTruTamVangDAO;
 import com.bluemoon.app.model.TamTruTamVang;
 import java.util.List;
+import java.sql.Date;
+import java.time.LocalDate;
 
 public class TamTruTamVangController {
     private final TamTruTamVangDAO tamTruTamVangDAO;
@@ -18,9 +20,9 @@ public class TamTruTamVangController {
     public boolean addTamTruTamVang(TamTruTamVang tttv) {
         // 1. Validate Null/Empty
         if (tttv.getMaNhanKhau() <= 0 ||
-            tttv.getLoaiHinh() == null || tttv.getLoaiHinh().trim().isEmpty() ||
-            tttv.getTuNgay() == null ||
-            tttv.getLyDo() == null || tttv.getLyDo().trim().isEmpty()) {
+                tttv.getLoaiHinh() == null || tttv.getLoaiHinh().trim().isEmpty() ||
+                tttv.getTuNgay() == null ||
+                tttv.getLyDo() == null || tttv.getLyDo().trim().isEmpty()) {
             return false;
         }
 
@@ -39,5 +41,12 @@ public class TamTruTamVangController {
 
     public List<TamTruTamVang> getByHoTen(String hoTen) {
         return tamTruTamVangDAO.getByHoTen(hoTen);
+    }
+
+    public boolean deleteExpiredRecordsToday() {
+        LocalDate today = LocalDate.now();
+        java.sql.Date sqlToday = java.sql.Date.valueOf(today);
+
+        return tamTruTamVangDAO.deleteByExpirationDate(sqlToday);
     }
 }
