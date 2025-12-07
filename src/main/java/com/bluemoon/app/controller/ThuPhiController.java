@@ -33,7 +33,7 @@ public class ThuPhiController {
     }
 
     public List<KhoanPhi> getListKhoanPhi(String keyword) {
-        return khoanPhiDAO.getAll(keyword);
+        return khoanPhiDAO.getAllActiveFee(keyword);
     }
 
     public boolean insertKhoanPhi(KhoanPhi kp) {
@@ -52,8 +52,8 @@ public class ThuPhiController {
         return khoanPhiDAO.update(kp);
     }
 
-    public boolean deleteKhoanPhi(int id) {
-        return khoanPhiDAO.delete(id);
+    public boolean disableKhoanPhi(int id) {
+        return khoanPhiDAO.disable(id);
     }
 
     // --- LOGIC TÍNH PHÍ TỰ ĐỘNG CHO 1 KHOẢN PHÍ MỚI (New Feature) ---

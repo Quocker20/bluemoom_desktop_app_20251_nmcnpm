@@ -6,6 +6,7 @@ public class KhoanPhi {
     private double donGia;
     private String donViTinh;
     private int loaiPhi; // 0: Bắt buộc, 1: Tự nguyện
+    private int trangThai; // 0: Da dung thu, 1: Van con thu
 
     public KhoanPhi() {
     }
@@ -62,4 +63,13 @@ public class KhoanPhi {
     public String toString() {
         return tenKhoanPhi;
     }
+
+    public int getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(int trangThai) {
+        this.trangThai = trangThai;
+    }
+
 }

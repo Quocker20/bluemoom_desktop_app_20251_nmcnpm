@@ -10,13 +10,16 @@ public class KhoanPhiDAO {
 
     // [MỚI] Hàm lấy tất cả không cần keyword (Dùng cho Controller tính phí tự động)
     public List<KhoanPhi> getAll() {
-        return getAll("");
+        return getAllActiveFee("");
     }
 
     // Hàm tìm kiếm (Gộp logic để tránh lặp code)
-    public List<KhoanPhi> getAll(String keyword) {
+    public List<KhoanPhi> getAllActiveFee(String keyword) {
         List<KhoanPhi> list = new ArrayList<>();
-        String sql = "SELECT * FROM KHOAN_PHI WHERE TenKhoanPhi LIKE ? ORDER BY MaKhoanPhi DESC";
+        String sql = "SELECT * FROM KHOAN_PHI " +
+                "WHERE TenKhoanPhi LIKE ? " +
+                "AND TrangThai = 1 " +
+                "ORDER BY MaKhoanPhi DESC";
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, "%" + keyword + "%");
@@ -28,6 +31,7 @@ public class KhoanPhiDAO {
                     kp.setDonGia(rs.getDouble("DonGia"));
                     kp.setDonViTinh(rs.getString("DonViTinh"));
                     kp.setLoaiPhi(rs.getInt("LoaiPhi"));
+                    kp.setTrangThai(rs.getInt("TrangThai"));
                     list.add(kp);
                 }
             }
@@ -68,8 +72,8 @@ public class KhoanPhiDAO {
         }
     }
 
-    public boolean delete(int id) {
-        String sql = "DELETE FROM KHOAN_PHI WHERE MaKhoanPhi=?";
+    public boolean disable(int id) {
+        String sql = "UPDATE KHOAN_PHI SET TrangThai = 0 WHERE MaKhoanPhi = ? ";
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);

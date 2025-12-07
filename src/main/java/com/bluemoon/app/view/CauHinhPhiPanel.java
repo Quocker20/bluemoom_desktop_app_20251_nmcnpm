@@ -237,7 +237,7 @@ public class CauHinhPhiPanel extends JPanel {
                             "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
 
                     if (confirm == JOptionPane.YES_OPTION) {
-                        if (controller.deleteKhoanPhi(selected.getMaKhoanPhi())) {
+                        if (controller.disableKhoanPhi(selected.getMaKhoanPhi())) {
                             JOptionPane.showMessageDialog(CauHinhPhiPanel.this, "Đã xóa thành công!");
                             loadData(txtSearch.getText());
                         } else {

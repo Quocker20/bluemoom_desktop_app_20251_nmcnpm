@@ -61,7 +61,8 @@ CREATE TABLE KHOAN_PHI (
     TenKhoanPhi VARCHAR(100) NOT NULL,
     DonGia DOUBLE DEFAULT 0, -- 0 nếu là khoản thu tự nguyện
     DonViTinh VARCHAR(20), -- 'm2', 'ho', 'nguoi'
-    LoaiPhi TINYINT NOT NULL DEFAULT 0 -- 0: Bắt buộc, 1: Tự nguyện
+    LoaiPhi TINYINT NOT NULL DEFAULT 0, -- 0: Bắt buộc, 1: Tự nguyện
+    TrangThai TINYINT NOT NULL DEFAULT 1 -- 0: Đã ngừng thu, 1: Còn thu
 );
 
 -- 7. Tạo bảng CONG_NO (Hóa đơn hàng tháng)
