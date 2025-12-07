@@ -1,23 +1,26 @@
 package com.bluemoon.app.controller;
 
 import com.bluemoon.app.dao.BaoCaoDAO;
+import com.bluemoon.app.dao.TamTruTamVangDAO;
 import com.bluemoon.app.model.CongNo;
+import com.bluemoon.app.model.TamTruTamVang;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import javax.swing.*;
-import javax.swing.table.TableModel;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public class BaoCaoController {
+    
     private final BaoCaoDAO baoCaoDAO;
+    private final TamTruTamVangDAO tttvDAO; // Thêm DAO mới
 
     public BaoCaoController() {
         this.baoCaoDAO = new BaoCaoDAO();
+        this.tttvDAO = new TamTruTamVangDAO(); // Khởi tạo
     }
 
     public Map<String, Double> getThongKeTaiChinh(int thang, int nam) {
@@ -32,50 +35,78 @@ public class BaoCaoController {
         return baoCaoDAO.getChiTietBaoCao(thang, nam);
     }
 
-    // --- LOGIC XUẤT EXCEL (CSV) ---
-    public void xuatBaoCaoExcel(JTable table, File file) {
-        try (BufferedWriter bw = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
-
-            // Thêm BOM để Excel nhận diện đúng tiếng Việt UTF-8
-            bw.write("\ufeff");
-
-            TableModel model = table.getModel();
-
-            // 1. Viết tiêu đề cột
-            for (int i = 0; i < model.getColumnCount(); i++) {
-                bw.write(model.getColumnName(i));
-                if (i < model.getColumnCount() - 1)
-                    bw.write(",");
-            }
-            bw.newLine();
-
-            // 2. Viết dữ liệu
-            for (int i = 0; i < model.getRowCount(); i++) {
-                for (int j = 0; j < model.getColumnCount(); j++) {
-                    Object value = model.getValueAt(i, j);
-                    String data = (value == null) ? "" : value.toString();
-
-                    // Xử lý nếu dữ liệu có dấu phẩy (bọc trong ngoặc kép)
-                    if (data.contains(";")) {
-                        data = "\"" + data + "\"";
-                    }
-                    // Xử lý xóa các ký tự HTML nếu có (do renderer)
-                    data = data.replaceAll("\\<.*?\\>", "");
-
-                    bw.write(data);
-                    if (j < model.getColumnCount() - 1)
-                        bw.write(";");
-                }
-                bw.newLine();
+    // --- [MỚI] LOGIC XUẤT EXCEL TẠM TRÚ - TẠM VẮNG ---
+    public boolean xuatBaoCaoTamTruTamVang(File file) {
+        // Sử dụng XSSFWorkbook cho định dạng .xlsx (Excel hiện đại)
+        try (Workbook workbook = new XSSFWorkbook()) {
+            
+            // --- SHEET 1: TẠM TRÚ ---
+            Sheet sheetTamTru = workbook.createSheet("Danh sách Tạm Trú");
+            createHeader(sheetTamTru, new String[]{"ID", "Mã NK", "Họ Tên", "Từ Ngày", "Đến Ngày", "Lý Do"});
+            
+            // Lấy dữ liệu TamTru từ DAO
+            List<TamTruTamVang> listTamTru = tttvDAO.getByLoaiHinh("TamTru");
+            
+            int rowIdx = 1;
+            for (TamTruTamVang item : listTamTru) {
+                Row row = sheetTamTru.createRow(rowIdx++);
+                row.createCell(0).setCellValue(item.getMaTTTV());
+                row.createCell(1).setCellValue(item.getMaNhanKhau());
+                row.createCell(2).setCellValue(item.getHoTenNhanKhau()); // Lấy tên đã map
+                row.createCell(3).setCellValue(item.getTuNgay() != null ? item.getTuNgay().toString() : "");
+                row.createCell(4).setCellValue(item.getDenNgay() != null ? item.getDenNgay().toString() : "Vô thời hạn");
+                row.createCell(5).setCellValue(item.getLyDo());
             }
 
-            JOptionPane.showMessageDialog(null, "Xuất báo cáo thành công!\nĐường dẫn: " + file.getAbsolutePath());
+            // --- SHEET 2: TẠM VẮNG ---
+            Sheet sheetTamVang = workbook.createSheet("Danh sách Tạm Vắng");
+            createHeader(sheetTamVang, new String[]{"ID", "Mã NK", "Họ Tên", "Từ Ngày", "Đến Ngày", "Lý Do"});
 
-        } catch (Exception e) {
+            // Lấy dữ liệu TamVang từ DAO
+            List<TamTruTamVang> listTamVang = tttvDAO.getByLoaiHinh("TamVang");
+            
+            rowIdx = 1;
+            for (TamTruTamVang item : listTamVang) {
+                Row row = sheetTamVang.createRow(rowIdx++);
+                row.createCell(0).setCellValue(item.getMaTTTV());
+                row.createCell(1).setCellValue(item.getMaNhanKhau());
+                row.createCell(2).setCellValue(item.getHoTenNhanKhau());
+                row.createCell(3).setCellValue(item.getTuNgay() != null ? item.getTuNgay().toString() : "");
+                row.createCell(4).setCellValue(item.getDenNgay() != null ? item.getDenNgay().toString() : "");
+                row.createCell(5).setCellValue(item.getLyDo());
+            }
+
+            // Auto resize cột cho đẹp (Optional)
+            for(int i=0; i<6; i++) {
+                sheetTamTru.autoSizeColumn(i);
+                sheetTamVang.autoSizeColumn(i);
+            }
+
+            // Ghi ra file
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                workbook.write(fos);
+            }
+            
+            return true;
+
+        } catch (IOException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Lỗi khi xuất file: " + e.getMessage(), "Lỗi",
-                    JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
+
+    // Helper tạo Header style
+    private void createHeader(Sheet sheet, String[] headers) {
+        Row headerRow = sheet.createRow(0);
+        CellStyle style = sheet.getWorkbook().createCellStyle();
+        Font font = sheet.getWorkbook().createFont();
+        font.setBold(true);
+        style.setFont(font);
+        
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(style);
         }
     }
 }

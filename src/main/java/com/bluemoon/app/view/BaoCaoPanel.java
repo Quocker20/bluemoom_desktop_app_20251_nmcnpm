@@ -5,13 +5,9 @@ import com.bluemoon.app.model.CongNo;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumnModel;
 import java.awt.*;
-import java.awt.geom.Arc2D;
 import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.text.DecimalFormat;
@@ -77,7 +73,7 @@ public class BaoCaoPanel extends JPanel {
         toolBox.add(cbNam);
 
         // [SỬA] Nút Xuất Excel dùng ColoredButton
-        btnExport = new ColoredButton("Xuất Excel", new Color(46, 204, 113));
+        btnExport = new ColoredButton("Xuất Excel (TT/TV)", new Color(46, 204, 113));
         btnExport.addActionListener(e -> handleExport());
         toolBox.add(btnExport);
 
@@ -116,7 +112,7 @@ public class BaoCaoPanel extends JPanel {
         // Bọc table trong panel có tiêu đề
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setOpaque(false);
-        JLabel lblTable = new JLabel("CHI TIẾT SỐ LIỆU");
+        JLabel lblTable = new JLabel("CHI TIẾT SỐ LIỆU (Tài Chính)");
         lblTable.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblTable.setBorder(new EmptyBorder(0, 0, 10, 0));
         tablePanel.add(lblTable, BorderLayout.NORTH);
@@ -150,7 +146,7 @@ public class BaoCaoPanel extends JPanel {
         Map<String, Integer> danCu = controller.getThongKeDanCu();
         pieChart.setData(danCu);
 
-        // 3. Load Data cho Table
+        // 3. Load Data cho Table (Vẫn giữ hiển thị công nợ trên giao diện)
         List<CongNo> list = controller.getChiTietBaoCao(thang, nam);
         tableModel.setRowCount(0);
         DecimalFormat df = new DecimalFormat("#,###");
@@ -160,7 +156,7 @@ public class BaoCaoPanel extends JPanel {
             tableModel.addRow(new Object[] {
                     stt++,
                     cn.getSoCanHo(),
-                    cn.getTenKhoanPhi(), // Đang dùng tạm field này lưu Tên Chủ Hộ từ DAO
+                    cn.getTenKhoanPhi(),
                     df.format(cn.getSoTienPhaiDong()),
                     df.format(cn.getSoTienDaDong()),
                     df.format(cn.getSoTienConThieu()),
@@ -169,24 +165,40 @@ public class BaoCaoPanel extends JPanel {
         }
     }
 
+    // --- [SỬA] HANDLE EXPORT MỚI ---
     private void handleExport() {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Lưu file Excel");
-        fileChooser.setSelectedFile(new File("BaoCao_Thang" + cbThang.getSelectedItem() + ".csv"));
+        fileChooser.setDialogTitle("Lưu file Excel (Tạm Trú - Tạm Vắng)");
+        
+        // Đặt tên file mặc định
+        String defaultName = "BaoCao_TamTruTamVang.xlsx";
+        fileChooser.setSelectedFile(new File(defaultName));
 
         int userSelection = fileChooser.showSaveDialog(this);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File fileToSave = fileChooser.getSelectedFile();
-            // Đảm bảo đuôi .csv
-            if (!fileToSave.getName().toLowerCase().endsWith(".csv")) {
-                fileToSave = new File(fileToSave.getParentFile(), fileToSave.getName() + ".csv");
+            // Đảm bảo đuôi .xlsx
+            if (!fileToSave.getName().toLowerCase().endsWith(".xlsx")) {
+                fileToSave = new File(fileToSave.getParentFile(), fileToSave.getName() + ".xlsx");
             }
-            controller.xuatBaoCaoExcel(table, fileToSave);
+            
+            // Gọi Controller xử lý
+            boolean success = controller.xuatBaoCaoTamTruTamVang(fileToSave);
+            
+            if (success) {
+                JOptionPane.showMessageDialog(this, 
+                    "Xuất file thành công!\n" + fileToSave.getAbsolutePath(), 
+                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Có lỗi xảy ra khi xuất file! Vui lòng kiểm tra lại.", 
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
     // =======================================================
-    // CUSTOM CHART COMPONENTS
+    // CUSTOM CHART COMPONENTS (Giữ nguyên)
     // =======================================================
 
     class BarChartPanel extends RoundedPanel {
