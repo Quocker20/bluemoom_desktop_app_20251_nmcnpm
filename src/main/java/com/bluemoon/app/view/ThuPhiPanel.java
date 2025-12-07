@@ -60,7 +60,7 @@ public class ThuPhiPanel extends JPanel {
         headerPanel.setBorder(new EmptyBorder(15, 25, 15, 25));
         headerPanel.setPreferredSize(new Dimension(getWidth(), 80));
 
-        JLabel lblTitle = new JLabel("Quản lý Thu phí & Công nợ (Tháng " + currentMonth + "/" + currentYear + ")");
+        JLabel lblTitle = new JLabel("Quản lý Công nợ (T" + currentMonth + "/" + currentYear + ")");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblTitle.setForeground(new Color(50, 50, 50));
         headerPanel.add(lblTitle, BorderLayout.WEST);
@@ -70,7 +70,7 @@ public class ThuPhiPanel extends JPanel {
 
         // Ô tìm kiếm
         txtSearch = new JTextField(15);
-        txtSearch.setPreferredSize(new Dimension(250, 40));
+        txtSearch.setPreferredSize(new Dimension(30, 40));
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(new Color(220, 220, 220), 1),
