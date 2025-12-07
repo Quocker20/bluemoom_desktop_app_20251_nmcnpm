@@ -181,7 +181,6 @@ public class ThuPhiPanel extends JPanel {
         int stt = 1;
 
         for (CongNo item : currentList) {
-            // [ĐÃ SỬA] Lấy trực tiếp từ Model CongNo (nhanh và chính xác hơn)
             String soCanHo = item.getSoCanHo();
             if (soCanHo == null)
                 soCanHo = "N/A";

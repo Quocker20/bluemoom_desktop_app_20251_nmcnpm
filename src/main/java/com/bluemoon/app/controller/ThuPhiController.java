@@ -263,4 +263,26 @@ public class ThuPhiController {
         congNoDAO.insert(cn);
         return "SUCCESS";
     }
+
+    /**
+     * Controller xu ly logic xoa 1 cong no
+     * 
+     * @param int id
+     * @return int Số dòng bị ảnh hưởng
+     */
+    public int deleteCongNoById(int id) {
+        if (id <= 0) {
+            return 0;
+        }
+
+        return congNoDAO.deleteCongNoById(id);
+    }
+
+    public CongNo getCongNoById(int id) {
+        if(id <= 0) {
+            return null;
+        }
+
+        return congNoDAO.getById(id);
+    }
 }

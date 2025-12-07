@@ -157,6 +157,11 @@ public class ThanhToanDialog extends JDialog {
 
             if (success) {
                 JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+                congNo = controller.getCongNoById(congNo.getMaCongNo());
+                
+                if (congNo.getTrangThai() == 1) {
+                    controller.deleteCongNoById(congNo.getMaCongNo());
+                }
                 parentPanel.loadData(); 
                 dispose();
             } else {

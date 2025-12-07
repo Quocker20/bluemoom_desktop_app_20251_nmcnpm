@@ -2,11 +2,16 @@ package com.bluemoon.app.dao;
 
 import com.bluemoon.app.model.CongNo;
 import com.bluemoon.app.util.DatabaseConnector;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CongNoDAO {
+
+    private static final Logger logger = Logger.getLogger(CongNoDAO.class.getName());
 
     public List<CongNo> getAll(int thang, int nam) {
         return getAll(thang, nam, "");
@@ -151,12 +156,47 @@ public class CongNoDAO {
     public boolean checkKhoanPhiInUse(int maKhoanPhi) {
         String sql = "SELECT COUNT(*) FROM CONG_NO WHERE MaKhoanPhi = ?";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, maKhoanPhi);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
+                if (rs.next())
+                    return rs.getInt(1) > 0;
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return false;
+    }
+
+    /**
+     * Ham xoa mot cong no bang id
+     * 
+     * @param id
+     * @return số dòng ảnh hưởng
+     */
+    public int deleteCongNoById(int id) {
+        String sql = "DELETE FROM CONG_NO WHERE MaCongNo = ?";
+        int affectedRows;
+
+        try (Connection conn = DatabaseConnector.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            affectedRows = pstmt.executeUpdate();
+
+            if(affectedRows > 0) {
+                logger.info("[CONGNODAO] Xóa công nợ thành công với id: " + id);
+
+                return affectedRows;
+            } else {
+                logger.warning("[CONGNODAO] Không tìm thấy công nợ với id: " + id);
+
+                return 0;
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[CONGNODAO] Lỗi khi xóa công nợ với id:" + id, e);
+
+            return 0;
+        }
     }
 }
