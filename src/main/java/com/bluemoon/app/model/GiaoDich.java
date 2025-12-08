@@ -1,24 +1,28 @@
 package com.bluemoon.app.model;
 
-import java.util.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 public class GiaoDich {
     private int maGiaoDich;
     private int maHo;
     private int maKhoanPhi;
-    private Date ngayNop;
+
+    private Timestamp ngayNop;
+
     private double soTien;
     private String nguoiNop;
     private String ghiChu;
 
-    // Trường hiển thị (optional - dùng khi hiển thị lịch sử)
+    // Trường hiển thị (DTO)
     private String tenKhoanPhi;
+    private String soCanHo;
 
     public GiaoDich() {
     }
 
     // Constructor đầy đủ
-    public GiaoDich(int maGiaoDich, int maHo, int maKhoanPhi, Date ngayNop, double soTien, String nguoiNop,
+    public GiaoDich(int maGiaoDich, int maHo, int maKhoanPhi, Timestamp ngayNop, double soTien, String nguoiNop,
             String ghiChu) {
         this.maGiaoDich = maGiaoDich;
         this.maHo = maHo;
@@ -36,7 +40,17 @@ public class GiaoDich {
         this.soTien = soTien;
         this.nguoiNop = nguoiNop;
         this.ghiChu = ghiChu;
-        this.ngayNop = new Date(); // Mặc định là hiện tại
+        this.ngayNop = new Timestamp(System.currentTimeMillis());
+    }
+
+    // --- Getter & Setter ---
+
+    public Timestamp getNgayNop() {
+        return ngayNop;
+    }
+
+    public void setNgayNop(Timestamp ngayNop) {
+        this.ngayNop = ngayNop;
     }
 
     public int getMaGiaoDich() {
@@ -61,14 +75,6 @@ public class GiaoDich {
 
     public void setMaKhoanPhi(int maKhoanPhi) {
         this.maKhoanPhi = maKhoanPhi;
-    }
-
-    public Date getNgayNop() {
-        return ngayNop;
-    }
-
-    public void setNgayNop(Date ngayNop) {
-        this.ngayNop = ngayNop;
     }
 
     public double getSoTien() {
@@ -101,5 +107,25 @@ public class GiaoDich {
 
     public void setTenKhoanPhi(String tenKhoanPhi) {
         this.tenKhoanPhi = tenKhoanPhi;
+    }
+
+    // Bổ sung Getter/Setter cho soCanHo (bạn đang thiếu trong code mẫu gửi lên)
+    public String getSoCanHo() {
+        return soCanHo;
+    }
+
+    public void setSoCanHo(String soCanHo) {
+        this.soCanHo = soCanHo;
+    }
+
+    /**
+     * Helper method: Trả về chuỗi ngày giờ đã format đẹp để hiển thị lên Table
+     * Ví dụ output: "20/10/2025 14:30:00"
+     */
+    public String getNgayNopHienThi() {
+        if (ngayNop == null)
+            return "";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        return sdf.format(ngayNop);
     }
 }

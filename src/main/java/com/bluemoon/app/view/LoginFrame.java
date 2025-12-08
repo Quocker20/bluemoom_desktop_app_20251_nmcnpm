@@ -26,7 +26,7 @@ public class LoginFrame extends JFrame {
     private void initComponents() {
         setTitle("BlueMoon Admin - Đăng nhập hệ thống");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH); 
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setMinimumSize(new Dimension(1024, 768));
         setLocationRelativeTo(null);
 
@@ -40,7 +40,7 @@ public class LoginFrame extends JFrame {
                     g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
                 } else {
                     Graphics2D g2d = (Graphics2D) g;
-                    GradientPaint gp = new GradientPaint(0, 0, new Color(65, 88, 208), 
+                    GradientPaint gp = new GradientPaint(0, 0, new Color(65, 88, 208),
                             getWidth(), getHeight(), new Color(200, 80, 192));
                     g2d.setPaint(gp);
                     g2d.fillRect(0, 0, getWidth(), getHeight());
@@ -91,7 +91,7 @@ public class LoginFrame extends JFrame {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(74, 144, 226)); 
+                g2.setColor(new Color(74, 144, 226));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
                 g2.dispose();
                 super.paintComponent(g);
@@ -117,14 +117,25 @@ public class LoginFrame extends JFrame {
 
         backgroundPanel.add(cardPanel);
 
+        // --- SỰ KIỆN ---
+        
+        // Sự kiện Click chuột vào nút Đăng nhập
         btnLogin.addActionListener(e -> handleLogin());
+        
+        // Sự kiện Click chuột vào nút Thoát
         btnExit.addActionListener(e -> System.exit(0));
+
+        // [MỚI] Sự kiện nhấn Enter khi đang ở ô Username
+        txtUsername.addActionListener(e -> handleLogin());
+
+        // [MỚI] Sự kiện nhấn Enter khi đang ở ô Password
+        txtPassword.addActionListener(e -> handleLogin());
     }
 
     private void handleLogin() {
         String username = txtUsername.getText();
         String password = new String(txtPassword.getPassword());
-        
+
         try {
             User user = controller.login(username, password);
             if (user != null) {
@@ -140,18 +151,20 @@ public class LoginFrame extends JFrame {
             }
         } catch (Exception e) {
             e.printStackTrace();
-             JOptionPane.showMessageDialog(this, "Lỗi hệ thống: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Lỗi hệ thống: " + e.getMessage());
         }
     }
 
     class RoundedPanel extends JPanel {
         private int radius;
         private Color backgroundColor;
+
         public RoundedPanel(int radius, Color bgColor) {
             this.radius = radius;
             this.backgroundColor = bgColor;
             setOpaque(false);
         }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -164,17 +177,22 @@ public class LoginFrame extends JFrame {
 
     class RoundedBorder extends AbstractBorder {
         private int radius;
-        public RoundedBorder(int radius) { this.radius = radius; }
+
+        public RoundedBorder(int radius) {
+            this.radius = radius;
+        }
+
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(new Color(200, 200, 200)); 
+            g2.setColor(new Color(200, 200, 200));
             g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
         }
+
         @Override
         public Insets getBorderInsets(Component c) {
-            return new Insets(radius/2, radius, radius/2, radius);
+            return new Insets(radius / 2, radius, radius / 2, radius);
         }
     }
 }

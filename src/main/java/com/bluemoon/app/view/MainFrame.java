@@ -81,7 +81,7 @@ public class MainFrame extends JFrame {
         topSidebar.add(createMenuItem("Quản lý Biến động", "/images/icon_change.png", false));
         topSidebar.add(createMenuItem("Quản lý Thu phí", "/images/icon_fee.png", false));
         topSidebar.add(createMenuItem("Cấu hình Phí", "/images/icon_settings.png", false));
-        topSidebar.add(createMenuItem("Báo cáo & Thống kê", "/images/icon_report.png", false));
+        topSidebar.add(createMenuItem("Lịch sử Giao dịch", "/images/transaction_history.png", false));
         topSidebar.add(createMenuItem("Hệ thống", "/images/icon_system.png", false));
 
         sidebarPanel.add(topSidebar, BorderLayout.NORTH);
@@ -236,6 +236,13 @@ public class MainFrame extends JFrame {
                     break;
                 }
                 contentPanel.add(new CauHinhPhiPanel(), BorderLayout.CENTER);
+                break;
+            case "Lịch sử Giao dịch":
+                if (userRole.equals("ThuKy")) {
+                    showAccessDenied();
+                    break;
+                }                
+                contentPanel.add(new GiaoDichPanel(), BorderLayout.CENTER);
                 break;
             case "Báo cáo & Thống kê":
                 contentPanel.add(new BaoCaoPanel(), BorderLayout.CENTER);
