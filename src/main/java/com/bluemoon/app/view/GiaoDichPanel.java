@@ -1,32 +1,43 @@
 package com.bluemoon.app.view;
 
-import com.bluemoon.app.controller.GiaoDichController;
-import com.bluemoon.app.controller.HoKhauController;
-import com.bluemoon.app.controller.ThuPhiController;
-import com.bluemoon.app.model.GiaoDich;
-import com.bluemoon.app.model.HoKhau;
-import com.bluemoon.app.model.KhoanPhi;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
-import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
-import java.sql.SQLException;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
+
+import com.bluemoon.app.controller.GiaoDichController;
+import com.bluemoon.app.controller.HoKhauController;
+import com.bluemoon.app.controller.ThuPhiController;
+import com.bluemoon.app.model.GiaoDich;
+import com.bluemoon.app.model.KhoanPhi;
 
 public class GiaoDichPanel extends JPanel {
 
     private JTable table;
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
-    
+
     // Controllers
     private final GiaoDichController gdController;
     private final HoKhauController hkController;
@@ -40,7 +51,7 @@ public class GiaoDichPanel extends JPanel {
         this.gdController = new GiaoDichController();
         this.hkController = new HoKhauController();
         this.tpController = new ThuPhiController();
-        
+
         initComponents();
         loadData();
     }
@@ -74,7 +85,7 @@ public class GiaoDichPanel extends JPanel {
         txtSearch.putClientProperty("JTextField.placeholderText", "Nhập số căn hộ để tìm...");
         txtSearch.addActionListener(e -> loadData()); // Enter để tìm
         toolBox.add(txtSearch);
-        
+
         // Nút Tìm (Icon kính lúp hoặc text)
         JButton btnSearch = new JButton("Tìm");
         btnSearch.setPreferredSize(new Dimension(80, 40));
@@ -87,7 +98,8 @@ public class GiaoDichPanel extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
 
         // 2. TABLE
-        String[] columnNames = { "STT", "Mã GD", "Căn hộ", "Khoản thu", "Số tiền (VNĐ)", "Người nộp", "Ngày nộp", "Ghi chú" };
+        String[] columnNames = { "STT", "Mã GD", "Căn hộ", "Khoản thu", "Số tiền (VNĐ)", "Người nộp", "Ngày nộp",
+                "Ghi chú" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -96,13 +108,13 @@ public class GiaoDichPanel extends JPanel {
         };
 
         table = new JTable(tableModel);
-        
+
         // Style Table (Giống ThuPhiPanel)
         JTableHeader header = table.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));
         header.setBackground(COL_TABLE_HEADER);
         header.setPreferredSize(new Dimension(header.getWidth(), 40));
-        
+
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setRowHeight(40);
         table.setSelectionBackground(new Color(232, 240, 254));
@@ -111,11 +123,11 @@ public class GiaoDichPanel extends JPanel {
 
         // Column Widths & Alignments
         TableColumnModel cm = table.getColumnModel();
-        cm.getColumn(0).setMaxWidth(60);  // STT
-        cm.getColumn(1).setMaxWidth(80);  // Mã GD
+        cm.getColumn(0).setMaxWidth(60); // STT
+        cm.getColumn(1).setMaxWidth(80); // Mã GD
         cm.getColumn(2).setPreferredWidth(100); // Căn hộ
         cm.getColumn(3).setPreferredWidth(200); // Khoản thu
-        
+
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
         rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
         rightRenderer.setBorder(new EmptyBorder(0, 0, 0, 20));
@@ -132,24 +144,20 @@ public class GiaoDichPanel extends JPanel {
         String keyword = txtSearch.getText().trim();
         List<GiaoDich> list = null;
 
-        try {
-            if (keyword.isEmpty()) {
-                list = gdController.getAll();
-            } else {
-                list = gdController.getAllBySoCanHo(keyword);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Lỗi tải dữ liệu giao dịch: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (keyword.isEmpty()) {
+            list = gdController.getAll();
+        } else {
+            list = gdController.getAllBySoCanHo(keyword);
         }
 
-        if (list == null) return;
+        if (list == null) {
+            return;
+        }
 
         DecimalFormat df = new DecimalFormat("#,###");
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         int stt = 1;
-        
+
         // Cache danh sách khoản phí để đỡ query nhiều lần (Simple Optimization)
         List<KhoanPhi> listPhi = tpController.getAllKhoanPhi();
 
@@ -160,8 +168,8 @@ public class GiaoDichPanel extends JPanel {
 
             String tenKhoanPhi = "N/A";
             // Tìm trong list cache
-            for(KhoanPhi kp : listPhi) {
-                if(kp.getMaKhoanPhi() == gd.getMaKhoanPhi()) {
+            for (KhoanPhi kp : listPhi) {
+                if (kp.getMaKhoanPhi() == gd.getMaKhoanPhi()) {
                     tenKhoanPhi = kp.getTenKhoanPhi();
                     break;
                 }

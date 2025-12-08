@@ -9,6 +9,7 @@ public class HoKhau {
     private double dienTich;
     private String sdt;
     private Date ngayTao;
+    private int isDeleted;
 
     public HoKhau() {
     }
@@ -72,5 +73,13 @@ public class HoKhau {
     @Override
     public String toString() {
         return soCanHo + " - " + tenChuHo;
+    }
+
+    public int getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(int isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }

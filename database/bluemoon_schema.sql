@@ -26,7 +26,8 @@ CREATE TABLE HO_KHAU (
     TenChuHo VARCHAR(100) NOT NULL,
     DienTich DOUBLE NOT NULL, -- Diện tích (m2) để tính phí dịch vụ
     SDT VARCHAR(15),
-    NgayTao DATE DEFAULT (CURRENT_DATE)
+    NgayTao DATE DEFAULT (CURRENT_DATE),
+    IsDeleted TINYINT NOT NULL DEFAULT 0   -- 0 la van con, 1 la da xoa ho
 );
 
 -- 4. Tạo bảng NHAN_KHAU

@@ -1,17 +1,16 @@
 package com.bluemoon.app.dao;
 
-import com.bluemoon.app.model.GiaoDich;
-import com.bluemoon.app.util.DatabaseConnector;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.logging.Logger;
 import java.util.ArrayList;
-import java.util.logging.Level;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.bluemoon.app.model.GiaoDich;
+import com.bluemoon.app.util.DatabaseConnector;
 
 public class GiaoDichDAO {
 
@@ -111,4 +110,6 @@ public class GiaoDichDAO {
 
         return list;
     }
+
+    // public int deleteByMaHo()
 }

@@ -1,9 +1,34 @@
 package com.bluemoon.app.view;
 
-import com.bluemoon.app.controller.HoKhauController;
-import com.bluemoon.app.model.HoKhau;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.geom.RoundRectangle2D;
+import java.net.URL;
+import java.util.List;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultCellEditor;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -11,10 +36,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
-import java.net.URL;
-import java.util.List;
+import com.bluemoon.app.controller.HoKhauController;
+import com.bluemoon.app.model.HoKhau;
 
 public class HoKhauPanel extends JPanel {
 
@@ -212,7 +235,7 @@ public class HoKhauPanel extends JPanel {
                             "Bạn có chắc chắn muốn xóa hộ " + selectedHk.getSoCanHo() + "?",
                             "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                     if (confirm == JOptionPane.YES_OPTION) {
-                        boolean deleted = controller.deleteHoKhau(selectedHk.getMaHo());
+                        boolean deleted = controller.xoaHoKhau(selectedHk.getMaHo());
                         if (deleted) {
                             JOptionPane.showMessageDialog(HoKhauPanel.this, "Đã xóa thành công!");
                             loadData();

@@ -1,19 +1,37 @@
 package com.bluemoon.app.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.bluemoon.app.model.HoKhau;
 import com.bluemoon.app.model.NhanKhau;
 import com.bluemoon.app.util.AppConstants;
 import com.bluemoon.app.util.DatabaseConnector;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 public class HoKhauDAO {
 
-    public List<HoKhau> getAll() {
+    private static final Logger logger = Logger.getLogger(HoKhauDAO.class.getName());
+
+    /**
+     * Lay tat ca ban ghi HoKhau chua bi xoa mem
+     * 
+     * @return
+     * @throws SQLException
+     */
+    public List<HoKhau> getAll() throws SQLException {
         List<HoKhau> list = new ArrayList<>();
-        String sql = "SELECT * FROM HO_KHAU ORDER BY SoCanHo ASC";
+        String sql = "SELECT * FROM HO_KHAU " +
+                "WHERE IsDeleted = 0 " +
+                "ORDER BY SoCanHo ASC";
+        logger.log(Level.INFO, "[HOKHAUDAO] Bat dau truy van CSDL...");
 
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -29,10 +47,18 @@ public class HoKhauDAO {
                 hk.setNgayTao(rs.getDate("NgayTao"));
                 list.add(hk);
             }
+            if (list.size() > 0) {
+                logger.log(Level.INFO, "[HOKHAUDAO] Truy van CSDL Thanh cong, ket qua: {0} ban ghi duoc tim thay",
+                        list.size());
+            } else {
+                logger.log(Level.WARNING, "[HOKHAUDAO] Truy van CSDL That bai, khong tim thay ban ghi Ho_Khau nao");
+            }
+            return list;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi he thong", e);
+
+            throw e;
         }
-        return list;
     }
 
     /**
@@ -141,15 +167,40 @@ public class HoKhauDAO {
         }
     }
 
-    public boolean delete(int maHo) {
-        String sql = "DELETE FROM HO_KHAU WHERE MaHo=?";
+    /**
+     * Xoa mem HoKhau (Soft Delete)
+     * 
+     * @param maHo
+     * @return
+     * @throws SQLException
+     */
+    public boolean softDelete(int maHo) throws SQLException {
+        String sql = "UPDATE HO_KHAU SET IsDeleted = 1 " +
+                "WHERE MaHo = ? " +
+                "AND NOT EXISTS ( " +
+                "SELECT 1 FROM CONG_NO WHERE CONG_NO.MaHo = HO_KHAU.MaHo )";
+        logger.log(Level.INFO, "[HOKHAUDAO] Bat dau thuc hien xoa trong CSDL");
+
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, maHo);
-            return pstmt.executeUpdate() > 0;
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                logger.log(Level.INFO, "[HOKHAUDAO] Xoa thanh cong ho khau co ma ho: {0}", maHo);
+
+                return true;
+            } else {
+                logger.log(Level.WARNING,
+                        "[HOKHAUDAO] Khong the xoa: Ho khau ID {0} khong ton tai hoac dang co du no trong bang CONG_NO",
+                        maHo);
+
+                return false;
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            logger.log(Level.SEVERE, "[HOKHAUDAO] Xoa that bai do loi he thong: ", e);
+
+            throw e;
         }
     }
 
