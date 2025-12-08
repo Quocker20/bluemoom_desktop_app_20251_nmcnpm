@@ -1,32 +1,47 @@
 package com.bluemoon.app.dao;
 
-import com.bluemoon.app.model.CongNo;
-import com.bluemoon.app.util.DatabaseConnector;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.bluemoon.app.model.CongNo;
+import com.bluemoon.app.util.DatabaseConnector;
+
 public class BaoCaoDAO {
 
-    // Thống kê Tổng thu & Tổng nợ theo tháng
+   // Thống kê Tổng thu & Tổng nợ theo tháng (Logic Mới)
     public Map<String, Double> getThongKeTaiChinh(int thang, int nam) {
         Map<String, Double> result = new HashMap<>();
+        
+        // SQL SUBQUERY:
+        // 1. TongThu: Tính tổng cột SoTien trong bảng GIAO_DICH_NOP_TIEN dựa trên ngày nộp thực tế.
+        // 2. TongNo: Tính tổng tiền còn thiếu trong bảng CONG_NO của tháng chỉ định.
         String sql = "SELECT " +
-                "SUM(SoTienDaDong) as TongThu, " +
-                "SUM(SoTienPhaiDong - SoTienDaDong) as TongNo " +
-                "FROM CONG_NO WHERE Thang = ? AND Nam = ?";
+                     "(SELECT COALESCE(SUM(SoTien), 0) FROM GIAO_DICH_NOP_TIEN WHERE MONTH(NgayNop) = ? AND YEAR(NgayNop) = ?) as TongThu, " +
+                     "(SELECT COALESCE(SUM(SoTienPhaiDong - SoTienDaDong), 0) FROM CONG_NO WHERE Thang = ? AND Nam = ?) as TongNo";
 
         try (Connection conn = DatabaseConnector.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            // Tham số 1, 2: Cho Subquery Giao Dịch (MONTH, YEAR)
             pstmt.setInt(1, thang);
             pstmt.setInt(2, nam);
+            
+            // Tham số 3, 4: Cho Subquery Công Nợ (Thang, Nam)
+            pstmt.setInt(3, thang);
+            pstmt.setInt(4, nam);
+            
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     result.put("TongThu", rs.getDouble("TongThu"));
-                    // Tổng nợ không được âm
+                    
                     double no = rs.getDouble("TongNo");
+                    // Đảm bảo số không âm (dù logic DB đã chặn, nhưng check lại cho chắc chắn)
                     result.put("TongNo", no < 0 ? 0 : no);
                 }
             }

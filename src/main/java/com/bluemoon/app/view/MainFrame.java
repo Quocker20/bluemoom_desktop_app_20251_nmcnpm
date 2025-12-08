@@ -82,6 +82,7 @@ public class MainFrame extends JFrame {
         topSidebar.add(createMenuItem("Quản lý Thu phí", "/images/icon_fee.png", false));
         topSidebar.add(createMenuItem("Cấu hình Phí", "/images/icon_settings.png", false));
         topSidebar.add(createMenuItem("Lịch sử Giao dịch", "/images/transaction_history.png", false));
+        topSidebar.add(createMenuItem("Báo cáo & Thống kê", "/images/icon_report.png", false));
         topSidebar.add(createMenuItem("Hệ thống", "/images/icon_system.png", false));
 
         sidebarPanel.add(topSidebar, BorderLayout.NORTH);
