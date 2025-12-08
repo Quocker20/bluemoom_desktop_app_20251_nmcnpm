@@ -1,12 +1,28 @@
 package com.bluemoon.app.view;
 
-import com.bluemoon.app.controller.UserController;
-import com.bluemoon.app.model.User;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.RenderingHints;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.SwingConstants;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+
+import com.bluemoon.app.controller.UserController;
+import com.bluemoon.app.model.User;
 
 public class DoiMatKhauPanel extends JPanel {
 
@@ -32,18 +48,6 @@ public class DoiMatKhauPanel extends JPanel {
         setLayout(new BorderLayout(0, 20));
         setBackground(COL_BG);
         setBorder(new EmptyBorder(30, 30, 30, 30));
-
-        // 1. Header
-        RoundedPanel headerPanel = new RoundedPanel(20, COL_HEADER_BG);
-        headerPanel.setLayout(new BorderLayout());
-        headerPanel.setBorder(new EmptyBorder(15, 25, 15, 25));
-        headerPanel.setPreferredSize(new Dimension(getWidth(), 80));
-
-        JLabel lblTitle = new JLabel("Hệ thống > Đổi mật khẩu");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        lblTitle.setForeground(new Color(50, 50, 50));
-        headerPanel.add(lblTitle, BorderLayout.WEST);
-        add(headerPanel, BorderLayout.NORTH);
 
         // 2. Form Content (Căn giữa)
         JPanel contentContainer = new JPanel(new GridBagLayout());

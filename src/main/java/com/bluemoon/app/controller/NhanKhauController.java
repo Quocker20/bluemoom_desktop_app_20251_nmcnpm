@@ -1,62 +1,120 @@
 package com.bluemoon.app.controller;
 
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.bluemoon.app.dao.NhanKhauDAO;
 import com.bluemoon.app.model.NhanKhau;
-import java.util.List;
 
+/**
+ * Controller quản lý nhân khẩu.
+ */
 public class NhanKhauController {
-    
+
     private final NhanKhauDAO nhanKhauDAO;
+    private final Logger logger;
 
     public NhanKhauController() {
         this.nhanKhauDAO = new NhanKhauDAO();
+        this.logger = Logger.getLogger(NhanKhauController.class.getName());
     }
 
+    /**
+     * Lấy danh sách nhân khẩu theo mã hộ.
+     * 
+     * @param maHo Mã hộ khẩu
+     * @return List<NhanKhau>
+     */
     public List<NhanKhau> getNhanKhauByHoKhau(int maHo) {
-        return nhanKhauDAO.selectByHoKhau(maHo);
-    }
-
-    public boolean addNhanKhau(NhanKhau nk) {
-        if (!validate(nk)) return false;
-
-        // Check trùng CCCD (nếu có nhập)
-        if (nk.getCccd() != null && !nk.getCccd().trim().isEmpty()) {
-            if (nhanKhauDAO.checkCccdExist(nk.getCccd())) {
-                System.err.println("Lỗi: Số CCCD " + nk.getCccd() + " đã tồn tại trong hệ thống!");
-                return false;
-            }
+        try {
+            return nhanKhauDAO.selectByHoKhau(maHo);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NhanKhauController] Loi getNhanKhauByHoKhau", e);
+            return Collections.emptyList();
         }
-
-        return nhanKhauDAO.insert(nk);
     }
 
+    /**
+     * Thêm mới nhân khẩu.
+     * 
+     * @param nk Đối tượng nhân khẩu
+     * @return true nếu thành công
+     */
+    public boolean addNhanKhau(NhanKhau nk) {
+        if (!validate(nk))
+            return false;
+
+        try {
+            // Check trùng CCCD (nếu có nhập)
+            if (nk.getCccd() != null && !nk.getCccd().trim().isEmpty()) {
+                if (nhanKhauDAO.checkCccdExist(nk.getCccd())) {
+                    logger.warning("Lỗi: Số CCCD " + nk.getCccd() + " đã tồn tại trong hệ thống!");
+                    return false;
+                }
+            }
+            return nhanKhauDAO.insert(nk);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NhanKhauController] Loi addNhanKhau", e);
+            return false;
+        }
+    }
+
+    /**
+     * Cập nhật thông tin nhân khẩu.
+     * 
+     * @param nk Đối tượng nhân khẩu
+     * @return true nếu thành công
+     */
     public boolean updateNhanKhau(NhanKhau nk) {
         if (!validate(nk) || nk.getMaNhanKhau() <= 0) {
             return false;
         }
 
-        // Logic check trùng CCCD nâng cao: Trừ chính mình ra
-        if (nk.getCccd() != null && !nk.getCccd().trim().isEmpty()) {
-            boolean isDuplicate = nhanKhauDAO.checkCccdExistForUpdate(nk.getCccd(), nk.getMaNhanKhau());
-            if (isDuplicate) {
-                System.err.println("Lỗi: Số CCCD " + nk.getCccd() + " đang thuộc về một cư dân khác!");
-                return false;
+        try {
+            // Logic check trùng CCCD nâng cao: Trừ chính mình ra
+            if (nk.getCccd() != null && !nk.getCccd().trim().isEmpty()) {
+                boolean isDuplicate = nhanKhauDAO.checkCccdExistForUpdate(nk.getCccd(), nk.getMaNhanKhau());
+                if (isDuplicate) {
+                    logger.warning("Lỗi: Số CCCD " + nk.getCccd() + " đang thuộc về một cư dân khác!");
+                    return false;
+                }
             }
+            return nhanKhauDAO.update(nk);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NhanKhauController] Loi updateNhanKhau", e);
+            return false;
         }
-
-        return nhanKhauDAO.update(nk);
     }
 
+    /**
+     * Xóa nhân khẩu.
+     * 
+     * @param maNhanKhau Mã nhân khẩu
+     * @return true nếu thành công
+     */
     public boolean deleteNhanKhau(int maNhanKhau) {
-        if (maNhanKhau <= 0) return false;
-        return nhanKhauDAO.delete(maNhanKhau);
+        if (maNhanKhau <= 0)
+            return false;
+        try {
+            return nhanKhauDAO.delete(maNhanKhau);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NhanKhauController] Loi deleteNhanKhau", e);
+            return false;
+        }
     }
 
     private boolean validate(NhanKhau nk) {
-        if (nk == null) return false;
-        if (nk.getHoTen() == null || nk.getHoTen().trim().isEmpty()) return false;
-        if (nk.getNgaySinh() == null) return false;
-        if (nk.getQuanHe() == null || nk.getQuanHe().trim().isEmpty()) return false;
+        if (nk == null)
+            return false;
+        if (nk.getHoTen() == null || nk.getHoTen().trim().isEmpty())
+            return false;
+        if (nk.getNgaySinh() == null)
+            return false;
+        if (nk.getQuanHe() == null || nk.getQuanHe().trim().isEmpty())
+            return false;
         return true;
     }
 }

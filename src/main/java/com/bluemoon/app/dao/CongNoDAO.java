@@ -1,30 +1,52 @@
 package com.bluemoon.app.dao;
 
-import com.bluemoon.app.model.CongNo;
-import com.bluemoon.app.util.DatabaseConnector;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bluemoon.app.model.CongNo;
+import com.bluemoon.app.util.DatabaseConnector;
+
 public class CongNoDAO {
 
     private static final Logger logger = Logger.getLogger(CongNoDAO.class.getName());
 
-    public List<CongNo> getAll(int thang, int nam) {
+    /**
+     * Lấy danh sách công nợ theo tháng năm (không có keyword)
+     * 
+     * @param thang Tháng
+     * @param nam   Năm
+     * @return List<CongNo>
+     * @throws SQLException lỗi kết nối CSDL
+     */
+    public List<CongNo> getAll(int thang, int nam) throws SQLException {
         return getAll(thang, nam, "");
     }
 
-    public List<CongNo> getAll(int thang, int nam, String keyword) {
+    /**
+     * Lấy danh sách công nợ có lọc theo từ khóa, tháng, năm
+     * 
+     * @param thang   Tháng
+     * @param nam     Năm
+     * @param keyword Từ khóa tìm kiếm (số căn hộ)
+     * @return List<CongNo>
+     * @throws SQLException lỗi kết nối CSDL
+     */
+    public List<CongNo> getAll(int thang, int nam, String keyword) throws SQLException {
         List<CongNo> list = new ArrayList<>();
-        // SQL đã JOIN sẵn HO_KHAU, chỉ cần lấy dữ liệu ra
         String sql = "SELECT cn.*, kp.TenKhoanPhi, hk.SoCanHo FROM CONG_NO cn " +
                 "JOIN KHOAN_PHI kp ON cn.MaKhoanPhi = kp.MaKhoanPhi " +
                 "JOIN HO_KHAU hk ON cn.MaHo = hk.MaHo " +
                 "WHERE cn.Thang = ? AND cn.Nam = ? AND hk.SoCanHo LIKE ? " +
                 "ORDER BY hk.SoCanHo ASC";
+
+        logger.log(Level.INFO, "[CONGNODAO] Lay danh sach cong no Thang {0}/{1}", new Object[] { thang, nam });
+
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, thang);
@@ -37,11 +59,8 @@ public class CongNoDAO {
                     cn.setMaCongNo(rs.getInt("MaCongNo"));
                     cn.setMaHo(rs.getInt("MaHo"));
                     cn.setMaKhoanPhi(rs.getInt("MaKhoanPhi"));
-
-                    // [MỚI] Map dữ liệu hiển thị
                     cn.setTenKhoanPhi(rs.getString("TenKhoanPhi"));
                     cn.setSoCanHo(rs.getString("SoCanHo"));
-
                     cn.setThang(rs.getInt("Thang"));
                     cn.setNam(rs.getInt("Nam"));
                     cn.setSoTienPhaiDong(rs.getDouble("SoTienPhaiDong"));
@@ -51,13 +70,23 @@ public class CongNoDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[CONGNODAO] Loi lay danh sach cong no", e);
+            throw e;
         }
         return list;
     }
 
-    public void insert(CongNo cn) {
+    /**
+     * Thêm mới một bản ghi công nợ
+     * 
+     * @param cn Đối tượng CongNo
+     * @throws SQLException lỗi kết nối CSDL
+     */
+    public void insert(CongNo cn) throws SQLException {
         String sql = "INSERT INTO CONG_NO (MaHo, MaKhoanPhi, Thang, Nam, SoTienPhaiDong, SoTienDaDong, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        logger.log(Level.INFO, "[CONGNODAO] Bat dau them cong no cho Ho: {0}, Phi: {1}",
+                new Object[] { cn.getMaHo(), cn.getMaKhoanPhi() });
+
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, cn.getMaHo());
@@ -68,12 +97,23 @@ public class CongNoDAO {
             pstmt.setDouble(6, 0);
             pstmt.setInt(7, 0);
             pstmt.executeUpdate();
+
+            logger.log(Level.INFO, "[CONGNODAO] Them cong no thanh cong");
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[CONGNODAO] Loi them cong no", e);
+            throw e;
         }
     }
 
-    public boolean checkCalculated(int thang, int nam) {
+    /**
+     * Kiểm tra xem tháng/năm này đã được tính phí (batch job) chưa
+     * 
+     * @param thang Tháng
+     * @param nam   Năm
+     * @return true nếu đã có dữ liệu
+     * @throws SQLException lỗi kết nối CSDL
+     */
+    public boolean checkCalculated(int thang, int nam) throws SQLException {
         String sql = "SELECT COUNT(*) FROM CONG_NO WHERE Thang = ? AND Nam = ?";
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -84,12 +124,23 @@ public class CongNoDAO {
                     return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[CONGNODAO] Loi checkCalculated", e);
+            throw e;
         }
         return false;
     }
 
-    public boolean checkExist(int maHo, int maKhoanPhi, int thang, int nam) {
+    /**
+     * Kiểm tra trùng lặp công nợ cho một hộ cụ thể
+     * 
+     * @param maHo       Mã hộ
+     * @param maKhoanPhi Mã khoản phí
+     * @param thang      Tháng
+     * @param nam        Năm
+     * @return true nếu đã tồn tại
+     * @throws SQLException lỗi kết nối CSDL
+     */
+    public boolean checkExist(int maHo, int maKhoanPhi, int thang, int nam) throws SQLException {
         String sql = "SELECT COUNT(*) FROM CONG_NO WHERE MaHo = ? AND MaKhoanPhi = ? AND Thang = ? AND Nam = ?";
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -102,14 +153,20 @@ public class CongNoDAO {
                     return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[CONGNODAO] Loi checkExist", e);
+            throw e;
         }
         return false;
     }
 
-    // [CẬP NHẬT] getById cũng cần JOIN HO_KHAU để lấy số căn hộ (hiển thị trên
-    // Dialog thanh toán)
-    public CongNo getById(int id) {
+    /**
+     * Lấy thông tin chi tiết công nợ theo ID
+     * 
+     * @param id Mã công nợ
+     * @return CongNo hoặc null
+     * @throws SQLException lỗi kết nối CSDL
+     */
+    public CongNo getById(int id) throws SQLException {
         String sql = "SELECT cn.*, kp.TenKhoanPhi, hk.SoCanHo FROM CONG_NO cn " +
                 "JOIN KHOAN_PHI kp ON cn.MaKhoanPhi = kp.MaKhoanPhi " +
                 "JOIN HO_KHAU hk ON cn.MaHo = hk.MaHo " +
@@ -123,11 +180,8 @@ public class CongNoDAO {
                     cn.setMaCongNo(rs.getInt("MaCongNo"));
                     cn.setMaHo(rs.getInt("MaHo"));
                     cn.setMaKhoanPhi(rs.getInt("MaKhoanPhi"));
-
-                    // [MỚI] Map dữ liệu hiển thị
                     cn.setTenKhoanPhi(rs.getString("TenKhoanPhi"));
                     cn.setSoCanHo(rs.getString("SoCanHo"));
-
                     cn.setSoTienPhaiDong(rs.getDouble("SoTienPhaiDong"));
                     cn.setSoTienDaDong(rs.getDouble("SoTienDaDong"));
                     cn.setTrangThai(rs.getInt("TrangThai"));
@@ -135,25 +189,44 @@ public class CongNoDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[CONGNODAO] Loi getById: " + id, e);
+            throw e;
         }
         return null;
     }
 
-    public boolean updatePayment(int maCongNo, double soTienMoiDaDong) {
+    /**
+     * Cập nhật số tiền đã đóng cho công nợ
+     * 
+     * @param maCongNo        Mã công nợ
+     * @param soTienMoiDaDong Tổng số tiền đã đóng mới
+     * @return true nếu update thành công
+     * @throws SQLException lỗi kết nối CSDL
+     */
+    public boolean updatePayment(int maCongNo, double soTienMoiDaDong) throws SQLException {
         String sql = "UPDATE CONG_NO SET SoTienDaDong = ?, TrangThai = CASE WHEN SoTienDaDong >= SoTienPhaiDong THEN 1 ELSE 0 END WHERE MaCongNo = ?";
+        logger.log(Level.INFO, "[CONGNODAO] Update thanh toan ID: {0}, So tien: {1}",
+                new Object[] { maCongNo, soTienMoiDaDong });
+
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDouble(1, soTienMoiDaDong);
             pstmt.setInt(2, maCongNo);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            logger.log(Level.SEVERE, "[CONGNODAO] Loi updatePayment", e);
+            throw e;
         }
     }
 
-    public boolean checkKhoanPhiInUse(int maKhoanPhi) {
+    /**
+     * Kiểm tra khoản phí có đang được sử dụng trong bảng công nợ không
+     * 
+     * @param maKhoanPhi Mã khoản phí
+     * @return true nếu đang sử dụng
+     * @throws SQLException lỗi kết nối CSDL
+     */
+    public boolean checkKhoanPhiInUse(int maKhoanPhi) throws SQLException {
         String sql = "SELECT COUNT(*) FROM CONG_NO WHERE MaKhoanPhi = ?";
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -163,40 +236,38 @@ public class CongNoDAO {
                     return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[CONGNODAO] Loi checkKhoanPhiInUse", e);
+            throw e;
         }
         return false;
     }
 
     /**
-     * Ham xoa mot cong no bang id
+     * Xóa một công nợ bằng id
      * 
-     * @param id
+     * @param id Mã công nợ
      * @return số dòng ảnh hưởng
+     * @throws SQLException lỗi kết nối CSDL
      */
-    public int deleteCongNoById(int id) {
+    public int deleteCongNoById(int id) throws SQLException {
         String sql = "DELETE FROM CONG_NO WHERE MaCongNo = ?";
         int affectedRows;
 
+        logger.log(Level.INFO, "[CONGNODAO] Bat dau xoa cong no ID: {0}", id);
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             affectedRows = pstmt.executeUpdate();
 
-            if(affectedRows > 0) {
-                logger.info("[CONGNODAO] Xóa công nợ thành công với id: " + id);
-
-                return affectedRows;
+            if (affectedRows > 0) {
+                logger.info("[CONGNODAO] Xoa cong no thanh cong");
             } else {
-                logger.warning("[CONGNODAO] Không tìm thấy công nợ với id: " + id);
-
-                return 0;
+                logger.warning("[CONGNODAO] Khong tim thay cong no de xoa");
             }
-
+            return affectedRows;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[CONGNODAO] Lỗi khi xóa công nợ với id:" + id, e);
-
-            return 0;
+            logger.log(Level.SEVERE, "[CONGNODAO] Loi khi xoa cong no ID: " + id, e);
+            throw e;
         }
     }
 }

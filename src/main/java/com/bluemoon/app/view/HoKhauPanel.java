@@ -240,7 +240,7 @@ public class HoKhauPanel extends JPanel {
                             JOptionPane.showMessageDialog(HoKhauPanel.this, "Đã xóa thành công!");
                             loadData();
                         } else {
-                            JOptionPane.showMessageDialog(HoKhauPanel.this, "Xóa thất bại!", "Lỗi",
+                            JOptionPane.showMessageDialog(HoKhauPanel.this, "Xóa thất bại, Có thể do còn dư công nợ!", "Lỗi",
                                     JOptionPane.ERROR_MESSAGE);
                         }
                     }

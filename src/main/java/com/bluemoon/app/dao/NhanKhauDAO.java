@@ -1,21 +1,38 @@
 package com.bluemoon.app.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.bluemoon.app.model.NhanKhau;
 import com.bluemoon.app.util.DatabaseConnector;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 public class NhanKhauDAO {
 
-    public List<NhanKhau> selectByHoKhau(int maHo) {
+    private static final Logger logger = Logger.getLogger(NhanKhauDAO.class.getName());
+
+    /**
+     * Lấy danh sách nhân khẩu thuộc một hộ
+     * 
+     * @param maHo Mã hộ khẩu
+     * @return List<NhanKhau>
+     * @throws SQLException lỗi truy vấn
+     */
+    public List<NhanKhau> selectByHoKhau(int maHo) throws SQLException {
         List<NhanKhau> list = new ArrayList<>();
         String sql = "SELECT * FROM NHAN_KHAU WHERE MaHo = ? ORDER BY QuanHe ASC";
-        
+
+        logger.log(Level.INFO, "[NHANKHAUDAO] Lay danh sach nhan khau cua ho ID: {0}", maHo);
+
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, maHo);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -30,97 +47,151 @@ public class NhanKhauDAO {
                     list.add(nk);
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NHANKHAUDAO] Loi selectByHoKhau", e);
+            throw e;
+        }
         return list;
     }
 
-    public boolean insert(NhanKhau nk) {
+    /**
+     * Thêm mới nhân khẩu
+     * 
+     * @param nk Đối tượng nhân khẩu
+     * @return true nếu thành công
+     * @throws SQLException lỗi truy vấn
+     */
+    public boolean insert(NhanKhau nk) throws SQLException {
         String sql = "INSERT INTO NHAN_KHAU (MaHo, HoTen, NgaySinh, GioiTinh, CCCD, QuanHe) VALUES (?, ?, ?, ?, ?, ?)";
+        logger.log(Level.INFO, "[NHANKHAUDAO] Insert nhan khau: {0}", nk.getHoTen());
+
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, nk.getMaHo());
             pstmt.setString(2, nk.getHoTen());
             pstmt.setDate(3, new java.sql.Date(nk.getNgaySinh().getTime()));
             pstmt.setString(4, nk.getGioiTinh());
-            
+
             if (nk.getCccd() == null || nk.getCccd().trim().isEmpty()) {
                 pstmt.setNull(5, Types.VARCHAR);
             } else {
                 pstmt.setString(5, nk.getCccd());
             }
             pstmt.setString(6, nk.getQuanHe());
-            
+
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            logger.log(Level.SEVERE, "[NHANKHAUDAO] Loi insert", e);
+            throw e;
         }
     }
 
-    public boolean update(NhanKhau nk) {
+    /**
+     * Cập nhật thông tin nhân khẩu
+     * 
+     * @param nk Đối tượng nhân khẩu
+     * @return true nếu thành công
+     * @throws SQLException lỗi truy vấn
+     */
+    public boolean update(NhanKhau nk) throws SQLException {
         String sql = "UPDATE NHAN_KHAU SET HoTen=?, NgaySinh=?, GioiTinh=?, CCCD=?, QuanHe=? WHERE MaNhanKhau=?";
+        logger.log(Level.INFO, "[NHANKHAUDAO] Update nhan khau ID: {0}", nk.getMaNhanKhau());
+
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, nk.getHoTen());
             pstmt.setDate(2, new java.sql.Date(nk.getNgaySinh().getTime()));
             pstmt.setString(3, nk.getGioiTinh());
-            
+
             if (nk.getCccd() == null || nk.getCccd().trim().isEmpty()) {
                 pstmt.setNull(4, Types.VARCHAR);
             } else {
                 pstmt.setString(4, nk.getCccd());
             }
-            
+
             pstmt.setString(5, nk.getQuanHe());
             pstmt.setInt(6, nk.getMaNhanKhau());
-            
+
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            logger.log(Level.SEVERE, "[NHANKHAUDAO] Loi update", e);
+            throw e;
         }
     }
 
-    public boolean delete(int maNhanKhau) {
+    /**
+     * Xóa nhân khẩu
+     * 
+     * @param maNhanKhau Mã nhân khẩu
+     * @return true nếu thành công
+     * @throws SQLException lỗi truy vấn
+     */
+    public boolean delete(int maNhanKhau) throws SQLException {
         String sql = "DELETE FROM NHAN_KHAU WHERE MaNhanKhau=?";
+        logger.log(Level.INFO, "[NHANKHAUDAO] Delete nhan khau ID: {0}", maNhanKhau);
+
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, maNhanKhau);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            logger.log(Level.SEVERE, "[NHANKHAUDAO] Loi delete", e);
+            throw e;
         }
     }
-    
-    // Check trùng khi thêm mới: Tìm xem có CCCD nào y hệt không
-    public boolean checkCccdExist(String cccd) {
-        if (cccd == null || cccd.trim().isEmpty()) return false;
+
+    /**
+     * Kiểm tra CCCD đã tồn tại chưa (cho chức năng thêm mới)
+     * 
+     * @param cccd Số CCCD
+     * @return true nếu đã tồn tại
+     * @throws SQLException lỗi truy vấn
+     */
+    public boolean checkCccdExist(String cccd) throws SQLException {
+        if (cccd == null || cccd.trim().isEmpty())
+            return false;
         String sql = "SELECT COUNT(*) FROM NHAN_KHAU WHERE CCCD = ?";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, cccd);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
+                if (rs.next())
+                    return rs.getInt(1) > 0;
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NHANKHAUDAO] Loi checkCccdExist", e);
+            throw e;
+        }
         return false;
     }
 
-    // Check trùng khi update: Tìm CCCD y hệt NHƯNG loại trừ chính mình ra
-    public boolean checkCccdExistForUpdate(String cccd, int maNhanKhauDangSua) {
-        if (cccd == null || cccd.trim().isEmpty()) return false;
+    /**
+     * Kiểm tra CCCD đã tồn tại chưa (cho chức năng cập nhật)
+     * Loại trừ chính bản ghi đang sửa
+     * 
+     * @param cccd              Số CCCD
+     * @param maNhanKhauDangSua ID nhân khẩu đang sửa
+     * @return true nếu đã tồn tại ở bản ghi khác
+     * @throws SQLException lỗi truy vấn
+     */
+    public boolean checkCccdExistForUpdate(String cccd, int maNhanKhauDangSua) throws SQLException {
+        if (cccd == null || cccd.trim().isEmpty())
+            return false;
         String sql = "SELECT COUNT(*) FROM NHAN_KHAU WHERE CCCD = ? AND MaNhanKhau != ?";
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, cccd);
             pstmt.setInt(2, maNhanKhauDangSua);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
+                if (rs.next())
+                    return rs.getInt(1) > 0;
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NHANKHAUDAO] Loi checkCccdExistForUpdate", e);
+            throw e;
+        }
         return false;
     }
 }

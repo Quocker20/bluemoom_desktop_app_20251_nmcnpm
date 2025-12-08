@@ -17,15 +17,16 @@ public class GiaoDichDAO {
     private static final Logger logger = Logger.getLogger(GiaoDichDAO.class.getName());
 
     /**
-     * Phuong thuc them mot giao dich vao CSDL
+     * Them mot giao dich vao CSDL
      * 
-     * @param gd
-     * @return
-     * @throws SQLException
+     * @param gd Đối tượng giao dịch
+     * @return true nếu thành công
+     * @throws SQLException lỗi truy vấn
      */
     public boolean insert(GiaoDich gd) throws SQLException {
         String sql = "INSERT INTO GIAO_DICH_NOP_TIEN (MaHo, MaKhoanPhi, SoTien, NguoiNop, GhiChu, NgayNop) VALUES (?, ?, ?, ?, ?, ?)";
-        logger.log(Level.INFO, "[GIAODICHDAO] Bat dau thuc hien Insert du lieu vao CSDL");
+        logger.log(Level.INFO, "[GIAODICHDAO] Bat dau Insert giao dich");
+
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -45,16 +46,15 @@ public class GiaoDichDAO {
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "[GIAODICHDAO] Loi SQL INSERT", e);
-
             throw e;
         }
     }
 
     /**
-     * Lay lich su giao dich cua tat ca ho khau theo thoi gian
+     * Lay lich su giao dich cua tat ca ho khau
      * 
-     * @return
-     * @throws SQLException
+     * @return List<GiaoDich>
+     * @throws SQLException lỗi truy vấn
      */
     public List<GiaoDich> getAll() throws SQLException {
         return getAllBySoCanHo("");
@@ -63,9 +63,9 @@ public class GiaoDichDAO {
     /**
      * Lay lich su giao dich cua mot so ho Khau theo thoi gian
      * 
-     * @param soCanHo
-     * @return
-     * @throws SQLException
+     * @param soCanHo Số căn hộ cần lọc
+     * @return List<GiaoDich>
+     * @throws SQLException lỗi truy vấn
      */
     public List<GiaoDich> getAllBySoCanHo(String soCanHo) throws SQLException {
         List<GiaoDich> list = new ArrayList<>();
@@ -87,8 +87,6 @@ public class GiaoDichDAO {
                     gd.setMaGiaoDich(rs.getInt("MaGiaoDich"));
                     gd.setMaHo(rs.getInt("MaHo"));
                     gd.setMaKhoanPhi(rs.getInt("MaKhoanPhi"));
-
-                    // Map du lieu hien thi
                     gd.setTenKhoanPhi(rs.getString("TenKhoanPhi"));
                     gd.setSoCanHo(rs.getString("SoCanHo"));
                     gd.setNgayNop(rs.getTimestamp("NgayNop"));
@@ -99,17 +97,13 @@ public class GiaoDichDAO {
                     list.add(gd);
                 }
             }
-
             logger.log(Level.INFO, "[GIAODICHDAO] Truy van thanh cong. Tim thay {0} giao dich", list.size());
 
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Loi SQL getAll", e);
-
+            logger.log(Level.SEVERE, "[GIAODICHDAO] Loi SQL getAll", e);
             throw e;
         }
 
         return list;
     }
-
-    // public int deleteByMaHo()
 }

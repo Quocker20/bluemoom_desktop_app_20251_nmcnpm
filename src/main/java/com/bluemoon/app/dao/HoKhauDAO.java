@@ -23,8 +23,8 @@ public class HoKhauDAO {
     /**
      * Lay tat ca ban ghi HoKhau chua bi xoa mem
      * 
-     * @return
-     * @throws SQLException
+     * @return List<HoKhau>
+     * @throws SQLException lỗi truy vấn
      */
     public List<HoKhau> getAll() throws SQLException {
         List<HoKhau> list = new ArrayList<>();
@@ -47,33 +47,38 @@ public class HoKhauDAO {
                 hk.setNgayTao(rs.getDate("NgayTao"));
                 list.add(hk);
             }
-            if (list.size() > 0) {
-                logger.log(Level.INFO, "[HOKHAUDAO] Truy van CSDL Thanh cong, ket qua: {0} ban ghi duoc tim thay",
-                        list.size());
+            if (!list.isEmpty()) {
+                logger.log(Level.INFO, "[HOKHAUDAO] Truy van thanh cong, ket qua: {0} ban ghi", list.size());
             } else {
-                logger.log(Level.WARNING, "[HOKHAUDAO] Truy van CSDL That bai, khong tim thay ban ghi Ho_Khau nao");
+                logger.log(Level.WARNING, "[HOKHAUDAO] Khong tim thay ban ghi Ho_Khau nao");
             }
             return list;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "[HOKHAUDAO] Loi he thong", e);
-
             throw e;
         }
     }
 
     /**
      * TRANSACTION: Thêm Hộ khẩu + Chủ hộ cùng lúc.
+     * 
+     * @param hk    Đối tượng Hộ khẩu
+     * @param chuHo Đối tượng Nhân khẩu (Chủ hộ)
+     * @return true nếu thành công
+     * @throws SQLException lỗi truy vấn
      */
-    public boolean addHoKhauWithChuHo(HoKhau hk, NhanKhau chuHo) {
+    public boolean addHoKhauWithChuHo(HoKhau hk, NhanKhau chuHo) throws SQLException {
         Connection conn = null;
         PreparedStatement pstmtHk = null;
         PreparedStatement pstmtNk = null;
         boolean result = false;
 
+        logger.info("[HOKHAUDAO] Bat dau Transaction them Ho Khau + Chu Ho");
+
         try {
             conn = DatabaseConnector.getConnection();
             if (conn == null)
-                return false;
+                throw new SQLException("Khong the ket noi CSDL");
 
             // 1. Start Transaction
             conn.setAutoCommit(false);
@@ -116,7 +121,6 @@ public class HoKhauDAO {
             } else {
                 pstmtNk.setString(5, chuHo.getCccd());
             }
-            // Gán cứng quan hệ là Chủ hộ từ Constants
             pstmtNk.setString(6, AppConstants.QH_CHU_HO);
 
             pstmtNk.executeUpdate();
@@ -124,33 +128,40 @@ public class HoKhauDAO {
             // 4. Commit
             conn.commit();
             result = true;
+            logger.info("[HOKHAUDAO] Transaction thanh cong");
 
         } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi Transaction", e);
             if (conn != null) {
                 try {
                     conn.rollback();
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    logger.log(Level.SEVERE, "Loi rollback", ex);
                 }
             }
-            e.printStackTrace();
+            throw e;
         } finally {
-            try {
-                if (pstmtHk != null)
-                    pstmtHk.close();
-                if (pstmtNk != null)
-                    pstmtNk.close();
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (pstmtHk != null)
+                pstmtHk.close();
+            if (pstmtNk != null)
+                pstmtNk.close();
+            if (conn != null)
+                conn.close();
         }
         return result;
     }
 
-    public boolean update(HoKhau hk) {
+    /**
+     * Cập nhật thông tin hộ khẩu
+     * 
+     * @param hk Đối tượng Hộ khẩu
+     * @return true nếu thành công
+     * @throws SQLException lỗi truy vấn
+     */
+    public boolean update(HoKhau hk) throws SQLException {
         String sql = "UPDATE HO_KHAU SET SoCanHo=?, TenChuHo=?, DienTich=?, SDT=? WHERE MaHo=?";
+        logger.log(Level.INFO, "[HOKHAUDAO] Update ho khau ID: {0}", hk.getMaHo());
+
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -162,24 +173,24 @@ public class HoKhauDAO {
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi update", e);
+            throw e;
         }
     }
 
     /**
      * Xoa mem HoKhau (Soft Delete)
      * 
-     * @param maHo
-     * @return
-     * @throws SQLException
+     * @param maHo Mã hộ khẩu
+     * @return true nếu xóa thành công
+     * @throws SQLException lỗi truy vấn
      */
     public boolean softDelete(int maHo) throws SQLException {
         String sql = "UPDATE HO_KHAU SET IsDeleted = 1 " +
                 "WHERE MaHo = ? " +
                 "AND NOT EXISTS ( " +
                 "SELECT 1 FROM CONG_NO WHERE CONG_NO.MaHo = HO_KHAU.MaHo )";
-        logger.log(Level.INFO, "[HOKHAUDAO] Bat dau thuc hien xoa trong CSDL");
+        logger.log(Level.INFO, "[HOKHAUDAO] Bat dau thuc hien xoa mem ID: {0}", maHo);
 
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -187,24 +198,26 @@ public class HoKhauDAO {
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                logger.log(Level.INFO, "[HOKHAUDAO] Xoa thanh cong ho khau co ma ho: {0}", maHo);
-
+                logger.log(Level.INFO, "[HOKHAUDAO] Xoa thanh cong ho khau ID: {0}", maHo);
                 return true;
             } else {
-                logger.log(Level.WARNING,
-                        "[HOKHAUDAO] Khong the xoa: Ho khau ID {0} khong ton tai hoac dang co du no trong bang CONG_NO",
-                        maHo);
-
+                logger.log(Level.WARNING, "[HOKHAUDAO] Khong the xoa (ID sai hoac con no): {0}", maHo);
                 return false;
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[HOKHAUDAO] Xoa that bai do loi he thong: ", e);
-
+            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi xoa mem", e);
             throw e;
         }
     }
 
-    public boolean checkExist(String soCanHo) {
+    /**
+     * Kiểm tra số căn hộ đã tồn tại chưa
+     * 
+     * @param soCanHo Số căn hộ
+     * @return true nếu đã tồn tại
+     * @throws SQLException lỗi truy vấn
+     */
+    public boolean checkExist(String soCanHo) throws SQLException {
         String sql = "SELECT COUNT(*) FROM HO_KHAU WHERE SoCanHo = ?";
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -214,14 +227,24 @@ public class HoKhauDAO {
                     return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi checkExist", e);
+            throw e;
         }
         return false;
     }
 
-    public List<HoKhau> search(String keyword) {
+    /**
+     * Tìm kiếm hộ khẩu theo từ khóa (Số căn hộ hoặc Tên chủ hộ)
+     * 
+     * @param keyword Từ khóa
+     * @return List<HoKhau>
+     * @throws SQLException lỗi truy vấn
+     */
+    public List<HoKhau> search(String keyword) throws SQLException {
         List<HoKhau> list = new ArrayList<>();
-        String sql = "SELECT * FROM HO_KHAU WHERE SoCanHo LIKE ? OR TenChuHo LIKE ?";
+        String sql = "SELECT * FROM HO_KHAU WHERE (SoCanHo LIKE ? OR TenChuHo LIKE ?) AND IsDeleted = 0";
+        logger.log(Level.INFO, "[HOKHAUDAO] Search voi keyword: {0}", keyword);
+
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -242,7 +265,8 @@ public class HoKhauDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi search", e);
+            throw e;
         }
         return list;
     }
@@ -250,34 +274,43 @@ public class HoKhauDAO {
     /**
      * Lấy hộ khẩu từ mã hộ
      * 
-     * @param maHo int
-     *             return hoKhau HoKhau
+     * @param id Mã hộ
+     * @return HoKhau
+     * @throws SQLException lỗi truy vấn
      */
-    public HoKhau getById(int id) {
+    public HoKhau getById(int id) throws SQLException {
         String sql = "SELECT * FROM HO_KHAU WHERE MaHo = ?";
         HoKhau hk = new HoKhau();
 
         try (Connection conn = DatabaseConnector.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-                ResultSet rs = pstmt.executeQuery()) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                hk.setMaHo(rs.getInt("MaHo"));
-                hk.setSoCanHo(rs.getString("SoCanHo"));
-                hk.setTenChuHo(rs.getString("TenChuHo"));
-                hk.setDienTich(rs.getDouble("DienTich"));
-                hk.setSdt(rs.getString("SDT"));
-                hk.setNgayTao(rs.getDate("NgayTao"));
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    hk.setMaHo(rs.getInt("MaHo"));
+                    hk.setSoCanHo(rs.getString("SoCanHo"));
+                    hk.setTenChuHo(rs.getString("TenChuHo"));
+                    hk.setDienTich(rs.getDouble("DienTich"));
+                    hk.setSdt(rs.getString("SDT"));
+                    hk.setNgayTao(rs.getDate("NgayTao"));
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi getById", e);
+            throw e;
         }
-
         return hk;
     }
 
-    // Lấy Hộ khẩu bằng Số căn hộ (String)
-    public HoKhau getBySoCanHo(String soCanHo) {
+    /**
+     * Lấy Hộ khẩu bằng Số căn hộ
+     * 
+     * @param soCanHo Số căn hộ
+     * @return HoKhau hoặc null
+     * @throws SQLException lỗi truy vấn
+     */
+    public HoKhau getBySoCanHo(String soCanHo) throws SQLException {
         String sql = "SELECT * FROM HO_KHAU WHERE SoCanHo = ?";
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -294,7 +327,8 @@ public class HoKhauDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi getBySoCanHo", e);
+            throw e;
         }
         return null;
     }
