@@ -30,7 +30,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import com.bluemoon.app.controller.BaoCaoController;
+import com.bluemoon.app.controller.thongke.BaoCaoController;
 import com.bluemoon.app.model.CongNo;
 
 public class BaoCaoPanel extends JPanel {

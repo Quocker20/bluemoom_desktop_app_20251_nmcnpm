@@ -24,7 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.TamTruTamVangController;
+import com.bluemoon.app.controller.dancu.TamTruTamVangController;
 import com.bluemoon.app.model.NhanKhau;
 import com.bluemoon.app.model.TamTruTamVang;
 import com.bluemoon.app.util.AppConstants;

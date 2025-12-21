@@ -23,7 +23,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.ThuPhiController;
+import com.bluemoon.app.controller.thuphi.ThuPhiController;
 import com.bluemoon.app.model.KhoanPhi;
 import com.bluemoon.app.util.AppConstants;
 

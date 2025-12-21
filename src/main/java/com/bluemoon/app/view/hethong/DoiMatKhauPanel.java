@@ -21,7 +21,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.UserController;
+import com.bluemoon.app.controller.hethong.UserController;
 import com.bluemoon.app.model.User;
 
 public class DoiMatKhauPanel extends JPanel {

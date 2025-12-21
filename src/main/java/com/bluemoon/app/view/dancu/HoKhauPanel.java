@@ -36,7 +36,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.HoKhauController;
+import com.bluemoon.app.controller.dancu.HoKhauController;
 import com.bluemoon.app.model.HoKhau;
 
 public class HoKhauPanel extends JPanel {

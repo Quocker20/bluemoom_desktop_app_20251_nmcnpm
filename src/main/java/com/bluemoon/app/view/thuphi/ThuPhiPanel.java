@@ -39,7 +39,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.ThuPhiController;
+import com.bluemoon.app.controller.thuphi.ThuPhiController;
 import com.bluemoon.app.model.CongNo;
 
 public class ThuPhiPanel extends JPanel {

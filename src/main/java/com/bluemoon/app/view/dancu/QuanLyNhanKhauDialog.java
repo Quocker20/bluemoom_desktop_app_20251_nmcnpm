@@ -25,7 +25,7 @@ import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import com.bluemoon.app.controller.NhanKhauController;
+import com.bluemoon.app.controller.dancu.NhanKhauController;
 import com.bluemoon.app.model.HoKhau;
 import com.bluemoon.app.model.NhanKhau;
 

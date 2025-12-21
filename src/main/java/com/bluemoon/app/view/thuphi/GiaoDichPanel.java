@@ -26,9 +26,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.GiaoDichController;
-import com.bluemoon.app.controller.HoKhauController;
-import com.bluemoon.app.controller.ThuPhiController;
+import com.bluemoon.app.controller.dancu.HoKhauController;
+import com.bluemoon.app.controller.thuphi.GiaoDichController;
+import com.bluemoon.app.controller.thuphi.ThuPhiController;
 import com.bluemoon.app.model.GiaoDich;
 import com.bluemoon.app.model.KhoanPhi;
 

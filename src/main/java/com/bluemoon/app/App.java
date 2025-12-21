@@ -6,7 +6,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import com.bluemoon.app.controller.TamTruTamVangController;
+import com.bluemoon.app.controller.dancu.TamTruTamVangController;
 import com.bluemoon.app.util.DatabaseConnector;
 import com.bluemoon.app.view.hethong.LoginFrame;
 

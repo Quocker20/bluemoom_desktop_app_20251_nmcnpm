@@ -31,7 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.DashboardController;
+import com.bluemoon.app.controller.thongke.DashboardController;
 import com.bluemoon.app.model.User;
 import com.bluemoon.app.view.dancu.BienDongPanel;
 import com.bluemoon.app.view.dancu.HoKhauPanel;
@@ -238,7 +238,7 @@ public class MainFrame extends JFrame {
         contentPanel.removeAll();
         switch (menuTitle) {
             case "Tổng quan":
-                refreshDashboardData(); // Refresh số liệu khi quay lại Dashboard
+                refreshDashboardData();
                 contentPanel.add(mainDashboardPanel, BorderLayout.CENTER);
                 break;
             case "Quản lý Cư dân":

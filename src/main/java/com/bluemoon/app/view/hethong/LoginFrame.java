@@ -24,7 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.AbstractBorder;
 
-import com.bluemoon.app.controller.LoginController;
+import com.bluemoon.app.controller.hethong.LoginController;
 import com.bluemoon.app.model.User;
 
 public class LoginFrame extends JFrame {

@@ -31,7 +31,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.TamTruTamVangController;
+import com.bluemoon.app.controller.dancu.TamTruTamVangController;
 import com.bluemoon.app.model.TamTruTamVang;
 import com.bluemoon.app.util.AppConstants;
 
