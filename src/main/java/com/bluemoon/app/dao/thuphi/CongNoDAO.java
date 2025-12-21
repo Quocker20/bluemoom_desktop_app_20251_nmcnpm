@@ -1,4 +1,4 @@
-package com.bluemoon.app.dao;
+package com.bluemoon.app.dao.thuphi;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
