@@ -57,7 +57,7 @@ public class App {
      * Điều này đảm bảo giao diện không bị treo.
      */
     private static void runCleanupInBackground() {
-        // Tạo và khởi chạy một luồng mới
+
         new Thread(() -> {
             System.out.println("Bắt đầu dọn dẹp Tạm trú/Tạm vắng hết hạn trong luồng nền...");
 
@@ -76,6 +76,6 @@ public class App {
                 System.err.println("LỖI NGHIÊM TRỌNG: Lỗi khi chạy dọn dẹp CSDL nền.");
                 e.printStackTrace();
             }
-        }).start(); // Bắt đầu luồng nền
+        }).start();
     }
 }
