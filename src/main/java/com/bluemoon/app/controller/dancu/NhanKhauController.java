@@ -1,4 +1,4 @@
-package com.bluemoon.app.controller;
+package com.bluemoon.app.controller.dancu;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bluemoon.app.dao.NhanKhauDAO;
+import com.bluemoon.app.dao.dancu.NhanKhauDAO;
 import com.bluemoon.app.model.NhanKhau;
 
 /**

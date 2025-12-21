@@ -1,4 +1,4 @@
-package com.bluemoon.app.controller;
+package com.bluemoon.app.controller.hethong;
 
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
-import com.bluemoon.app.dao.UserDAO;
+import com.bluemoon.app.dao.hethong.UserDAO;
 import com.bluemoon.app.model.User;
 import com.bluemoon.app.util.DatabaseConnector;
 

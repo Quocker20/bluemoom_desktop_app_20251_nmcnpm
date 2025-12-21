@@ -1,4 +1,4 @@
-package com.bluemoon.app.controller;
+package com.bluemoon.app.controller.dancu;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bluemoon.app.dao.TamTruTamVangDAO;
+import com.bluemoon.app.dao.dancu.TamTruTamVangDAO;
 import com.bluemoon.app.model.TamTruTamVang;
 
 /**

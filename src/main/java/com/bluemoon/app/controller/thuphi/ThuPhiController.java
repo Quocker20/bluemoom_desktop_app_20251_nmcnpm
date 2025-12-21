@@ -1,4 +1,4 @@
-package com.bluemoon.app.controller;
+package com.bluemoon.app.controller.thuphi;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bluemoon.app.dao.CongNoDAO;
-import com.bluemoon.app.dao.GiaoDichDAO;
-import com.bluemoon.app.dao.HoKhauDAO;
-import com.bluemoon.app.dao.KhoanPhiDAO;
+import com.bluemoon.app.dao.dancu.HoKhauDAO;
+import com.bluemoon.app.dao.thuphi.CongNoDAO;
+import com.bluemoon.app.dao.thuphi.GiaoDichDAO;
+import com.bluemoon.app.dao.thuphi.KhoanPhiDAO;
 import com.bluemoon.app.model.CongNo;
 import com.bluemoon.app.model.GiaoDich;
 import com.bluemoon.app.model.HoKhau;

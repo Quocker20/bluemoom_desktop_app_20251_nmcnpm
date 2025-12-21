@@ -1,4 +1,4 @@
-package com.bluemoon.app.controller;
+package com.bluemoon.app.controller.thongke;
 
 import java.sql.SQLException;
 import java.util.Calendar;
@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bluemoon.app.dao.DashboardDAO;
+import com.bluemoon.app.dao.thongke.DashboardDAO;
 
 /**
  * Controller cho màn hình Dashboard (Trang chủ).
