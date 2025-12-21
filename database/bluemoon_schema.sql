@@ -95,22 +95,5 @@ CREATE TABLE GIAO_DICH_NOP_TIEN (
     FOREIGN KEY (MaKhoanPhi) REFERENCES KHOAN_PHI(MaKhoanPhi)
 );
 
--- =============================================
--- DỮ LIỆU MẪU (SEED DATA) - Để test ứng dụng
--- =============================================
-
--- 1. Tài khoản Admin (Mật khẩu giả định: 123456)
-INSERT INTO TAI_KHOAN (TenDangNhap, MatKhau, VaiTro) VALUES 
-('admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'QuanLy'),
-('ketoan', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'KeToan'),
-('thuky', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ThuKy');
-
--- 2. Cấu hình Phí cơ bản
-INSERT INTO KHOAN_PHI (TenKhoanPhi, DonGia, DonViTinh, LoaiPhi) VALUES 
-('Phí Dịch vụ Chung cư', 7000, 'm2', 0), -- Bắt buộc, 7k/m2
-('Phí Quản lý', 3000, 'm2', 0),          -- Bắt buộc, 3k/m2
-('Quỹ Vì người nghèo', 0, 'ho', 1);      -- Tự nguyện
-
-
 
 

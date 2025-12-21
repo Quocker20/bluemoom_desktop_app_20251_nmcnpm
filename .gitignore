@@ -1,9 +1,7 @@
 
 *.class
 
-
 *.log
-
 
 *.jar
 *.war
@@ -12,7 +10,6 @@
 *.zip
 *.tar.gz
 *.rar
-
 
 target/
 pom.xml.tag
@@ -23,17 +20,14 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.properties
 
-
 .idea/
 *.iws
 *.iml
 *.ipr
 
-
 .vscode/
 .history/
 *.code-workspace
-
 
 .metadata
 bin/
@@ -48,7 +42,6 @@ local.properties
 .recommenders
 .classpath
 .project
-
 
 .DS_Store
 Thumbs.db

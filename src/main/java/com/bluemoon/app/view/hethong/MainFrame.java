@@ -109,26 +109,59 @@ public class MainFrame extends JFrame {
         lblLogo.setAlignmentX(Component.LEFT_ALIGNMENT);
         topSidebar.add(lblLogo);
 
+        // --- MENU ITEMS ---
         topSidebar.add(createMenuItem("Tổng quan", "/images/icon_overview.png", true));
-        topSidebar.add(createMenuItem("Quản lý Cư dân", "/images/icon_resident.png", false));
-        topSidebar.add(createMenuItem("Quản lý Biến động", "/images/icon_change.png", false));
-        topSidebar.add(createMenuItem("Quản lý Thu phí", "/images/icon_fee.png", false));
-        topSidebar.add(createMenuItem("Cấu hình Phí", "/images/icon_settings.png", false));
-        topSidebar.add(createMenuItem("Lịch sử Giao dịch", "/images/transaction_history.png", false));
+
+        // 1. NHÓM QUẢN LÝ CƯ DÂN
+        JButton btnCuDanParent = createParentMenuButton("Quản lý Cư dân", "/images/icon_resident.png");
+        JPanel subPanelCuDan = new JPanel();
+        subPanelCuDan.setLayout(new BoxLayout(subPanelCuDan, BoxLayout.Y_AXIS));
+        subPanelCuDan.setOpaque(false);
+        subPanelCuDan.setVisible(false); // Mặc định ẩn
+
+        subPanelCuDan.add(createChildMenuItem("Quản lý Hộ khẩu", "/images/house.png"));
+        subPanelCuDan.add(createChildMenuItem("Quản lý Biến động", "/images/icon_change.png"));
+
+        // Sự kiện toggle
+        btnCuDanParent.addActionListener(e -> {
+            subPanelCuDan.setVisible(!subPanelCuDan.isVisible());
+            sidebarPanel.revalidate();
+        });
+
+        topSidebar.add(btnCuDanParent);
+        topSidebar.add(subPanelCuDan);
+
+        // 2. NHÓM QUẢN LÝ THU PHÍ
+        JButton btnThuPhiParent = createParentMenuButton("Quản lý Thu phí", "/images/icon_fee.png");
+        JPanel subPanelThuPhi = new JPanel();
+        subPanelThuPhi.setLayout(new BoxLayout(subPanelThuPhi, BoxLayout.Y_AXIS));
+        subPanelThuPhi.setOpaque(false);
+        subPanelThuPhi.setVisible(false); // Mặc định ẩn
+
+        subPanelThuPhi.add(createChildMenuItem("Quản lý Công nợ", "/images/debt.png"));
+        subPanelThuPhi.add(createChildMenuItem("Cấu hình Phí", "/images/icon_settings.png"));
+        subPanelThuPhi.add(createChildMenuItem("Lịch sử Giao dịch", "/images/transaction_history.png"));
+
+        // Sự kiện toggle
+        btnThuPhiParent.addActionListener(e -> {
+            subPanelThuPhi.setVisible(!subPanelThuPhi.isVisible());
+            sidebarPanel.revalidate();
+        });
+
+        topSidebar.add(btnThuPhiParent);
+        topSidebar.add(subPanelThuPhi);
+
+        // Các menu khác
         topSidebar.add(createMenuItem("Báo cáo & Thống kê", "/images/icon_report.png", false));
-        // Đã bỏ menu "Hệ thống" theo yêu cầu
 
         sidebarPanel.add(topSidebar, BorderLayout.NORTH);
 
-        // Đã bỏ nút Logout ở bottom sidebar theo yêu cầu
-        
         // 2. HEADER
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setPreferredSize(new Dimension(getWidth(), 80));
         headerPanel.setBackground(Color.WHITE);
         headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)));
 
-        // Container cho phần User Info (Text + Avatar)
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 20));
         userPanel.setOpaque(false);
         userPanel.setBorder(new EmptyBorder(0, 0, 0, 25));
@@ -136,11 +169,9 @@ public class MainFrame extends JFrame {
         String roleName = currentUser != null ? currentUser.getVaiTro() : "Admin";
         String username = currentUser != null ? currentUser.getTenDangNhap() : "User";
         
-        // Label Text (Chỉ hiện chữ, không có mũi tên)
         JLabel lblText = new JLabel("Xin chào, " + roleName + " (" + username + ")");
         lblText.setFont(new Font("Inter", Font.BOLD, 16));
         
-        // Label Avatar (Riêng biệt để bắt sự kiện click)
         JLabel lblAvatar = new JLabel();
         lblAvatar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         URL avatarUrl = getClass().getResource("/images/avatar.png");
@@ -149,16 +180,14 @@ public class MainFrame extends JFrame {
                     new ImageIcon(avatarUrl).getImage().getScaledInstance(45, 45, Image.SCALE_SMOOTH));
             lblAvatar.setIcon(avatarIcon);
         } else {
-            lblAvatar.setText("[Avatar]"); // Fallback text
+            lblAvatar.setText("[Avatar]");
         }
 
-        // Tạo Popup Menu
         JPopupMenu userMenu = new JPopupMenu();
         
         JMenuItem itemChangePass = new JMenuItem("Đổi mật khẩu");
         itemChangePass.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         itemChangePass.addActionListener(e -> {
-            // Clear selection sidebar
             updateActiveMenu(""); 
             contentPanel.removeAll();
             contentPanel.add(new DoiMatKhauPanel(currentUser), BorderLayout.CENTER);
@@ -188,7 +217,6 @@ public class MainFrame extends JFrame {
         userMenu.addSeparator();
         userMenu.add(itemLogout);
 
-        // Sự kiện click: CHỈ BẮT VÀO AVATAR
         lblAvatar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 userMenu.show(lblAvatar, evt.getX() - 120, lblAvatar.getHeight());
@@ -218,7 +246,6 @@ public class MainFrame extends JFrame {
         this.add(centerContainer, BorderLayout.CENTER);
     }
 
-    // --- LOGIC LẤY DỮ LIỆU THẬT ---
     private void refreshDashboardData() {
         if (lblValHoKhau != null)
             lblValHoKhau.setText(String.valueOf(dashboardController.getSoLuongHo()));
@@ -234,7 +261,6 @@ public class MainFrame extends JFrame {
         JPanel dashboard = new JPanel(new BorderLayout());
         dashboard.setOpaque(false);
 
-        // A. Cards Panel (Hiển thị số liệu thật)
         JPanel cardsPanel = new JPanel(new GridBagLayout());
         cardsPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -242,7 +268,6 @@ public class MainFrame extends JFrame {
         gbc.weightx = 1.0;
         gbc.insets = new Insets(0, 0, 0, 20);
 
-        // Khởi tạo các Label giá trị
         lblValHoKhau = new JLabel("...", SwingConstants.RIGHT);
         lblValNhanKhau = new JLabel("...", SwingConstants.RIGHT);
         lblValTongThu = new JLabel("...", SwingConstants.RIGHT);
@@ -258,7 +283,6 @@ public class MainFrame extends JFrame {
         gbc.insets = new Insets(0, 0, 0, 0);
         cardsPanel.add(createDashboardCard("Công nợ (T)", lblValCongNo, "/images/icon_card.png"), gbc);
 
-        // B. Charts Area
         JPanel mainSection = new JPanel(new GridBagLayout());
         mainSection.setOpaque(false);
         mainSection.setBorder(new EmptyBorder(30, 0, 0, 0));
@@ -267,7 +291,6 @@ public class MainFrame extends JFrame {
         gbcMain.fill = GridBagConstraints.BOTH;
         gbcMain.weighty = 1.0;
 
-        // Placeholder for Charts (Sẽ được thay bằng BaoCaoPanel khi click menu)
         gbcMain.gridx = 0;
         gbcMain.weightx = 0.65;
         gbcMain.insets = new Insets(0, 0, 0, 20);
@@ -297,7 +320,7 @@ public class MainFrame extends JFrame {
                 refreshDashboardData();
                 contentPanel.add(mainDashboardPanel, BorderLayout.CENTER);
                 break;
-            case "Quản lý Cư dân":
+            case "Quản lý Hộ khẩu": // Đổi tên case
                 if (userRole.equals("KeToan")) {
                     showAccessDenied();
                     break;
@@ -311,7 +334,7 @@ public class MainFrame extends JFrame {
                 }
                 contentPanel.add(new BienDongPanel(), BorderLayout.CENTER);
                 break;
-            case "Quản lý Thu phí":
+            case "Quản lý Công nợ": // Đổi tên case
                 if (userRole.equals("ThuKy")) {
                     showAccessDenied();
                     break;
@@ -365,7 +388,6 @@ public class MainFrame extends JFrame {
         JPanel textPanel = new JPanel(new GridLayout(2, 1));
         textPanel.setOpaque(false);
 
-        // Setup font cho Label giá trị
         lblValueObj.setFont(new Font("Segoe UI", Font.BOLD, 28));
         lblValueObj.setForeground(Color.BLACK);
 
@@ -401,6 +423,24 @@ public class MainFrame extends JFrame {
             else
                 entry.getValue().setActive(false);
         }
+    }
+
+    // Tạo menu con (Leaf node) - Căn lề trái nhiều hơn
+    private JButton createChildMenuItem(String text, String iconPath) {
+        MenuButton btn = new MenuButton(text, iconPath, false);
+        // Thụt lề cho menu con (50px)
+        btn.setBorder(new EmptyBorder(10, 50, 10, 0)); 
+        btn.setFont(new Font("Inter", Font.PLAIN, 18)); // Font nhỏ hơn xíu
+        btn.addActionListener(e -> handleMenuClick(text));
+        menuButtons.put(text, btn);
+        return btn;
+    }
+
+    // Tạo menu cha (Parent node) - Chỉ có tác dụng xổ xuống
+    private JButton createParentMenuButton(String text, String iconPath) {
+        MenuButton btn = new MenuButton(text, iconPath, false);
+        // Có thể thêm icon mũi tên nhỏ nếu cần, ở đây giữ nguyên style
+        return btn;
     }
 
     private JButton createMenuItem(String text, String iconPath, boolean initActive) {
