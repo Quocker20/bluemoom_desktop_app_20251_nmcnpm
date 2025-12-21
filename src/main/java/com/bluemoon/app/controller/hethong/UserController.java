@@ -73,4 +73,43 @@ public class UserController {
             return "Lỗi kết nối cơ sở dữ liệu!";
         }
     }
+
+    /**
+     * Controller Dang ky
+     * 
+     * @param username
+     * @param password
+     * @param userRole
+     * @return
+     */
+    public String register(String username, String password, String userRole) {
+        if (username == null || username.trim().isEmpty() ||
+                password == null || password.trim().isEmpty() ||
+                userRole == null || userRole.trim().isEmpty()) {
+            return "Vui lòng nhập đầy đủ thông tin!";
+        }
+
+        if (password.length() < 6) {
+            return "Mật khẩu phải có ít nhất 6 ký tự!";
+        }
+
+        try {
+            boolean success = userDAO.registerUser(username, password, userRole);
+
+            if (success) {
+                return "SUCCESS";
+            } else {
+                return "Lỗi hệ thống! Không thể đăng ký.";
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[UserController] Loi dang ky", e);
+
+            String msg = e.getMessage();
+            if (msg != null && (msg.contains("Duplicate entry") || e.getMessage().contains("UNIQUE constraint"))) {
+                return "Tên đăng nhập đã tồn tại! Vui lòng chọn tên khác.";
+            }
+
+            return "Lỗi Truy vấn Cơ sở dữ liệu";
+        }
+    }
 }

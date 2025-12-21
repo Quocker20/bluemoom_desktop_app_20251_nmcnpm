@@ -27,7 +27,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -114,35 +116,89 @@ public class MainFrame extends JFrame {
         topSidebar.add(createMenuItem("Cấu hình Phí", "/images/icon_settings.png", false));
         topSidebar.add(createMenuItem("Lịch sử Giao dịch", "/images/transaction_history.png", false));
         topSidebar.add(createMenuItem("Báo cáo & Thống kê", "/images/icon_report.png", false));
-        topSidebar.add(createMenuItem("Hệ thống", "/images/icon_system.png", false));
+        // Đã bỏ menu "Hệ thống" theo yêu cầu
 
         sidebarPanel.add(topSidebar, BorderLayout.NORTH);
 
-        JButton btnLogout = createLogoutButton();
-        JPanel bottomSidebar = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 20));
-        bottomSidebar.setOpaque(false);
-        bottomSidebar.setBorder(new EmptyBorder(0, 40, 10, 0));
-        bottomSidebar.add(btnLogout);
-        sidebarPanel.add(bottomSidebar, BorderLayout.SOUTH);
-
+        // Đã bỏ nút Logout ở bottom sidebar theo yêu cầu
+        
         // 2. HEADER
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setPreferredSize(new Dimension(getWidth(), 80));
         headerPanel.setBackground(Color.WHITE);
         headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)));
 
+        // Container cho phần User Info (Text + Avatar)
+        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 20));
+        userPanel.setOpaque(false);
+        userPanel.setBorder(new EmptyBorder(0, 0, 0, 25));
+
         String roleName = currentUser != null ? currentUser.getVaiTro() : "Admin";
         String username = currentUser != null ? currentUser.getTenDangNhap() : "User";
-        JLabel lblUserInfo = new JLabel("Xin chào, " + roleName + " (" + username + ")  ");
-        lblUserInfo.setFont(new Font("Inter", Font.BOLD, 20));
+        
+        // Label Text (Chỉ hiện chữ, không có mũi tên)
+        JLabel lblText = new JLabel("Xin chào, " + roleName + " (" + username + ")");
+        lblText.setFont(new Font("Inter", Font.BOLD, 16));
+        
+        // Label Avatar (Riêng biệt để bắt sự kiện click)
+        JLabel lblAvatar = new JLabel();
+        lblAvatar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         URL avatarUrl = getClass().getResource("/images/avatar.png");
         if (avatarUrl != null) {
             Icon avatarIcon = new ImageIcon(
-                    new ImageIcon(avatarUrl).getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
-            lblUserInfo.setIcon(avatarIcon);
+                    new ImageIcon(avatarUrl).getImage().getScaledInstance(45, 45, Image.SCALE_SMOOTH));
+            lblAvatar.setIcon(avatarIcon);
+        } else {
+            lblAvatar.setText("[Avatar]"); // Fallback text
         }
-        lblUserInfo.setBorder(new EmptyBorder(0, 0, 0, 20));
-        headerPanel.add(lblUserInfo, BorderLayout.EAST);
+
+        // Tạo Popup Menu
+        JPopupMenu userMenu = new JPopupMenu();
+        
+        JMenuItem itemChangePass = new JMenuItem("Đổi mật khẩu");
+        itemChangePass.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        itemChangePass.addActionListener(e -> {
+            // Clear selection sidebar
+            updateActiveMenu(""); 
+            contentPanel.removeAll();
+            contentPanel.add(new DoiMatKhauPanel(currentUser), BorderLayout.CENTER);
+            contentPanel.revalidate();
+            contentPanel.repaint();
+        });
+
+        JMenuItem itemRegister = new JMenuItem("Đăng ký");
+        itemRegister.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        itemRegister.addActionListener(e -> {
+            updateActiveMenu("");
+            contentPanel.removeAll();
+            contentPanel.add(new DangKyPanel(), BorderLayout.CENTER);
+            contentPanel.revalidate();
+            contentPanel.repaint();
+        });
+
+        JMenuItem itemLogout = new JMenuItem("Đăng xuất");
+        itemLogout.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        itemLogout.addActionListener(e -> {
+            this.dispose();
+            new LoginFrame().setVisible(true);
+        });
+
+        userMenu.add(itemChangePass);
+        userMenu.add(itemRegister);
+        userMenu.addSeparator();
+        userMenu.add(itemLogout);
+
+        // Sự kiện click: CHỈ BẮT VÀO AVATAR
+        lblAvatar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                userMenu.show(lblAvatar, evt.getX() - 120, lblAvatar.getHeight());
+            }
+        });
+
+        userPanel.add(lblText);
+        userPanel.add(lblAvatar);
+
+        headerPanel.add(userPanel, BorderLayout.EAST);
 
         // 3. BODY
         contentPanel = new JPanel();
@@ -279,9 +335,6 @@ public class MainFrame extends JFrame {
             case "Báo cáo & Thống kê":
                 contentPanel.add(new BaoCaoPanel(), BorderLayout.CENTER);
                 break;
-            case "Hệ thống":
-                contentPanel.add(new DoiMatKhauPanel(currentUser), BorderLayout.CENTER);
-                break;
             default:
                 showDevelopingFeature(menuTitle);
                 break;
@@ -293,7 +346,6 @@ public class MainFrame extends JFrame {
 
     // --- Helpers UI ---
 
-    // Sửa hàm này để nhận JLabel thay vì String value cứng
     private JPanel createDashboardCard(String title, JLabel lblValueObj, String iconPath) {
         RoundedPanel card = new RoundedPanel(15, new Color(225, 225, 225));
         card.setPreferredSize(new Dimension(200, 100));
@@ -328,7 +380,6 @@ public class MainFrame extends JFrame {
         return card;
     }
 
-    // Các hàm phụ trợ khác (giữ nguyên)
     private void showAccessDenied() {
         JLabel lbl = new JLabel("Bạn không có quyền truy cập chức năng này", SwingConstants.CENTER);
         lbl.setFont(new Font("Segoe UI", Font.ITALIC, 24));
@@ -359,30 +410,6 @@ public class MainFrame extends JFrame {
         return btn;
     }
 
-    private JButton createLogoutButton() {
-        JButton btn = new JButton(" Đăng xuất");
-        btn.setPreferredSize(new Dimension(200, 40));
-        btn.setFont(new Font("Inter", Font.BOLD, 15));
-        btn.setForeground(Color.WHITE);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setHorizontalAlignment(SwingConstants.LEFT);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setIconTextGap(10);
-        try {
-            URL url = getClass().getResource("/images/icon_logout.png");
-            if (url != null)
-                btn.setIcon(new ImageIcon(new ImageIcon(url).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
-        } catch (Exception e) {
-        }
-        btn.addActionListener(e -> {
-            this.dispose();
-            new LoginFrame().setVisible(true);
-        });
-        return btn;
-    }
-
     private JPanel createPlaceholderPanel(String text, int width, int height) {
         RoundedPanel panel = new RoundedPanel(15, new Color(225, 225, 225));
         panel.setPreferredSize(new Dimension(width, height));
@@ -393,7 +420,6 @@ public class MainFrame extends JFrame {
         return panel;
     }
 
-    // Inner Classes (MenuButton, RoundedPanel) - Giữ nguyên như cũ
     class MenuButton extends JButton {
         private boolean isActive;
 

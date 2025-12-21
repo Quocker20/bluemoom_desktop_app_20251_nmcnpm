@@ -78,4 +78,38 @@ public class UserDAO {
             throw e;
         }
     }
+
+    /**
+     * Dang ky User moi
+     * @param username
+     * @param password
+     * @param userRole
+     * @return
+     * @throws Exception
+     */
+    public boolean registerUser(String username, String password, String userRole) throws SQLException {
+        String sql = "INSERT INTO TAI_KHOAN (TenDangNhap, MatKhau, VaiTro) VALUES (?, ?, ?)";
+        logger.info("[USERDAO] Bat dau dang ky tai khoan moi voi vai tro: " + userRole);
+
+        try (Connection conn = DatabaseConnector.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            String hashedPassword = SecurityUtil.hashPassword(password);
+            pstmt.setString(2, hashedPassword);
+            pstmt.setString(3, userRole);
+
+            int affectedRows = pstmt.executeUpdate();
+
+            if(affectedRows > 0) {
+                logger.info("[USERDAO] Dang ky User moi thanh cong");
+                
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[USERDAO] Loi dang ky User: ", e);
+            throw e;
+        }
+    }
 }
