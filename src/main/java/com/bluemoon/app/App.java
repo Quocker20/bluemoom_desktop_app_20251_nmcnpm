@@ -8,7 +8,7 @@ import javax.swing.UIManager;
 
 import com.bluemoon.app.controller.TamTruTamVangController;
 import com.bluemoon.app.util.DatabaseConnector;
-import com.bluemoon.app.view.LoginFrame;
+import com.bluemoon.app.view.hethong.LoginFrame;
 
 public class App {
 

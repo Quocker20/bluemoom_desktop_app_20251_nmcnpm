@@ -1,4 +1,4 @@
-package com.bluemoon.app.view;
+package com.bluemoon.app.view.dancu;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

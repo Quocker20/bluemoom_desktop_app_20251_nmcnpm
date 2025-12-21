@@ -1,15 +1,31 @@
-package com.bluemoon.app.view;
+package com.bluemoon.app.view.thuphi;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.util.Calendar;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.AbstractBorder;
+import javax.swing.border.EmptyBorder;
 
 import com.bluemoon.app.controller.ThuPhiController;
 import com.bluemoon.app.model.KhoanPhi;
 import com.bluemoon.app.util.AppConstants;
-
-import javax.swing.*;
-import javax.swing.border.AbstractBorder;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.util.Calendar;
-import java.util.List;
 
 public class QuanLyKhoanPhiDialog extends JDialog {
 

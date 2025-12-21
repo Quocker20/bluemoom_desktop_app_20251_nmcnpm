@@ -1,13 +1,44 @@
-package com.bluemoon.app.view;
+package com.bluemoon.app.view.hethong;
 
-import com.bluemoon.app.controller.DashboardController;
-import com.bluemoon.app.model.User;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+
+import com.bluemoon.app.controller.DashboardController;
+import com.bluemoon.app.model.User;
+import com.bluemoon.app.view.dancu.BienDongPanel;
+import com.bluemoon.app.view.dancu.HoKhauPanel;
+import com.bluemoon.app.view.thongke.BaoCaoPanel;
+import com.bluemoon.app.view.thuphi.CauHinhPhiPanel;
+import com.bluemoon.app.view.thuphi.GiaoDichPanel;
+import com.bluemoon.app.view.thuphi.ThuPhiPanel;
 
 public class MainFrame extends JFrame {
 
