@@ -194,4 +194,78 @@ public class NhanKhauDAO {
         }
         return false;
     }
+
+
+    /**
+     * 
+     * @param keyword
+     * @return
+     * @throws SQLException
+     */
+    public List<NhanKhau> search(String keyword) throws SQLException {
+        List<NhanKhau> list = new ArrayList<>();
+        String sql = "SELECT * FROM NHAN_KHAU WHERE (HoTen LIKE ? OR CCCD LIKE ?)";
+        logger.log(Level.INFO, "NHANKHAUDAO Search voi keyword: {0}", keyword);
+
+        try (Connection conn = DatabaseConnector.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            String query = "%" + keyword + "%";
+            pstmt.setString(1, query);
+            pstmt.setString(2, query);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    NhanKhau nk = new NhanKhau();
+                    nk.setMaNhanKhau(rs.getInt("MaNhanKhau"));
+                    nk.setMaHo(rs.getInt("MaHo"));
+                    nk.setHoTen(rs.getString("HoTen"));
+                    nk.setNgaySinh(rs.getDate("NgaySinh"));
+                    nk.setGioiTinh(rs.getString("GioiTinh"));
+                    nk.setCccd(rs.getString("CCCD"));
+                    nk.setQuanHe(rs.getString("QuanHe"));
+                    
+                    list.add(nk);
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NHANKHAUDAO] Loi search", e);
+            throw e;
+        }
+        
+        return list;
+    }
+
+    /**
+     * Lấy tất cả nhân khẩu
+     * 
+     * @return List<NhanKhau>
+     * @throws SQLException lỗi truy vấn
+     */
+    public List<NhanKhau> getAll() throws SQLException {
+        List<NhanKhau> list = new ArrayList<>();
+        String sql = "SELECT * FROM NHAN_KHAU ORDER BY MaNhanKhau ASC";
+
+        logger.log(Level.INFO, "[NHANKHAUDAO] Lay tat ca nhan khau");
+
+        try (Connection conn = DatabaseConnector.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                NhanKhau nk = new NhanKhau();
+                nk.setMaNhanKhau(rs.getInt("MaNhanKhau"));
+                nk.setMaHo(rs.getInt("MaHo"));
+                nk.setHoTen(rs.getString("HoTen"));
+                nk.setNgaySinh(rs.getDate("NgaySinh"));
+                nk.setGioiTinh(rs.getString("GioiTinh"));
+                nk.setCccd(rs.getString("CCCD"));
+                nk.setQuanHe(rs.getString("QuanHe"));
+                list.add(nk);
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NHANKHAUDAO] Loi getAll", e);
+            throw e;
+        }
+        return list;
+    }
 }

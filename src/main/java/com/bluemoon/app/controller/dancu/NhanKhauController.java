@@ -106,6 +106,11 @@ public class NhanKhauController {
         }
     }
 
+    /**
+     * 
+     * @param nk
+     * @return
+     */
     private boolean validate(NhanKhau nk) {
         if (nk == null)
             return false;
@@ -116,5 +121,39 @@ public class NhanKhauController {
         if (nk.getQuanHe() == null || nk.getQuanHe().trim().isEmpty())
             return false;
         return true;
+    }
+
+
+/**
+     * Lấy tất cả nhân khẩu.
+     * @return
+     */
+    public List<NhanKhau> getAllNhanKhau() {
+        List<NhanKhau> list = Collections.emptyList();
+        try {
+            logger.info("[NHANKHAUCONTROLLER] Bat dau yeu cau lay tat ca nhan khau");
+            list = nhanKhauDAO.getAll();
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "[NHANKHAUCONTROLLER] Yeu cau that bai", e);
+        }
+        return list;
+    }
+
+    /**
+     * Tìm kiếm nhân khẩu theo từ khóa.
+     * @param keyword
+     * @return
+     */
+    public List<NhanKhau> searchNhanKhau(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllNhanKhau();
+        }
+        
+        try {
+            return nhanKhauDAO.search(keyword.trim());
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[NHANKHAUCONTROLLER] Loi searchNhanKhau", e);
+            return Collections.emptyList();
+        }
     }
 }

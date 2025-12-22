@@ -37,6 +37,7 @@ import com.bluemoon.app.controller.thongke.DashboardController;
 import com.bluemoon.app.model.User;
 import com.bluemoon.app.view.dancu.BienDongPanel;
 import com.bluemoon.app.view.dancu.HoKhauPanel;
+import com.bluemoon.app.view.dancu.NhanKhauPanel; // [NEW] Import panel Nhân khẩu
 import com.bluemoon.app.view.thongke.BaoCaoPanel;
 import com.bluemoon.app.view.thuphi.CauHinhPhiPanel;
 import com.bluemoon.app.view.thuphi.GiaoDichPanel;
@@ -120,6 +121,8 @@ public class MainFrame extends JFrame {
         subPanelCuDan.setVisible(false); // Mặc định ẩn
 
         subPanelCuDan.add(createChildMenuItem("Quản lý Hộ khẩu", "/images/house.png"));
+        // [NEW] Thêm mục Quản lý Nhân khẩu vào đây
+        subPanelCuDan.add(createChildMenuItem("Quản lý Nhân khẩu", "/images/icon_people.png")); 
         subPanelCuDan.add(createChildMenuItem("Quản lý Biến động", "/images/icon_change.png"));
 
         // Sự kiện toggle
@@ -320,12 +323,20 @@ public class MainFrame extends JFrame {
                 refreshDashboardData();
                 contentPanel.add(mainDashboardPanel, BorderLayout.CENTER);
                 break;
-            case "Quản lý Hộ khẩu": // Đổi tên case
+            case "Quản lý Hộ khẩu": 
                 if (userRole.equals("KeToan")) {
                     showAccessDenied();
                     break;
                 }
                 contentPanel.add(new HoKhauPanel(), BorderLayout.CENTER);
+                break;
+            // [NEW] Logic xử lý khi click menu Nhân khẩu
+            case "Quản lý Nhân khẩu":
+                if (userRole.equals("KeToan")) { // Giữ logic chặn Kế toán giống Hộ khẩu
+                    showAccessDenied();
+                    break;
+                }
+                contentPanel.add(new NhanKhauPanel(), BorderLayout.CENTER);
                 break;
             case "Quản lý Biến động":
                 if (userRole.equals("KeToan")) {
@@ -334,7 +345,7 @@ public class MainFrame extends JFrame {
                 }
                 contentPanel.add(new BienDongPanel(), BorderLayout.CENTER);
                 break;
-            case "Quản lý Công nợ": // Đổi tên case
+            case "Quản lý Công nợ": 
                 if (userRole.equals("ThuKy")) {
                     showAccessDenied();
                     break;
