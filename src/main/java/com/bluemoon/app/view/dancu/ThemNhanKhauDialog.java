@@ -35,16 +35,30 @@ public class ThemNhanKhauDialog extends JDialog {
     private JLabel lblTitle;
 
     private NhanKhauController controller;
-    private QuanLyNhanKhauDialog parentDialog;
+    
+    // Biến để xác định màn hình cha gọi dialog này
+    private QuanLyNhanKhauDialog parentDialog; 
+    private NhanKhauPanel nhanKhauPanel;
+    
     private HoKhau hoKhauHienTai;
     
     private boolean isEditMode = false;
     private NhanKhau currentNK = null;
 
+    // Constructor 1: Gọi từ màn hình Chi tiết hộ khẩu (QuanLyNhanKhauDialog)
     public ThemNhanKhauDialog(JFrame parentFrame, QuanLyNhanKhauDialog parentDialog, HoKhau hoKhau) {
         super(parentFrame, "Thông tin Nhân khẩu", true);
         this.parentDialog = parentDialog;
         this.hoKhauHienTai = hoKhau;
+        this.controller = new NhanKhauController();
+        initComponents();
+    }
+
+    // Constructor 2: Gọi từ màn hình Danh sách nhân khẩu tổng (NhanKhauPanel)
+    public ThemNhanKhauDialog(JFrame parentFrame, NhanKhauPanel nhanKhauPanel, HoKhau hoKhau) {
+        super(parentFrame, "Thông tin Nhân khẩu", true);
+        this.nhanKhauPanel = nhanKhauPanel;
+        this.hoKhauHienTai = hoKhau; // Lưu ý: Khi Sửa thì hoKhau này không được null
         this.controller = new NhanKhauController();
         initComponents();
     }
@@ -154,16 +168,30 @@ public class ThemNhanKhauDialog extends JDialog {
                 
                 if (controller.updateNhanKhau(currentNK)) {
                     JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
-                    parentDialog.loadData();
+                    
+                    // [FIX] Cập nhật lại màn hình cha tương ứng
+                    if (parentDialog != null) parentDialog.loadData();
+                    if (nhanKhauPanel != null) nhanKhauPanel.loadData();
+                    
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "Cập nhật thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
+                // Logic Thêm mới
+                if (hoKhauHienTai == null) {
+                    JOptionPane.showMessageDialog(this, "Lỗi: Chưa xác định hộ khẩu để thêm thành viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
                 NhanKhau nk = new NhanKhau(hoKhauHienTai.getMaHo(), hoTen, ngaySinh, gioiTinh, cccd, quanHe);
                 if (controller.addNhanKhau(nk)) {
                     JOptionPane.showMessageDialog(this, "Thêm mới thành công!");
-                    parentDialog.loadData();
+                    
+                    // [FIX] Cập nhật lại màn hình cha tương ứng
+                    if (parentDialog != null) parentDialog.loadData();
+                    if (nhanKhauPanel != null) nhanKhauPanel.loadData();
+                    
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "Thêm thất bại (Có thể trùng CCCD)!", "Lỗi", JOptionPane.ERROR_MESSAGE);

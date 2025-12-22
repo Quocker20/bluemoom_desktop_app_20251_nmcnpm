@@ -21,12 +21,14 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities; // [QUAN TRỌNG] Cần import cái này
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -48,7 +50,6 @@ public class NhanKhauPanel extends JPanel {
     private JTextField txtSearch;
     private List<NhanKhau> currentList;
 
-    // Màu sắc chủ đạo (Giống HoKhauPanel)
     private final Color COL_PRIMARY = new Color(52, 152, 219);
     private final Color COL_BG = new Color(245, 247, 250);
     private final Color COL_HEADER_BG = Color.WHITE;
@@ -106,11 +107,14 @@ public class NhanKhauPanel extends JPanel {
         btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnAdd.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnAdd.addActionListener(e -> {
-            // Mở dialog thêm nhân khẩu (Giả định bạn đã có class ThemNhanKhauDialog)
-            // JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            // ThemNhanKhauDialog dialog = new ThemNhanKhauDialog(parentFrame, this);
-            // dialog.setVisible(true);
-            JOptionPane.showMessageDialog(this, "Tính năng mở Dialog thêm nhân khẩu đang được phát triển.");
+            // [LOGIC] Để thêm nhân khẩu, bắt buộc phải chọn Hộ khẩu.
+            // Do Dialog hiện tại thiết kế cần truyền HoKhau vào, nên ở màn hình tổng này
+            // ta hướng dẫn người dùng vào quản lý Hộ khẩu để thêm cho chính xác.
+            JOptionPane.showMessageDialog(this, 
+                "Để thêm nhân khẩu mới, vui lòng vào:\n" +
+                "Quản lý Hộ khẩu -> Chọn Hộ cần thêm -> Thêm thành viên.\n" +
+                "(Hệ thống cần xác định nhân khẩu thuộc hộ nào)", 
+                "Hướng dẫn", JOptionPane.INFORMATION_MESSAGE);
         });
         toolBox.add(btnAdd);
 
@@ -118,8 +122,7 @@ public class NhanKhauPanel extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
 
         // --- Table Section ---
-        // Cập nhật tên cột cho phù hợp với Nhân Khẩu
-        String[] columnNames = { "STT", "Mã NK", "Họ tên", "Ngày sinh", "Giới tính", "CCCD", "Thao tác" };
+        String[] columnNames = { "STT", "Mã hộ", "Họ tên", "Ngày sinh", "Giới tính", "CCCD", "Thao tác" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -130,7 +133,7 @@ public class NhanKhauPanel extends JPanel {
         table = new JTable(tableModel);
         TableColumnModel columnModel = table.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(50); // STT
-        columnModel.getColumn(1).setPreferredWidth(80); // Mã NK
+        columnModel.getColumn(1).setPreferredWidth(80); // Mã hộ
         columnModel.getColumn(2).setPreferredWidth(180); // Họ tên
         columnModel.getColumn(3).setPreferredWidth(100); // Ngày sinh
         columnModel.getColumn(4).setPreferredWidth(70); // Giới tính
@@ -148,7 +151,6 @@ public class NhanKhauPanel extends JPanel {
         table.setSelectionForeground(Color.BLACK);
         table.setShowVerticalLines(false);
 
-        // Setup Renderer & Editor cho cột Thao tác
         table.getColumnModel().getColumn(6).setCellRenderer(new TableActionCellRender());
         table.getColumnModel().getColumn(6).setCellEditor(new TableActionCellEditor());
 
@@ -157,7 +159,6 @@ public class NhanKhauPanel extends JPanel {
         scrollPane.getViewport().setBackground(Color.WHITE);
         add(scrollPane, BorderLayout.CENTER);
 
-        // --- Footer Section ---
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footerPanel.setOpaque(false);
         JLabel lblPage = new JLabel("Hiển thị tất cả kết quả   ");
@@ -168,19 +169,19 @@ public class NhanKhauPanel extends JPanel {
 
     public void loadData() {
         tableModel.setRowCount(0);
-        // Gọi controller lấy danh sách
         currentList = nkController.getAllNhanKhau();
         int stt = 1;
         for (NhanKhau nk : currentList) {
             HoKhau hk = hkController.getById(nk.getMaHo());
+            String soCanHo = (hk != null) ? hk.getSoCanHo() : "N/A";
             tableModel.addRow(new Object[] {
                     stt++,
-                    hk.getSoCanHo(),
+                    soCanHo,
                     nk.getHoTen(),
                     nk.getNgaySinh(),
                     nk.getGioiTinh(),
                     nk.getCccd(),
-                    "" // Placeholder cho cột Thao tác
+                    "" 
             });
         }
     }
@@ -192,9 +193,10 @@ public class NhanKhauPanel extends JPanel {
         int stt = 1;
         for (NhanKhau nk : currentList) {
             HoKhau hk = hkController.getById(nk.getMaHo());
+            String soCanHo = (hk != null) ? hk.getSoCanHo() : "N/A";
             tableModel.addRow(new Object[] {
                     stt++,
-                    hk.getSoCanHo(),
+                    soCanHo,
                     nk.getHoTen(),
                     nk.getNgaySinh(),
                     nk.getGioiTinh(),
@@ -207,17 +209,13 @@ public class NhanKhauPanel extends JPanel {
     // --- Inner Classes cho Custom UI ---
 
     class PanelAction extends JPanel {
-        private JButton btnEdit, btnDelete; // Có thể bỏ btnShowResidentList vì đây đã là danh sách chi tiết
+        private JButton btnEdit, btnDelete; 
 
         public PanelAction() {
             setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
             setOpaque(false);
-
-            // Icon Edit
             btnEdit = createBtn("/images/icon_edit.png", new Color(243, 156, 18));
-            // Icon Delete
             btnDelete = createBtn("/images/icon_delete.png", new Color(231, 76, 60));
-
             add(btnEdit);
             add(btnDelete);
         }
@@ -237,32 +235,32 @@ public class NhanKhauPanel extends JPanel {
                         new ImageIcon(url).getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
                 btn.setIcon(icon);
             } else {
-                // Fallback text nếu không tìm thấy icon
                 btn.setText("•");
                 btn.setForeground(color);
             }
             return btn;
         }
 
-        
-
         public void initEvent(int row) {
             // Xử lý sự kiện Sửa
             btnEdit.addActionListener(e -> {
                 if (row >= 0 && row < currentList.size()) {
-                    NhanKhau selectedNk = currentList.get(row);
-
-                    // JFrame parentFrame = (JFrame);
-                    // SwingUtilities.getWindowAncestor(NhanKhauPanel.this);
-                    // ThemNhanKhauDialog dialog = new ThemNhanKhauDialog(parentFrame,
-                    // NhanKhauPanel.this);
-                    // dialog.setEditData(selectedNk);
-                    // dialog.setVisible(true);
-
                     if (table.getCellEditor() != null)
                         table.getCellEditor().stopCellEditing();
 
-                    JOptionPane.showMessageDialog(NhanKhauPanel.this, "Đang sửa nhân khẩu: " + selectedNk.getHoTen());
+                    NhanKhau selectedNk = currentList.get(row);
+                    HoKhau hk = hkController.getById(selectedNk.getMaHo());
+                    
+                    // [FIX LỖI BIÊN DỊCH Ở ĐÂY]
+                    // 1. Lấy JFrame cha chuẩn
+                    JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(NhanKhauPanel.this);
+                    
+                    // 2. Sử dụng 'NhanKhauPanel.this' thay vì 'this' (vì 'this' đang là PanelAction)
+                    // 3. Truyền 'hk' vào constructor cho phép sửa
+                    ThemNhanKhauDialog dialog = new ThemNhanKhauDialog(parentFrame, NhanKhauPanel.this, hk);
+                    
+                    dialog.setEditData(selectedNk);
+                    dialog.setVisible(true);
                 }
             });
 
@@ -320,7 +318,6 @@ public class NhanKhauPanel extends JPanel {
         }
     }
 
-    // Class vẽ Panel bo tròn
     class RoundedPanel extends JPanel {
         private int radius;
         private Color bgColor;
@@ -341,7 +338,6 @@ public class NhanKhauPanel extends JPanel {
         }
     }
 
-    // Class vẽ Button bo tròn
     class RoundedButton extends JButton {
         public RoundedButton(String text) {
             super(text);

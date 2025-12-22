@@ -45,6 +45,8 @@ public class QuanLyNhanKhauDialog extends JDialog {
         loadData();
     }
 
+    
+
     private void initComponents() {
         setSize(950, 550);
         setLocationRelativeTo(getParent());

@@ -121,8 +121,7 @@ public class MainFrame extends JFrame {
         subPanelCuDan.setVisible(false); // Mặc định ẩn
 
         subPanelCuDan.add(createChildMenuItem("Quản lý Hộ khẩu", "/images/house.png"));
-        // [NEW] Thêm mục Quản lý Nhân khẩu vào đây
-        subPanelCuDan.add(createChildMenuItem("Quản lý Nhân khẩu", "/images/icon_people.png")); 
+        subPanelCuDan.add(createChildMenuItem("Quản lý Nhân khẩu", "/images/icon_resident.png")); 
         subPanelCuDan.add(createChildMenuItem("Quản lý Biến động", "/images/icon_change.png"));
 
         // Sự kiện toggle
