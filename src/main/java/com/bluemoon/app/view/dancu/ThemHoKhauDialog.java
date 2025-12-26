@@ -185,7 +185,7 @@ public class ThemHoKhauDialog extends JDialog {
                     parentPanel.loadData();
                     dispose();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Thêm thất bại! Kiểm tra lại Mã hộ hoặc CCCD.");
+                    JOptionPane.showMessageDialog(this, "Thêm thất bại!");
                 }
             }
         } catch (Exception ex) {
