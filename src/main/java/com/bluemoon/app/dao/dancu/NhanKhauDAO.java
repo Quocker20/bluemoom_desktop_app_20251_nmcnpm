@@ -26,7 +26,7 @@ public class NhanKhauDAO {
      */
     public List<NhanKhau> selectByHoKhau(int maHo) throws SQLException {
         List<NhanKhau> list = new ArrayList<>();
-        String sql = "SELECT * FROM NHAN_KHAU WHERE MaHo = ? ORDER BY QuanHe ASC";
+        String sql = "SELECT * FROM NHAN_KHAU WHERE MaHo = ? AND IsDeleted = 0 ORDER BY QuanHe ASC";
 
         logger.log(Level.INFO, "[NHANKHAUDAO] Lay danh sach nhan khau cua ho ID: {0}", maHo);
 
@@ -122,14 +122,14 @@ public class NhanKhauDAO {
     }
 
     /**
-     * Xóa nhân khẩu
+     * Xóa nhân khẩu (SOFT DELETE)
      * 
      * @param maNhanKhau Mã nhân khẩu
      * @return true nếu thành công
      * @throws SQLException lỗi truy vấn
      */
     public boolean delete(int maNhanKhau) throws SQLException {
-        String sql = "DELETE FROM NHAN_KHAU WHERE MaNhanKhau=?";
+        String sql = "UPDATE NHAN_KHAU SET IsDeleted = 1 WHERE MaNhanKhau = ?";
         logger.log(Level.INFO, "[NHANKHAUDAO] Delete nhan khau ID: {0}", maNhanKhau);
 
         try (Connection conn = DatabaseConnector.getConnection();
@@ -204,7 +204,7 @@ public class NhanKhauDAO {
      */
     public List<NhanKhau> search(String keyword) throws SQLException {
         List<NhanKhau> list = new ArrayList<>();
-        String sql = "SELECT * FROM NHAN_KHAU WHERE (HoTen LIKE ? OR CCCD LIKE ?)";
+        String sql = "SELECT * FROM NHAN_KHAU WHERE (HoTen LIKE ? OR CCCD LIKE ?) AND IsDeleted = 0 ORDER BY MaNhanKhau ASC";
         logger.log(Level.INFO, "NHANKHAUDAO Search voi keyword: {0}", keyword);
 
         try (Connection conn = DatabaseConnector.getConnection();
@@ -243,7 +243,7 @@ public class NhanKhauDAO {
      */
     public List<NhanKhau> getAll() throws SQLException {
         List<NhanKhau> list = new ArrayList<>();
-        String sql = "SELECT * FROM NHAN_KHAU ORDER BY MaNhanKhau ASC";
+        String sql = "SELECT * FROM NHAN_KHAU WHERE IsDeleted = 0 ORDER BY MaNhanKhau ASC";
 
         logger.log(Level.INFO, "[NHANKHAUDAO] Lay tat ca nhan khau");
 

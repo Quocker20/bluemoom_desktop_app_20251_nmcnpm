@@ -40,6 +40,7 @@ CREATE TABLE NHAN_KHAU (
     GioiTinh VARCHAR(10) NOT NULL, -- 'Nam', 'Nu', 'Khac'
     CCCD VARCHAR(20) UNIQUE, -- Có thể NULL (nếu là trẻ em chưa có CCCD)
     QuanHe VARCHAR(50) NOT NULL, -- Quan hệ với chủ hộ (Vo, Con...)
+    IsDeleted TINYINT NOT NULL DEFAULT 0, -- 0 la van con, 1 la da xoa nhan khau
     FOREIGN KEY (MaHo) REFERENCES HO_KHAU(MaHo) ON DELETE CASCADE
 );
 

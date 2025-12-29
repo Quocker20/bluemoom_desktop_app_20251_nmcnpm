@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import com.bluemoon.app.dao.dancu.NhanKhauDAO;
 import com.bluemoon.app.model.NhanKhau;
 
+
 /**
  * Controller quản lý nhân khẩu.
  */
@@ -90,7 +91,7 @@ public class NhanKhauController {
     }
 
     /**
-     * Xóa nhân khẩu.
+     * Xóa nhân khẩu. (SOFT DELETE)
      * 
      * @param maNhanKhau Mã nhân khẩu
      * @return true nếu thành công

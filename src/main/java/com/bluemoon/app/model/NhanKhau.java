@@ -8,8 +8,9 @@ public class NhanKhau {
     private String hoTen;
     private Date ngaySinh;
     private String gioiTinh;
-    private String cccd; // Có thể null
+    private String cccd; 
     private String quanHe;
+    private int isDeleted;
 
     public NhanKhau() {
     }
@@ -78,5 +79,13 @@ public class NhanKhau {
 
     public void setQuanHe(String quanHe) {
         this.quanHe = quanHe;
+    }
+
+    public int getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(int isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }
