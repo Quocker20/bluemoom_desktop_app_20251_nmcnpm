@@ -68,24 +68,21 @@ public class HoKhauDAO {
      * @throws SQLException lỗi truy vấn
      */
     public boolean addHoKhauWithChuHo(HoKhau hk, NhanKhau chuHo) throws SQLException {
-        Connection conn = null;
-        PreparedStatement pstmtHk = null;
-        PreparedStatement pstmtNk = null;
-        boolean result = false;
+    logger.info("[HOKHAUDAO] Bắt đầu Transaction thêm Ho Khau + Chu Ho");
 
-        logger.info("[HOKHAUDAO] Bat dau Transaction them Ho Khau + Chu Ho");
+    String sqlHk = "INSERT INTO HO_KHAU (SoCanHo, TenChuHo, DienTich, SDT) VALUES (?, ?, ?, ?)";
+    String sqlNk = "INSERT INTO NHAN_KHAU (MaHo, HoTen, NgaySinh, GioiTinh, CCCD, QuanHe) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try {
-            conn = DatabaseConnector.getConnection();
-            if (conn == null)
-                throw new SQLException("Khong the ket noi CSDL");
+    try (Connection conn = DatabaseConnector.getConnection()) {
+        if (conn == null) {
+            throw new SQLException("Không thể kết nối CSDL");
+        }
 
-            // 1. Start Transaction
-            conn.setAutoCommit(false);
+        conn.setAutoCommit(false);
 
-            // 2. Insert HO_KHAU
-            String sqlHk = "INSERT INTO HO_KHAU (SoCanHo, TenChuHo, DienTich, SDT) VALUES (?, ?, ?, ?)";
-            pstmtHk = conn.prepareStatement(sqlHk, Statement.RETURN_GENERATED_KEYS);
+        // 2. Insert HO_KHAU
+        int newMaHo;
+        try (PreparedStatement pstmtHk = conn.prepareStatement(sqlHk, Statement.RETURN_GENERATED_KEYS)) {
             pstmtHk.setString(1, hk.getSoCanHo());
             pstmtHk.setString(2, hk.getTenChuHo());
             pstmtHk.setDouble(3, hk.getDienTich());
@@ -97,8 +94,6 @@ public class HoKhauDAO {
                 return false;
             }
 
-            // Lấy MaHo vừa sinh ra
-            int newMaHo = 0;
             try (ResultSet generatedKeys = pstmtHk.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     newMaHo = generatedKeys.getInt(1);
@@ -107,10 +102,10 @@ public class HoKhauDAO {
                     return false;
                 }
             }
+        }
 
-            // 3. Insert NHAN_KHAU (Chủ hộ)
-            String sqlNk = "INSERT INTO NHAN_KHAU (MaHo, HoTen, NgaySinh, GioiTinh, CCCD, QuanHe) VALUES (?, ?, ?, ?, ?, ?)";
-            pstmtNk = conn.prepareStatement(sqlNk);
+        // 3. Insert NHAN_KHAU (Chủ hộ)
+        try (PreparedStatement pstmtNk = conn.prepareStatement(sqlNk)) {
             pstmtNk.setInt(1, newMaHo);
             pstmtNk.setString(2, chuHo.getHoTen());
             pstmtNk.setDate(3, new java.sql.Date(chuHo.getNgaySinh().getTime()));
@@ -124,32 +119,18 @@ public class HoKhauDAO {
             pstmtNk.setString(6, AppConstants.QH_CHU_HO);
 
             pstmtNk.executeUpdate();
-
-            // 4. Commit
-            conn.commit();
-            result = true;
-            logger.info("[HOKHAUDAO] Transaction thanh cong");
-
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi Transaction", e);
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    logger.log(Level.SEVERE, "Loi rollback", ex);
-                }
-            }
-            throw e;
-        } finally {
-            if (pstmtHk != null)
-                pstmtHk.close();
-            if (pstmtNk != null)
-                pstmtNk.close();
-            if (conn != null)
-                conn.close();
         }
-        return result;
+
+        // 4. Commit
+        conn.commit();
+        logger.info("[HOKHAUDAO] Transaction thành công");
+        return true;
+
+    } catch (SQLException e) {
+        logger.log(Level.SEVERE, "[HOKHAUDAO] Lỗi Transaction", e);
+        throw e;
     }
+}
 
     /**
      * Cập nhật thông tin hộ khẩu
@@ -185,30 +166,40 @@ public class HoKhauDAO {
      * @return true nếu xóa thành công
      * @throws SQLException lỗi truy vấn
      */
-    public boolean softDelete(int maHo) throws SQLException {
-        String sql = "UPDATE HO_KHAU SET IsDeleted = 1 " +
-                "WHERE MaHo = ? " +
-                "AND NOT EXISTS ( " +
-                "SELECT 1 FROM CONG_NO WHERE CONG_NO.MaHo = HO_KHAU.MaHo )";
-        logger.log(Level.INFO, "[HOKHAUDAO] Bat dau thuc hien xoa mem ID: {0}", maHo);
+public boolean softDelete(int maHo) throws SQLException {
+    String sqlHoKhau = "UPDATE HO_KHAU SET IsDeleted = 1 WHERE MaHo = ?";
+    String sqlNhanKhau = "UPDATE NHAN_KHAU SET IsDeleted = 1 WHERE MaHo = ?";
 
-        try (Connection conn = DatabaseConnector.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, maHo);
+    try (Connection conn = DatabaseConnector.getConnection();
+         PreparedStatement pstmtHoKhau = conn.prepareStatement(sqlHoKhau);
+         PreparedStatement pstmtNhanKhau = conn.prepareStatement(sqlNhanKhau)) {
 
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows > 0) {
-                logger.log(Level.INFO, "[HOKHAUDAO] Xoa thanh cong ho khau ID: {0}", maHo);
-                return true;
-            } else {
-                logger.log(Level.WARNING, "[HOKHAUDAO] Khong the xoa (ID sai hoac con no): {0}", maHo);
-                return false;
-            }
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[HOKHAUDAO] Loi xoa mem", e);
-            throw e;
+        if (conn == null) throw new SQLException("Khong the ket noi CSDL");
+        conn.setAutoCommit(false);
+
+        pstmtHoKhau.setInt(1, maHo);
+        int affectedRowsHoKhau = pstmtHoKhau.executeUpdate();
+        if (affectedRowsHoKhau == 0) {
+            conn.rollback();
+            return false;
         }
+
+        pstmtNhanKhau.setInt(1, maHo);
+        int affectedRowsNhanKhau = pstmtNhanKhau.executeUpdate();
+        if (affectedRowsNhanKhau == 0) {
+            conn.rollback();
+            return false;
+        }
+
+        conn.commit();
+        logger.info("[HOKHAUDAO] Transaction thành công, HoKhau=" + affectedRowsHoKhau + ", NhanKhau=" + affectedRowsNhanKhau);
+        return true;
+
+    } catch (SQLException e) {
+        logger.log(Level.SEVERE, "[HOKHAUDAO] Lỗi Transaction", e);
+        throw e;
     }
+}
 
     /**
      * Kiểm tra số căn hộ đã tồn tại chưa
