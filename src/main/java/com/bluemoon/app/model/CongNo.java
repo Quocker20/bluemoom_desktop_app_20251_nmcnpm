@@ -4,16 +4,17 @@ public class CongNo {
     private int maCongNo;
     private int maHo;
     private int maKhoanPhi;
+    private double soTienPhaiDong;
+    private double soTienDaDong;
+    private int thang;
+    private int nam;
+    private int trangThai; // 0: Chưa xong, 1: Đã xong
 
     // Các trường hiển thị (DTO)
     private String tenKhoanPhi;
-    private String soCanHo; // [MỚI] Thêm trường này
-
-    private int thang;
-    private int nam;
-    private double soTienPhaiDong;
-    private double soTienDaDong;
-    private int trangThai; // 0: Chưa xong, 1: Đã xong
+    private String soCanHo; 
+       
+    
 
     public CongNo() {
     }

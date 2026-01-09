@@ -10,7 +10,7 @@ public class TamTruTamVang {
     private Date denNgay;
     private String lyDo;
 
-    // Trường hiển thị (không lưu trong bảng DB này)
+    // Trường hiển thị (DTO)
     private String hoTenNhanKhau;
 
     public TamTruTamVang() {
