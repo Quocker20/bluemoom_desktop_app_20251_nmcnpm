@@ -120,7 +120,7 @@ public class MainFrame extends JFrame {
         subPanelCuDan.setVisible(false);
 
         subPanelCuDan.add(createChildMenuItem("Quản lý Hộ khẩu", "/images/house.png"));
-        subPanelCuDan.add(createChildMenuItem("Quản lý Nhân khẩu", "/images/icon_resident.png")); 
+        subPanelCuDan.add(createChildMenuItem("Quản lý Nhân khẩu", "/images/icon_resident.png"));
         // [MOVED] Đã bỏ Quản lý Phương tiện ở đây
         subPanelCuDan.add(createChildMenuItem("Quản lý Biến động", "/images/icon_change.png"));
 
@@ -172,10 +172,10 @@ public class MainFrame extends JFrame {
 
         String roleName = currentUser != null ? currentUser.getVaiTro() : "Admin";
         String username = currentUser != null ? currentUser.getTenDangNhap() : "User";
-        
+
         JLabel lblText = new JLabel("Xin chào, " + roleName + " (" + username + ")");
         lblText.setFont(new Font("Inter", Font.BOLD, 16));
-        
+
         JLabel lblAvatar = new JLabel();
         lblAvatar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         URL avatarUrl = getClass().getResource("/images/avatar.png");
@@ -191,7 +191,7 @@ public class MainFrame extends JFrame {
         JMenuItem itemChangePass = new JMenuItem("Đổi mật khẩu");
         itemChangePass.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         itemChangePass.addActionListener(e -> {
-            updateActiveMenu(""); 
+            updateActiveMenu("");
             contentPanel.removeAll();
             contentPanel.add(new DoiMatKhauPanel(currentUser), BorderLayout.CENTER);
             contentPanel.revalidate();
@@ -322,7 +322,7 @@ public class MainFrame extends JFrame {
                 refreshDashboardData();
                 contentPanel.add(mainDashboardPanel, BorderLayout.CENTER);
                 break;
-            case "Quản lý Hộ khẩu": 
+            case "Quản lý Hộ khẩu":
                 if (userRole.equals("KeToan")) {
                     showAccessDenied();
                     break;
@@ -344,11 +344,14 @@ public class MainFrame extends JFrame {
                 contentPanel.add(new BienDongPanel(), BorderLayout.CENTER);
                 break;
             case "Quản lý Phương tiện":
-                // Module này ai cũng được vào, hoặc chặn kế toán nếu muốn
-                // if (userRole.equals("KeToan")) { showAccessDenied(); break; }
+
+                if (userRole.equals("KeToan")) {
+                    showAccessDenied();
+                    break;
+                }
                 contentPanel.add(new GuiXePanel(), BorderLayout.CENTER);
                 break;
-            case "Quản lý Công nợ": 
+            case "Quản lý Công nợ":
                 if (userRole.equals("ThuKy")) {
                     showAccessDenied();
                     break;
@@ -366,7 +369,7 @@ public class MainFrame extends JFrame {
                 if (userRole.equals("ThuKy")) {
                     showAccessDenied();
                     break;
-                }                
+                }
                 contentPanel.add(new GiaoDichPanel(), BorderLayout.CENTER);
                 break;
             case "Báo cáo & Thống kê":
@@ -441,7 +444,7 @@ public class MainFrame extends JFrame {
 
     private JButton createChildMenuItem(String text, String iconPath) {
         MenuButton btn = new MenuButton(text, iconPath, false);
-        btn.setBorder(new EmptyBorder(10, 50, 10, 0)); 
+        btn.setBorder(new EmptyBorder(10, 50, 10, 0));
         btn.setFont(new Font("Inter", Font.PLAIN, 18));
         btn.addActionListener(e -> handleMenuClick(text));
         menuButtons.put(text, btn);
