@@ -37,7 +37,8 @@ import com.bluemoon.app.controller.thongke.DashboardController;
 import com.bluemoon.app.model.User;
 import com.bluemoon.app.view.dancu.BienDongPanel;
 import com.bluemoon.app.view.dancu.HoKhauPanel;
-import com.bluemoon.app.view.dancu.NhanKhauPanel; // [NEW] Import panel Nhân khẩu
+import com.bluemoon.app.view.dancu.NhanKhauPanel;
+import com.bluemoon.app.view.guixe.GuiXePanel;
 import com.bluemoon.app.view.thongke.BaoCaoPanel;
 import com.bluemoon.app.view.thuphi.CauHinhPhiPanel;
 import com.bluemoon.app.view.thuphi.GiaoDichPanel;
@@ -50,10 +51,8 @@ public class MainFrame extends JFrame {
     private JPanel mainDashboardPanel;
     private Map<String, MenuButton> menuButtons = new HashMap<>();
 
-    // Controller cho Dashboard
     private final DashboardController dashboardController;
 
-    // Các Label hiển thị số liệu (Để cập nhật động)
     private JLabel lblValHoKhau, lblValNhanKhau, lblValTongThu, lblValCongNo;
 
     // Colors
@@ -66,7 +65,7 @@ public class MainFrame extends JFrame {
         this.currentUser = user;
         this.dashboardController = new DashboardController();
         initComponents();
-        refreshDashboardData(); // Load dữ liệu ngay khi mở
+        refreshDashboardData();
     }
 
     private void initComponents() {
@@ -118,13 +117,13 @@ public class MainFrame extends JFrame {
         JPanel subPanelCuDan = new JPanel();
         subPanelCuDan.setLayout(new BoxLayout(subPanelCuDan, BoxLayout.Y_AXIS));
         subPanelCuDan.setOpaque(false);
-        subPanelCuDan.setVisible(false); // Mặc định ẩn
+        subPanelCuDan.setVisible(false);
 
         subPanelCuDan.add(createChildMenuItem("Quản lý Hộ khẩu", "/images/house.png"));
         subPanelCuDan.add(createChildMenuItem("Quản lý Nhân khẩu", "/images/icon_resident.png")); 
+        // [MOVED] Đã bỏ Quản lý Phương tiện ở đây
         subPanelCuDan.add(createChildMenuItem("Quản lý Biến động", "/images/icon_change.png"));
 
-        // Sự kiện toggle
         btnCuDanParent.addActionListener(e -> {
             subPanelCuDan.setVisible(!subPanelCuDan.isVisible());
             sidebarPanel.revalidate();
@@ -138,13 +137,12 @@ public class MainFrame extends JFrame {
         JPanel subPanelThuPhi = new JPanel();
         subPanelThuPhi.setLayout(new BoxLayout(subPanelThuPhi, BoxLayout.Y_AXIS));
         subPanelThuPhi.setOpaque(false);
-        subPanelThuPhi.setVisible(false); // Mặc định ẩn
+        subPanelThuPhi.setVisible(false);
 
         subPanelThuPhi.add(createChildMenuItem("Quản lý Công nợ", "/images/debt.png"));
         subPanelThuPhi.add(createChildMenuItem("Cấu hình Phí", "/images/icon_settings.png"));
         subPanelThuPhi.add(createChildMenuItem("Lịch sử Giao dịch", "/images/transaction_history.png"));
 
-        // Sự kiện toggle
         btnThuPhiParent.addActionListener(e -> {
             subPanelThuPhi.setVisible(!subPanelThuPhi.isVisible());
             sidebarPanel.revalidate();
@@ -153,12 +151,16 @@ public class MainFrame extends JFrame {
         topSidebar.add(btnThuPhiParent);
         topSidebar.add(subPanelThuPhi);
 
-        // Các menu khác
+        // [NEW LOCATION] 3. QUẢN LÝ PHƯƠNG TIỆN (MENU RIÊNG)
+        // Dùng createMenuItem (Menu cha) thay vì createChildMenuItem
+        topSidebar.add(createMenuItem("Quản lý Phương tiện", "/images/car.png", false));
+
+        // 4. BÁO CÁO & THỐNG KÊ
         topSidebar.add(createMenuItem("Báo cáo & Thống kê", "/images/icon_report.png", false));
 
         sidebarPanel.add(topSidebar, BorderLayout.NORTH);
 
-        // 2. HEADER
+        // --- HEADER ---
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setPreferredSize(new Dimension(getWidth(), 80));
         headerPanel.setBackground(Color.WHITE);
@@ -186,7 +188,6 @@ public class MainFrame extends JFrame {
         }
 
         JPopupMenu userMenu = new JPopupMenu();
-        
         JMenuItem itemChangePass = new JMenuItem("Đổi mật khẩu");
         itemChangePass.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         itemChangePass.addActionListener(e -> {
@@ -227,10 +228,9 @@ public class MainFrame extends JFrame {
 
         userPanel.add(lblText);
         userPanel.add(lblAvatar);
-
         headerPanel.add(userPanel, BorderLayout.EAST);
 
-        // 3. BODY
+        // --- BODY ---
         contentPanel = new JPanel();
         contentPanel.setBackground(COL_MAIN_BG);
         contentPanel.setLayout(new BorderLayout());
@@ -239,7 +239,7 @@ public class MainFrame extends JFrame {
         mainDashboardPanel = createDashboardUI();
         contentPanel.add(mainDashboardPanel, BorderLayout.CENTER);
 
-        // 4. LẮP RÁP
+        // --- ASSEMBLE ---
         JPanel centerContainer = new JPanel(new BorderLayout());
         centerContainer.add(headerPanel, BorderLayout.NORTH);
         centerContainer.add(contentPanel, BorderLayout.CENTER);
@@ -329,9 +329,8 @@ public class MainFrame extends JFrame {
                 }
                 contentPanel.add(new HoKhauPanel(), BorderLayout.CENTER);
                 break;
-            // [NEW] Logic xử lý khi click menu Nhân khẩu
             case "Quản lý Nhân khẩu":
-                if (userRole.equals("KeToan")) { // Giữ logic chặn Kế toán giống Hộ khẩu
+                if (userRole.equals("KeToan")) {
                     showAccessDenied();
                     break;
                 }
@@ -343,6 +342,11 @@ public class MainFrame extends JFrame {
                     break;
                 }
                 contentPanel.add(new BienDongPanel(), BorderLayout.CENTER);
+                break;
+            case "Quản lý Phương tiện":
+                // Module này ai cũng được vào, hoặc chặn kế toán nếu muốn
+                // if (userRole.equals("KeToan")) { showAccessDenied(); break; }
+                contentPanel.add(new GuiXePanel(), BorderLayout.CENTER);
                 break;
             case "Quản lý Công nợ": 
                 if (userRole.equals("ThuKy")) {
@@ -435,21 +439,17 @@ public class MainFrame extends JFrame {
         }
     }
 
-    // Tạo menu con (Leaf node) - Căn lề trái nhiều hơn
     private JButton createChildMenuItem(String text, String iconPath) {
         MenuButton btn = new MenuButton(text, iconPath, false);
-        // Thụt lề cho menu con (50px)
         btn.setBorder(new EmptyBorder(10, 50, 10, 0)); 
-        btn.setFont(new Font("Inter", Font.PLAIN, 18)); // Font nhỏ hơn xíu
+        btn.setFont(new Font("Inter", Font.PLAIN, 18));
         btn.addActionListener(e -> handleMenuClick(text));
         menuButtons.put(text, btn);
         return btn;
     }
 
-    // Tạo menu cha (Parent node) - Chỉ có tác dụng xổ xuống
     private JButton createParentMenuButton(String text, String iconPath) {
         MenuButton btn = new MenuButton(text, iconPath, false);
-        // Có thể thêm icon mũi tên nhỏ nếu cần, ở đây giữ nguyên style
         return btn;
     }
 
