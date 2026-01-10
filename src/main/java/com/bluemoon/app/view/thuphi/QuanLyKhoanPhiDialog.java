@@ -43,8 +43,8 @@ public class QuanLyKhoanPhiDialog extends JDialog {
     private boolean isEditMode = false;
     private KhoanPhi currentKhoanPhi = null;
 
-    // [UPDATE] Chỉ giữ lại m2 và lần theo yêu cầu
-    private final String[] DON_VI_TINH = { "m2", "lần" };
+
+    private final String[] DON_VI_TINH = { "m2", "lần", "Phương tiện (Ô tô)", "Phương tiện (Xe đạp/Xe máy)" };
 
     public QuanLyKhoanPhiDialog(JFrame parentFrame, ThuPhiPanel parentPanel) {
         super(parentFrame, "Quản lý Khoản Thu", true);
@@ -185,7 +185,13 @@ public class QuanLyKhoanPhiDialog extends JDialog {
                         }
                     }
                     Calendar cal = Calendar.getInstance();
-                    controller.tinhPhiTuDongChoKhoanPhi(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR), kp);
+                    if (kp.getDonViTinh().equals("m2") || kp.getDonViTinh().equals("lần")) {
+                        controller.tinhPhiTuDongChoKhoanPhi(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR), kp);
+                    }
+                    else {
+                        controller.chotSoPhiGuiXe(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR));
+                    }
+                    
                 }
 
                 JOptionPane.showMessageDialog(this, "Lưu khoản thu thành công!");

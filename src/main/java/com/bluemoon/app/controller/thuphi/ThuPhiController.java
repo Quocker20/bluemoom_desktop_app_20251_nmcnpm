@@ -494,4 +494,37 @@ public class ThuPhiController {
             return null;
         }
     }
+
+    /**
+     * Hàm Controller riêng biệt: CHỈ tính phí gửi xe (Ô tô & Xe máy).
+     * Hàm này sẽ tìm tất cả các khoản phí có đơn vị là "Phương tiện..." và chạy tính toán.
+     */
+    public String chotSoPhiGuiXe(int thang, int nam) {
+        try {
+            List<KhoanPhi> listPhi = khoanPhiDAO.getAll(); // Lấy tất cả khoản phí đang active
+            int countOto = 0;
+            int countXeMay = 0;
+
+            for (KhoanPhi kp : listPhi) {
+                String donVi = kp.getDonViTinh().trim(); // Xóa khoảng trắng thừa cho chắc chắn
+
+                // 1. Xử lý Ô tô
+                if ("Phương tiện (Ô tô)".equalsIgnoreCase(donVi)) {
+                    int rows = congNoDAO.tinhPhiPhuongTien(thang, nam, kp.getMaKhoanPhi(), kp.getDonGia(), 1);
+                    countOto += rows;
+                } 
+                // 2. Xử lý Xe máy / Xe đạp
+                else if ("Phương tiện (Xe đạp/Xe máy)".equalsIgnoreCase(donVi)) {
+                    int rows = congNoDAO.tinhPhiPhuongTien(thang, nam, kp.getMaKhoanPhi(), kp.getDonGia(), 2);
+                    countXeMay += rows;
+                }
+            }
+            
+            return "Hoàn tất! Đã tạo công nợ cho " + countOto + " hộ gửi Ô tô và " + countXeMay + " hộ gửi Xe máy.";
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Lỗi hệ thống: " + e.getMessage();
+        }
+    }
 }

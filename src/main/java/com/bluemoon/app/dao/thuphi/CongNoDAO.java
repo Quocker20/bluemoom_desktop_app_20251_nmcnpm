@@ -270,4 +270,43 @@ public class CongNoDAO {
             throw e;
         }
     }
+
+    /**
+     * Hàm DAO riêng biệt để tính phí gửi xe.
+     * Logic: Tìm các hộ có xe đang gửi (TrangThai=1) thuộc loại xe chỉ định -> Đếm số lượng -> Nhân đơn giá -> Tạo nợ.
+     * * @param thang Tháng thu phí
+     * @param nam Năm thu phí
+     * @param maKhoanPhi ID của khoản phí trong bảng KHOAN_PHI
+     * @param donGia Giá tiền mỗi xe
+     * @param loaiXe 1 = Ô tô, 2 = Xe máy/Xe đạp
+     * @return Số bản ghi công nợ được tạo ra
+     */
+    public int tinhPhiPhuongTien(int thang, int nam, int maKhoanPhi, double donGia, int loaiXe) throws SQLException {
+        // Query: Insert vào CONG_NO lấy dữ liệu từ PHUONG_TIEN
+        String sql = "INSERT INTO CONG_NO (MaHo, MaKhoanPhi, SoTienPhaiDong, SoTienDaDong, Thang, Nam, TrangThai) " +
+                     "SELECT pt.MaHo, ?, (COUNT(pt.MaPhuongTien) * ?), 0, ?, ?, 0 " +
+                     "FROM PHUONG_TIEN pt " +
+                     "WHERE pt.LoaiXe = ? AND pt.TrangThai = 1 " + // Chỉ tính xe đang hoạt động
+                     "GROUP BY pt.MaHo " + 
+                     // Dòng dưới để tránh tạo trùng nếu đã có công nợ khoản này trong tháng rồi
+                     "HAVING NOT EXISTS (SELECT 1 FROM CONG_NO cn WHERE cn.MaHo = pt.MaHo AND cn.MaKhoanPhi = ? AND cn.Thang = ? AND cn.Nam = ?)";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+            // Set params cho phần SELECT & INSERT
+            pstmt.setInt(1, maKhoanPhi);
+            pstmt.setDouble(2, donGia);
+            pstmt.setInt(3, thang);
+            pstmt.setInt(4, nam);
+            pstmt.setInt(5, loaiXe); 
+            
+            // Set params cho phần CHECK EXISTS
+            pstmt.setInt(6, maKhoanPhi);
+            pstmt.setInt(7, thang);
+            pstmt.setInt(8, nam);
+            
+            return pstmt.executeUpdate();
+        }
+    }
 }
