@@ -31,7 +31,7 @@ public class QuanLyKhoanPhiDialog extends JDialog {
 
     private JTextField txtTenKhoan;
     private JTextField txtDonGia;
-    private JTextField txtDonVi;
+    private JComboBox<String> cbDonVi; 
     private JComboBox<String> cbLoaiPhi;
     private JButton btnSave;
     private JLabel lblTitle;
@@ -43,7 +43,9 @@ public class QuanLyKhoanPhiDialog extends JDialog {
     private boolean isEditMode = false;
     private KhoanPhi currentKhoanPhi = null;
 
-    // Constructor cho ThuPhiPanel
+    // [UPDATE] Chỉ giữ lại m2 và lần theo yêu cầu
+    private final String[] DON_VI_TINH = { "m2", "lần" };
+
     public QuanLyKhoanPhiDialog(JFrame parentFrame, ThuPhiPanel parentPanel) {
         super(parentFrame, "Quản lý Khoản Thu", true);
         this.parentThuPhi = parentPanel;
@@ -51,7 +53,6 @@ public class QuanLyKhoanPhiDialog extends JDialog {
         initComponents();
     }
 
-    // Constructor cho CauHinhPhiPanel
     public QuanLyKhoanPhiDialog(JFrame parentFrame, CauHinhPhiPanel parentPanel) {
         super(parentFrame, "Quản lý Khoản Thu", true);
         this.parentCauHinh = parentPanel;
@@ -85,8 +86,11 @@ public class QuanLyKhoanPhiDialog extends JDialog {
         cbLoaiPhi.addActionListener(e -> updateDonGiaVisibility());
         mainPanel.add(cbLoaiPhi);
 
-        addLabel(mainPanel, "Đơn vị tính (m2, hộ, lần) *", 145, 250);
-        txtDonVi = addTextField(mainPanel, 170, 260, 250);
+        addLabel(mainPanel, "Đơn vị tính *", 145, 250);
+        cbDonVi = new JComboBox<>(DON_VI_TINH);
+        cbDonVi.setBounds(250, 170, 260, 35);
+        cbDonVi.setBackground(Color.WHITE);
+        mainPanel.add(cbDonVi);
 
         addLabel(mainPanel, "Đơn giá (VNĐ/ĐVT) *", 225);
         txtDonGia = addTextField(mainPanel, 250, 470);
@@ -135,7 +139,7 @@ public class QuanLyKhoanPhiDialog extends JDialog {
         btnSave.setText("Lưu thay đổi");
         txtTenKhoan.setText(kp.getTenKhoanPhi());
         txtDonGia.setText(String.valueOf(kp.getDonGia()));
-        txtDonVi.setText(kp.getDonViTinh());
+        cbDonVi.setSelectedItem(kp.getDonViTinh());
         cbLoaiPhi.setSelectedIndex(kp.getLoaiPhi() == AppConstants.PHI_BAT_BUOC ? 0 : 1);
         updateDonGiaVisibility();
     }
@@ -143,11 +147,11 @@ public class QuanLyKhoanPhiDialog extends JDialog {
     private void handleSave() {
         try {
             String tenKhoan = txtTenKhoan.getText().trim();
-            String donVi = txtDonVi.getText().trim();
+            String donVi = (String) cbDonVi.getSelectedItem();
             String donGiaStr = txtDonGia.getText().trim();
             int loaiPhi = cbLoaiPhi.getSelectedIndex() == 0 ? AppConstants.PHI_BAT_BUOC : AppConstants.PHI_TU_NGUYEN;
 
-            if (tenKhoan.isEmpty() || donVi.isEmpty()
+            if (tenKhoan.isEmpty() || donVi == null || donVi.isEmpty()
                     || (loaiPhi == AppConstants.PHI_BAT_BUOC && donGiaStr.isEmpty())) {
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập đủ thông tin bắt buộc!", "Cảnh báo",
                         JOptionPane.WARNING_MESSAGE);
@@ -172,26 +176,20 @@ public class QuanLyKhoanPhiDialog extends JDialog {
             boolean success = isEditMode ? controller.updateKhoanPhi(kp) : controller.insertKhoanPhi(kp);
 
             if (success) {
-                // [LOGIC MỚI] Nếu thêm mới thành công & là phí bắt buộc -> Tính phí ngay cho
-                // tháng này
                 if (!isEditMode && loaiPhi == AppConstants.PHI_BAT_BUOC) {
-                    // Cần lấy lại ID của khoản phí vừa thêm (do ID tự tăng trong DB)
-                    // Cách đơn giản: Lấy danh sách về và tìm tên khớp
                     List<KhoanPhi> listAll = controller.getAllKhoanPhi();
                     for (KhoanPhi dbKp : listAll) {
                         if (dbKp.getTenKhoanPhi().equals(tenKhoan)) {
-                            kp.setMaKhoanPhi(dbKp.getMaKhoanPhi()); // Gán ID thật
+                            kp.setMaKhoanPhi(dbKp.getMaKhoanPhi());
                             break;
                         }
                     }
-                    // Gọi hàm tính phí
                     Calendar cal = Calendar.getInstance();
                     controller.tinhPhiTuDongChoKhoanPhi(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR), kp);
                 }
 
                 JOptionPane.showMessageDialog(this, "Lưu khoản thu thành công!");
 
-                // Refresh parent
                 if (parentThuPhi != null)
                     parentThuPhi.loadData();
                 if (parentCauHinh != null)
