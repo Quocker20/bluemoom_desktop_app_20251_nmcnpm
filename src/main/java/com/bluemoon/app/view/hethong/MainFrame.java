@@ -198,15 +198,15 @@ public class MainFrame extends JFrame {
             contentPanel.repaint();
         });
 
-        JMenuItem itemRegister = new JMenuItem("Đăng ký");
-        itemRegister.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        itemRegister.addActionListener(e -> {
-            updateActiveMenu("");
-            contentPanel.removeAll();
-            contentPanel.add(new DangKyPanel(), BorderLayout.CENTER);
-            contentPanel.revalidate();
-            contentPanel.repaint();
-        });
+        // JMenuItem itemRegister = new JMenuItem("Đăng ký");
+        // itemRegister.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        // itemRegister.addActionListener(e -> {
+        //     updateActiveMenu("");
+        //     contentPanel.removeAll();
+        //     contentPanel.add(new DangKyPanel(), BorderLayout.CENTER);
+        //     contentPanel.revalidate();
+        //     contentPanel.repaint();
+        // });
 
         JMenuItem itemLogout = new JMenuItem("Đăng xuất");
         itemLogout.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -216,7 +216,7 @@ public class MainFrame extends JFrame {
         });
 
         userMenu.add(itemChangePass);
-        userMenu.add(itemRegister);
+        // userMenu.add(itemRegister);
         userMenu.addSeparator();
         userMenu.add(itemLogout);
 
