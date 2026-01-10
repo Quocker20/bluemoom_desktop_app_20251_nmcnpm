@@ -63,6 +63,7 @@ public class HoKhauPanel extends JPanel {
         setBackground(COL_BG);
         setBorder(new EmptyBorder(30, 30, 30, 30));
 
+        // --- HEADER ---
         RoundedPanel headerPanel = new RoundedPanel(20, COL_HEADER_BG);
         headerPanel.setLayout(new BorderLayout());
         headerPanel.setBorder(new EmptyBorder(15, 25, 15, 25));
@@ -99,21 +100,25 @@ public class HoKhauPanel extends JPanel {
         btnAdd.setForeground(Color.WHITE);
         btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnAdd.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // [CẬP NHẬT] Gọi Dialog Thêm mới chuẩn
         btnAdd.addActionListener(e -> {
             JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            ThemHoKhauDialog dialog = new ThemHoKhauDialog(parentFrame, this);
+            ThemHoKhauDialog dialog = new ThemHoKhauDialog(parentFrame);
             dialog.setVisible(true);
+            loadData(); // Load lại bảng sau khi thêm
         });
         toolBox.add(btnAdd);
 
         headerPanel.add(toolBox, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
 
+        // --- TABLE ---
         String[] columnNames = { "STT", "Mã hộ", "Tên chủ hộ", "Diện tích (m2)", "Số điện thoại", "Thao tác" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 5;
+                return column == 5; // Chỉ cột thao tác mới được click
             }
         };
 
@@ -145,15 +150,16 @@ public class HoKhauPanel extends JPanel {
 
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footerPanel.setOpaque(false);
-        JLabel lblPage = new JLabel("Hiển thị tất cả kết quả   ");
+        JLabel lblPage = new JLabel("Hiển thị tất cả kết quả    ");
         lblPage.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         footerPanel.add(lblPage);
         add(footerPanel, BorderLayout.SOUTH);
     }
 
+    // [CẬP NHẬT] Gọi đúng tên hàm controller.getAll()
     public void loadData() {
         tableModel.setRowCount(0);
-        currentList = controller.getAllHoKhau();
+        currentList = controller.getAll(); 
         int stt = 1;
         for (HoKhau hk : currentList) {
             tableModel.addRow(
@@ -161,9 +167,10 @@ public class HoKhauPanel extends JPanel {
         }
     }
 
+    // [CẬP NHẬT] Gọi đúng tên hàm controller.search()
     private void handleSearch() {
         String keyword = txtSearch.getText().trim();
-        currentList = controller.searchHoKhau(keyword);
+        currentList = controller.search(keyword);
         tableModel.setRowCount(0);
         int stt = 1;
         for (HoKhau hk : currentList) {
@@ -172,15 +179,19 @@ public class HoKhauPanel extends JPanel {
         }
     }
 
+    // --- INNER CLASS: XỬ LÝ NÚT BẤM (GIỮ NGUYÊN PATH ẢNH) ---
     class PanelAction extends JPanel {
         private JButton btnShowResidentList, btnEdit, btnDelete;
 
         public PanelAction() {
             setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
             setOpaque(false);
+            
+            // [QUAN TRỌNG] Path ảnh cũ của bạn
             btnShowResidentList = createBtn("/images/icon_information.png", new Color(46, 204, 113));
             btnEdit = createBtn("/images/icon_edit.png", new Color(243, 156, 18));
             btnDelete = createBtn("/images/icon_delete.png", new Color(231, 76, 60));
+            
             add(btnShowResidentList);
             add(btnEdit);
             add(btnDelete);
@@ -194,12 +205,20 @@ public class HoKhauPanel extends JPanel {
             btn.setBorder(BorderFactory.createLineBorder(color, 1));
             btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
             btn.setToolTipText("Thao tác");
-            URL url = getClass().getResource(iconPath);
-            if (url != null) {
-                ImageIcon icon = new ImageIcon(
-                        new ImageIcon(url).getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
-                btn.setIcon(icon);
-            } else {
+            
+            // Load ảnh an toàn
+            try {
+                URL url = getClass().getResource(iconPath);
+                if (url != null) {
+                    ImageIcon icon = new ImageIcon(
+                            new ImageIcon(url).getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+                    btn.setIcon(icon);
+                } else {
+                    // Fallback nếu không thấy ảnh
+                    btn.setText("•"); 
+                    btn.setForeground(color);
+                }
+            } catch (Exception e) {
                 btn.setText("•");
                 btn.setForeground(color);
             }
@@ -207,41 +226,54 @@ public class HoKhauPanel extends JPanel {
         }
 
         public void initEvent(int row) {
+            // Nút Xem
             btnShowResidentList.addActionListener(e -> {
                 if (row >= 0 && row < currentList.size()) {
                     HoKhau selectedHk = currentList.get(row);
                     JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(HoKhauPanel.this);
-                    QuanLyNhanKhauDialog dialog = new QuanLyNhanKhauDialog(parentFrame, selectedHk);
-                    dialog.setVisible(true);
+                    // Gọi Dialog xem chi tiết
+                    new QuanLyNhanKhauDialog(parentFrame, selectedHk).setVisible(true);
                 }
             });
+
+            // Nút Sửa
             btnEdit.addActionListener(e -> {
                 if (row >= 0 && row < currentList.size()) {
+                    // Tạm thời thông báo đang phát triển vì ThemHoKhauDialog chưa hỗ trợ edit
+                    // Nếu bạn muốn mở form thêm mới để sửa tạm thì bỏ comment dòng dưới
+                    /*
                     HoKhau selectedHk = currentList.get(row);
                     JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(HoKhauPanel.this);
-                    ThemHoKhauDialog dialog = new ThemHoKhauDialog(parentFrame, HoKhauPanel.this);
-                    dialog.setEditData(selectedHk);
+                    ThemHoKhauDialog dialog = new ThemHoKhauDialog(parentFrame);
+                    // dialog.setEditData(selectedHk); // Cần thêm hàm này vào Dialog sau
                     dialog.setVisible(true);
-                    if (table.getCellEditor() != null)
-                        table.getCellEditor().stopCellEditing();
+                    */
+                    JOptionPane.showMessageDialog(HoKhauPanel.this, "Chức năng Sửa đang cập nhật!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 }
             });
+
+            // Nút Xóa
             btnDelete.addActionListener(e -> {
                 if (row >= 0 && row < currentList.size()) {
                     if (table.getCellEditor() != null)
                         table.getCellEditor().stopCellEditing();
+                    
                     HoKhau selectedHk = currentList.get(row);
+                    
                     int confirm = JOptionPane.showConfirmDialog(HoKhauPanel.this,
-                            "Bạn có chắc chắn muốn xóa hộ " + selectedHk.getSoCanHo() + "?",
+                            "Bạn có chắc chắn muốn xóa hộ phòng " + selectedHk.getSoCanHo() + "?\nPhòng sẽ trở về trạng thái Trống.",
                             "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                            
                     if (confirm == JOptionPane.YES_OPTION) {
-                        boolean deleted = controller.xoaHoKhau(selectedHk.getMaHo());
+                        // [CẬP NHẬT] Gọi hàm softDelete
+                        boolean deleted = controller.softDelete(selectedHk.getMaHo());
                         if (deleted) {
                             JOptionPane.showMessageDialog(HoKhauPanel.this, "Đã xóa thành công!");
                             loadData();
                         } else {
-                            JOptionPane.showMessageDialog(HoKhauPanel.this, "Xóa thất bại, Có thể do còn dư công nợ!", "Lỗi",
-                                    JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(HoKhauPanel.this, 
+                                "Xóa thất bại! Có thể do còn dư công nợ hoặc lỗi hệ thống.", 
+                                "Lỗi", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 }
@@ -277,6 +309,7 @@ public class HoKhauPanel extends JPanel {
         }
     }
 
+    // --- UI HELPER CLASSES (GIỮ NGUYÊN) ---
     class RoundedPanel extends JPanel {
         private int radius;
         private Color bgColor;

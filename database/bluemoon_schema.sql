@@ -1,108 +1,99 @@
--- =============================================
--- Script tạo CSDL cho Dự án BlueMoon (Desktop)
--- Phiên bản: 1.0
--- Hệ quản trị: MySQL
--- =============================================
-
--- 1. Tạo CSDL và Sử dụng
 DROP DATABASE IF EXISTS bluemoon_db;
 CREATE DATABASE bluemoon_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE bluemoon_db;
 
--- 2. Tạo bảng TAI_KHOAN (Admin users)
--- Lưu trữ thông tin đăng nhập của BQT
 CREATE TABLE TAI_KHOAN (
     MaTK INT AUTO_INCREMENT PRIMARY KEY,
     TenDangNhap VARCHAR(50) NOT NULL UNIQUE,
-    MatKhau VARCHAR(255) NOT NULL, -- Mật khẩu (nên được mã hóa MD5/SHA trong code Java)
-    VaiTro VARCHAR(20) NOT NULL -- 'KeToan', 'ThuKy', 'QuanLy'
+    MatKhau VARCHAR(255) NOT NULL,
+    VaiTro VARCHAR(20) NOT NULL
 );
 
--- 3. Tạo bảng HO_KHAU
--- Lưu trữ thông tin hộ gia đình
-CREATE TABLE HO_KHAU (
-    MaHo INT AUTO_INCREMENT PRIMARY KEY,
-    SoCanHo VARCHAR(20) NOT NULL UNIQUE, -- VD: A-101, B-205
-    TenChuHo VARCHAR(100) NOT NULL,
-    DienTich DOUBLE NOT NULL, -- Diện tích (m2) để tính phí dịch vụ
-    SDT VARCHAR(15),
-    NgayTao DATE DEFAULT (CURRENT_DATE),
-    IsDeleted TINYINT NOT NULL DEFAULT 0   -- 0 la van con, 1 la da xoa ho
-);
-
--- 4. Tạo bảng NHAN_KHAU
--- Lưu trữ thông tin thành viên trong hộ
-CREATE TABLE NHAN_KHAU (
-    MaNhanKhau INT AUTO_INCREMENT PRIMARY KEY,
-    MaHo INT NOT NULL,
-    HoTen VARCHAR(100) NOT NULL,
-    NgaySinh DATE NOT NULL,
-    GioiTinh VARCHAR(10) NOT NULL, -- 'Nam', 'Nu', 'Khac'
-    CCCD VARCHAR(20) UNIQUE, -- Có thể NULL (nếu là trẻ em chưa có CCCD)
-    QuanHe VARCHAR(50) NOT NULL, -- Quan hệ với chủ hộ (Vo, Con...)
-    IsDeleted TINYINT NOT NULL DEFAULT 0, -- 0 la van con, 1 la da xoa nhan khau
-    FOREIGN KEY (MaHo) REFERENCES HO_KHAU(MaHo) ON DELETE CASCADE
-);
-
--- 5. Tạo bảng TAM_TRU_TAM_VANG
--- Lưu trữ lịch sử biến động cư trú
-CREATE TABLE TAM_TRU_TAM_VANG (
-    MaTTTV INT AUTO_INCREMENT PRIMARY KEY,
-    MaNhanKhau INT NOT NULL,
-    LoaiHinh VARCHAR(20) NOT NULL, -- 'TamTru', 'TamVang'
-    TuNgay DATE NOT NULL,
-    DenNgay DATE,
-    LyDo VARCHAR(255),
-    FOREIGN KEY (MaNhanKhau) REFERENCES NHAN_KHAU(MaNhanKhau) ON DELETE CASCADE
-);
-
--- 6. Tạo bảng KHOAN_PHI (Danh mục phí)
--- Định nghĩa các loại phí và đơn giá
 CREATE TABLE KHOAN_PHI (
     MaKhoanPhi INT AUTO_INCREMENT PRIMARY KEY,
     TenKhoanPhi VARCHAR(100) NOT NULL,
-    DonGia DOUBLE DEFAULT 0, -- 0 nếu là khoản thu tự nguyện
-    DonViTinh VARCHAR(20), -- 'm2', 'ho', 'nguoi'
-    LoaiPhi TINYINT NOT NULL DEFAULT 0, -- 0: Bắt buộc, 1: Tự nguyện
-    TrangThai TINYINT NOT NULL DEFAULT 1 -- 0: Đã ngừng thu, 1: Còn thu
+    DonGia DOUBLE DEFAULT 0,
+    DonViTinh VARCHAR(20),
+    LoaiPhi INT DEFAULT 0,
+    TrangThai INT DEFAULT 1
 );
 
--- 7. Tạo bảng CONG_NO (Hóa đơn hàng tháng)
--- Lưu trữ công nợ của từng hộ cho từng loại phí
+CREATE TABLE CAN_HO (
+    MaCanHo INT AUTO_INCREMENT PRIMARY KEY,
+    SoCanHo VARCHAR(20) NOT NULL UNIQUE,
+    DienTich DOUBLE NOT NULL,
+    TrangThai INT DEFAULT 0
+);
+
+CREATE TABLE HO_KHAU (
+    MaHo INT AUTO_INCREMENT PRIMARY KEY,
+    SoCanHo VARCHAR(20) NOT NULL,
+    TenChuHo VARCHAR(100) NOT NULL,
+    SDT VARCHAR(15),
+    NgayTao DATE DEFAULT (CURRENT_DATE),
+    IsDeleted INT DEFAULT 0,
+    FOREIGN KEY (SoCanHo) REFERENCES CAN_HO(SoCanHo) ON UPDATE CASCADE
+);
+
+CREATE TABLE NHAN_KHAU (
+    MaNhanKhau INT AUTO_INCREMENT PRIMARY KEY,
+    MaHo INT,
+    HoTen VARCHAR(100) NOT NULL,
+    NgaySinh DATE,
+    GioiTinh VARCHAR(10),
+    CCCD VARCHAR(20),
+    QuanHe VARCHAR(30),
+    IsDeleted INT DEFAULT 0,
+    FOREIGN KEY (MaHo) REFERENCES HO_KHAU(MaHo)
+);
+
+CREATE TABLE TAM_TRU_TAM_VANG (
+    MaTTTV INT AUTO_INCREMENT PRIMARY KEY,
+    MaNhanKhau INT NOT NULL,
+    LoaiHinh VARCHAR(20) NOT NULL,
+    TuNgay DATE NOT NULL,
+    DenNgay DATE,
+    LyDo TEXT,
+    FOREIGN KEY (MaNhanKhau) REFERENCES NHAN_KHAU(MaNhanKhau)
+);
+
 CREATE TABLE CONG_NO (
     MaCongNo INT AUTO_INCREMENT PRIMARY KEY,
     MaHo INT NOT NULL,
     MaKhoanPhi INT NOT NULL,
     Thang INT NOT NULL,
     Nam INT NOT NULL,
-    SoTienPhaiDong DOUBLE NOT NULL, -- Tính toán từ Diện tích * Đơn giá (nếu là phí bắt buộc)
-    SoTienDaDong DOUBLE DEFAULT 0, -- Cập nhật khi có giao dịch nộp tiền
-    TrangThai TINYINT DEFAULT 0, -- 0: Chưa xong, 1: Đã xong
+    SoTienPhaiDong DOUBLE DEFAULT 0,
+    SoTienDaDong DOUBLE DEFAULT 0,
+    TrangThai INT DEFAULT 0,
     FOREIGN KEY (MaHo) REFERENCES HO_KHAU(MaHo),
     FOREIGN KEY (MaKhoanPhi) REFERENCES KHOAN_PHI(MaKhoanPhi)
 );
 
--- 8. Tạo bảng GIAO_DICH_NOP_TIEN (Lịch sử nộp)
--- Lưu vết chi tiết từng lần nộp tiền
 CREATE TABLE GIAO_DICH_NOP_TIEN (
     MaGiaoDich INT AUTO_INCREMENT PRIMARY KEY,
     MaHo INT NOT NULL,
     MaKhoanPhi INT NOT NULL,
-    NgayNop TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     SoTien DOUBLE NOT NULL,
+    NgayNop DATETIME DEFAULT CURRENT_TIMESTAMP,
     NguoiNop VARCHAR(100),
-    GhiChu VARCHAR(255),
+    GhiChu TEXT,
     FOREIGN KEY (MaHo) REFERENCES HO_KHAU(MaHo),
     FOREIGN KEY (MaKhoanPhi) REFERENCES KHOAN_PHI(MaKhoanPhi)
 );
 
-INSERT INTO TAI_KHOAN (TenDangNhap, MatKhau, VaiTro) VALUES
-('admin', '2830a50677ada5e2d715eab68e09c75500058060d3e77c2dd5ca095c143784c2', 'QuanLy'), 
-('ketoan', '2830a50677ada5e2d715eab68e09c75500058060d3e77c2dd5ca095c143784c2', 'KeToan'), 
-('thuky', '2830a50677ada5e2d715eab68e09c75500058060d3e77c2dd5ca095c143784c2', 'ThuKy'); 
+DELIMITER $$
+CREATE TRIGGER AfterInsertHoKhau AFTER INSERT ON HO_KHAU
+FOR EACH ROW
+BEGIN
+    UPDATE CAN_HO SET TrangThai = 1 WHERE SoCanHo = NEW.SoCanHo;
+END$$
 
-
-
-
-
-
+CREATE TRIGGER AfterSoftDeleteHoKhau AFTER UPDATE ON HO_KHAU
+FOR EACH ROW
+BEGIN
+    IF NEW.IsDeleted = 1 AND OLD.IsDeleted = 0 THEN
+        UPDATE CAN_HO SET TrangThai = 0 WHERE SoCanHo = NEW.SoCanHo;
+    END IF;
+END$$
+DELIMITER ; 

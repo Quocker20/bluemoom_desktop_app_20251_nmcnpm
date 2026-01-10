@@ -6,7 +6,7 @@ public class HoKhau {
     private int maHo;
     private String soCanHo;
     private String tenChuHo;
-    private double dienTich;
+    private double dienTich; // Vẫn giữ để hiển thị (lấy từ bảng CAN_HO)
     private String sdt;
     private Date ngayTao;
     private int isDeleted;
@@ -14,12 +14,22 @@ public class HoKhau {
     public HoKhau() {
     }
 
-    // Constructor dùng để thêm mới (không cần maHo và ngayTao)
-    public HoKhau(String soCanHo, String tenChuHo, double dienTich, String sdt) {
+    // [QUAN TRỌNG] Constructor này đã bỏ tham số 'dienTich'
+    public HoKhau(String soCanHo, String tenChuHo, String sdt) {
+        this.soCanHo = soCanHo;
+        this.tenChuHo = tenChuHo;
+        this.sdt = sdt;
+    }
+
+    // Constructor đầy đủ (dùng khi map dữ liệu từ DB lên)
+    public HoKhau(int maHo, String soCanHo, String tenChuHo, double dienTich, String sdt, Date ngayTao, int isDeleted) {
+        this.maHo = maHo;
         this.soCanHo = soCanHo;
         this.tenChuHo = tenChuHo;
         this.dienTich = dienTich;
         this.sdt = sdt;
+        this.ngayTao = ngayTao;
+        this.isDeleted = isDeleted;
     }
 
     public int getMaHo() {
@@ -68,11 +78,6 @@ public class HoKhau {
 
     public void setNgayTao(Date ngayTao) {
         this.ngayTao = ngayTao;
-    }
-
-    @Override
-    public String toString() {
-        return soCanHo + " - " + tenChuHo;
     }
 
     public int getIsDeleted() {
