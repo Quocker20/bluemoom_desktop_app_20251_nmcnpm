@@ -114,7 +114,7 @@ public class HoKhauPanel extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
 
         // --- TABLE ---
-        String[] columnNames = { "STT", "Mã hộ", "Tên chủ hộ", "Diện tích (m2)", "Số điện thoại", "Thao tác" };
+        String[] columnNames = { "STT", "Số căn hộ", "Tên chủ hộ", "Diện tích (m2)", "Số điện thoại", "Thao tác" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -179,7 +179,7 @@ public class HoKhauPanel extends JPanel {
         }
     }
 
-    // --- INNER CLASS: XỬ LÝ NÚT BẤM (GIỮ NGUYÊN PATH ẢNH) ---
+
     class PanelAction extends JPanel {
         private JButton btnShowResidentList, btnEdit, btnDelete;
 
@@ -236,23 +236,21 @@ public class HoKhauPanel extends JPanel {
                 }
             });
 
-            // Nút Sửa
+         
             btnEdit.addActionListener(e -> {
                 if (row >= 0 && row < currentList.size()) {
-                    // Tạm thời thông báo đang phát triển vì ThemHoKhauDialog chưa hỗ trợ edit
-                    // Nếu bạn muốn mở form thêm mới để sửa tạm thì bỏ comment dòng dưới
-                    /*
+                   
                     HoKhau selectedHk = currentList.get(row);
                     JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(HoKhauPanel.this);
                     ThemHoKhauDialog dialog = new ThemHoKhauDialog(parentFrame);
-                    // dialog.setEditData(selectedHk); // Cần thêm hàm này vào Dialog sau
+
                     dialog.setVisible(true);
-                    */
+                    
                     JOptionPane.showMessageDialog(HoKhauPanel.this, "Chức năng Sửa đang cập nhật!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 }
             });
 
-            // Nút Xóa
+           
             btnDelete.addActionListener(e -> {
                 if (row >= 0 && row < currentList.size()) {
                     if (table.getCellEditor() != null)
@@ -309,7 +307,7 @@ public class HoKhauPanel extends JPanel {
         }
     }
 
-    // --- UI HELPER CLASSES (GIỮ NGUYÊN) ---
+
     class RoundedPanel extends JPanel {
         private int radius;
         private Color bgColor;
