@@ -76,7 +76,7 @@ public class ResidencyRecord {
         return residentName;
     }
 
-    public void setResidentName(String hoTenNhanKhau) {
-        this.residentName = hoTenNhanKhau;
+    public void setResidentName(String residentName) {
+        this.residentName = residentName;
     }
 }
