@@ -40,7 +40,6 @@ import javax.swing.table.TableColumnModel;
 
 import com.bluemoon.app.controller.payment.BillingController;
 import com.bluemoon.app.model.Fee;
-import com.bluemoon.app.util.AppConstants;
 
 public class CauHinhPhiPanel extends JPanel {
     private JTable table;
@@ -158,7 +157,7 @@ public class CauHinhPhiPanel extends JPanel {
                     kp.getName(),
                     df.format(kp.getUnitPrice()),
                     kp.getUnit(),
-                    kp.getType() == AppConstants.PHI_BAT_BUOC ? "Bắt buộc" : "Tự nguyện",
+                    kp.getType(),
                     "" // Placeholder cho nút
             });
         }

@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import com.bluemoon.app.model.Household;
 import com.bluemoon.app.model.Resident;
+import com.bluemoon.app.util.AppConstants;
 import com.bluemoon.app.util.DatabaseConnector;
 
 /**
@@ -111,7 +112,7 @@ public class HouseholdDAO {
             pstmtNk.setDate(3, new java.sql.Date(owner.getDob().getTime()));
             pstmtNk.setString(4, owner.getGender());
             pstmtNk.setString(5, owner.getIdentityCard());
-            pstmtNk.setString(6, "Owner"); // Default relationship
+            pstmtNk.setString(6, AppConstants.QH_CHU_HO); // Default relationship
             pstmtNk.executeUpdate();
 
             conn.commit(); // Commit Transaction

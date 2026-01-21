@@ -24,7 +24,7 @@ public class AppConstants {
     public static final int PHI_TU_NGUYEN = 1;
 
     // Loại biến động
-    public static final String TAM_TRU = "TamTru";
-    public static final String TAM_VANG = "TamVang";
-    public static final String KHAI_TU = "KhaiTu";
+    public static final String TAM_TRU = "Tạm Trú";
+    public static final String TAM_VANG = "Tạm Vắng";
+
 }

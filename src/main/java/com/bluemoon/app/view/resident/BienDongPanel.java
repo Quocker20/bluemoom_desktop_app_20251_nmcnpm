@@ -195,9 +195,6 @@ public class BienDongPanel extends JPanel {
                 case "Tạm vắng":
                     loaiHinh = AppConstants.TAM_VANG;
                     break;
-                case "Khai tử":
-                    loaiHinh = AppConstants.KHAI_TU;
-                    break;
             }
             list = controller.getByType(loaiHinh);
         }
@@ -238,12 +235,7 @@ public class BienDongPanel extends JPanel {
                     : "Mã NK: " + item.getResidentId();
 
             String loaiHienThi = item.getType();
-            if (AppConstants.TAM_TRU.equalsIgnoreCase(loaiHienThi))
-                loaiHienThi = "Tạm trú";
-            else if (AppConstants.TAM_VANG.equalsIgnoreCase(loaiHienThi))
-                loaiHienThi = "Tạm vắng";
-            else if (AppConstants.KHAI_TU.equalsIgnoreCase(loaiHienThi))
-                loaiHienThi = "Khai tử";
+            
 
             tableModel.addRow(new Object[] {
                     stt++, item.getId(), tenHienThi, loaiHienThi,

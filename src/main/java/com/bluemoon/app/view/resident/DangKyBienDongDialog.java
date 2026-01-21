@@ -68,7 +68,7 @@ public class DangKyBienDongDialog extends JDialog {
         mainPanel.add(lblName);
 
         addLabel(mainPanel, "Loại biến động *", 90);
-        cbLoaiHinh = new JComboBox<>(new String[]{AppConstants.TAM_TRU, AppConstants.TAM_VANG, AppConstants.KHAI_TU});
+        cbLoaiHinh = new JComboBox<>(new String[]{AppConstants.TAM_TRU, AppConstants.TAM_VANG});
         cbLoaiHinh.setBounds(60, 115, 500, 35);
         cbLoaiHinh.setBackground(Color.WHITE);
         mainPanel.add(cbLoaiHinh);

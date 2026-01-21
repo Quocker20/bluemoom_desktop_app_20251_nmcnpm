@@ -93,6 +93,6 @@ public class Vehicle {
     }
 
     public String getVehicleTypeDisplay() {
-        return (this.type == 1) ? "Car" : "Motorbike/Bicycle";
+        return (this.type == 1) ? "Ô tô" : "Xe máy/Xe đạp";
     }
 }
