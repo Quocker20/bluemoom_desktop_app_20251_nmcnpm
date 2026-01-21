@@ -1,20 +1,4 @@
-Chào bạn Quốc Anh, dựa trên thông tin chi tiết và mã nguồn bạn cung cấp, đây là bản **README.md** hoàn chỉnh, chuyên nghiệp, sẵn sàng để bạn đưa lên GitHub cá nhân.
 
-Bản này tập trung vào thế mạnh **tư duy kiến trúc (Backend)** và **khả năng thích ứng công nghệ (AI-Workflow)** của bạn.
-
----
-
-### Hướng dẫn nhanh trước khi Commit:
-
-1. **Ảnh:** Tạo thư mục tên là `images` trong dự án của bạn (ngang hàng với `src`).
-2. **Copy:** Đổi tên file ảnh bạn gửi thành `dashboard.png` (MainFrame.png) và `report.png` (Report.png), rồi bỏ vào thư mục `images` đó.
-3. **File SQL:** Đảm bảo file `bluemoon_schema.sql` nằm đúng vị trí `src/main/resources/database/`.
-
----
-
-### Nội dung file `README.md`
-
-```markdown
 # 🏢 BlueMoon - Apartment Management System
 
 ![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
@@ -79,7 +63,7 @@ Tôi xây dựng Backend hoàn toàn thủ công (No Framework) để thể hi�
 ### 3. Tiện ích & Báo cáo
 * Quản lý bãi xe: Theo dõi phương tiện, biển số xe của từng hộ.
 * **Dashboard:** Biểu đồ trực quan về doanh thu và cơ cấu dân số (Vẽ thủ công bằng Graphics2D).
-* **Xuất Excel:** Trích xuất danh sách Tạm trú/Tạm vắng phục vụ báo cáo hành chính.
+* **Xuất Excel:** Trích xuất danh sách Tạm trú/Tạm vắng phục vụ báo cáo hành chính. 
 
 ---
 
@@ -160,4 +144,5 @@ Nếu bạn quan tâm đến dự án hoặc muốn trao đổi về quy trình 
 
 ```
 
+```
 ```
