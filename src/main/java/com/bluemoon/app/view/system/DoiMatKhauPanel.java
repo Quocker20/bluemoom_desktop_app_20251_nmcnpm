@@ -101,7 +101,7 @@ public class DoiMatKhauPanel extends JPanel {
         String newPass = new String(txtPassNew.getPassword());
         String confirmPass = new String(txtPassConfirm.getPassword());
 
-        String result = controller.doiMatKhau(currentUser, oldPass, newPass, confirmPass);
+        String result = controller.changePassword(currentUser, oldPass, newPass, confirmPass);
 
         if ("SUCCESS".equals(result)) {
             JOptionPane.showMessageDialog(this, "Đổi mật khẩu thành công!");

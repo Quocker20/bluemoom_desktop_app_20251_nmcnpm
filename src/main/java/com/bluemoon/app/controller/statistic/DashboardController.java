@@ -9,7 +9,8 @@ import java.util.logging.Logger;
 import com.bluemoon.app.dao.statistic.DashboardDAO;
 
 /**
- * Controller cho màn hình Dashboard (Trang chủ).
+ * Controller for the Main Dashboard.
+ * Handles summary data display for the home screen.
  */
 public class DashboardController {
 
@@ -22,76 +23,80 @@ public class DashboardController {
     }
 
     /**
-     * Lấy số lượng hộ gia đình.
-     * 
-     * @return int
+     * Get total number of households.
+     * * @return Total active households count.
      */
-    public int getSoLuongHo() {
+    public int getHouseholdCount() {
         try {
-            return dashboardDAO.getDemCuDan().getOrDefault("soHo", 0);
+            // DAO returns Map<String, Integer> with key "householdCount"
+            return dashboardDAO.getDemographics().getOrDefault("householdCount", 0);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[DashboardController] Loi getSoLuongHo", e);
+            logger.log(Level.SEVERE, "[DashboardController] Error in getHouseholdCount", e);
             return 0;
         }
     }
 
     /**
-     * Lấy số lượng nhân khẩu.
-     * 
-     * @return int
+     * Get total number of residents.
+     * * @return Total active residents count.
      */
-    public int getSoLuongNguoi() {
+    public int getResidentCount() {
         try {
-            return dashboardDAO.getDemCuDan().getOrDefault("soNguoi", 0);
+            // DAO returns Map<String, Integer> with key "residentCount"
+            return dashboardDAO.getDemographics().getOrDefault("residentCount", 0);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[DashboardController] Loi getSoLuongNguoi", e);
+            logger.log(Level.SEVERE, "[DashboardController] Error in getResidentCount", e);
             return 0;
         }
     }
 
     /**
-     * Lấy tổng thu của tháng hiện tại.
-     * 
-     * @return String chuỗi định dạng (VD: "500 K", "1.2 Tr")
+     * Get total revenue for the current month.
+     * * @return Formatted string (e.g., "500 K", "1.2 M").
      */
-    public String getTongThuThangNay() {
+    public String getCurrentMonthRevenue() {
         Calendar cal = Calendar.getInstance();
         try {
-            Map<String, Double> data = dashboardDAO.getTaiChinhThangNay(
+            // Month in Calendar is 0-indexed, so add 1
+            Map<String, Double> data = dashboardDAO.getMonthlyFinance(
                     cal.get(Calendar.MONTH) + 1,
                     cal.get(Calendar.YEAR));
-            return formatMoney(data.getOrDefault("tongThu", 0.0));
+            
+            return formatMoney(data.getOrDefault("revenue", 0.0));
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[DashboardController] Loi getTongThuThangNay", e);
+            logger.log(Level.SEVERE, "[DashboardController] Error in getCurrentMonthRevenue", e);
             return "0";
         }
     }
 
     /**
-     * Lấy tổng công nợ của tháng hiện tại.
-     * 
-     * @return String chuỗi định dạng
+     * Get total outstanding debt for the current month.
+     * * @return Formatted string.
      */
-    public String getCongNoThangNay() {
+    public String getCurrentMonthDebt() {
         Calendar cal = Calendar.getInstance();
         try {
-            Map<String, Double> data = dashboardDAO.getTaiChinhThangNay(
+            Map<String, Double> data = dashboardDAO.getMonthlyFinance(
                     cal.get(Calendar.MONTH) + 1,
                     cal.get(Calendar.YEAR));
-            return formatMoney(data.getOrDefault("congNo", 0.0));
+            
+            return formatMoney(data.getOrDefault("debt", 0.0));
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[DashboardController] Loi getCongNoThangNay", e);
+            logger.log(Level.SEVERE, "[DashboardController] Error in getCurrentMonthDebt", e);
             return "0";
         }
     }
 
+    /**
+     * Helper to format large numbers with suffixes (B, M, K).
+     */
     private String formatMoney(double amount) {
         if (amount >= 1_000_000_000) {
-            return String.format("%.1f Tỷ", amount / 1_000_000_000);
+            return String.format("%.1f B", amount / 1_000_000_000); // Billion (Tỷ)
         } else if (amount >= 1_000_000) {
-            return String.format("%.1f Tr", amount / 1_000_000);
+            return String.format("%.1f M", amount / 1_000_000); // Million (Triệu)
         } else if (amount >= 1_000) {
-            return String.format("%.0f K", amount / 1_000);
+            return String.format("%.0f K", amount / 1_000); // Thousand (Nghìn)
         } else {
             return String.format("%.0f", amount);
         }

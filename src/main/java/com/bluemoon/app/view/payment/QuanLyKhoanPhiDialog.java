@@ -23,7 +23,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.payment.ThuPhiController;
+import com.bluemoon.app.controller.payment.BillingController;
 import com.bluemoon.app.model.Fee;
 import com.bluemoon.app.util.AppConstants;
 
@@ -36,7 +36,7 @@ public class QuanLyKhoanPhiDialog extends JDialog {
     private JButton btnSave;
     private JLabel lblTitle;
 
-    private final ThuPhiController controller;
+    private final BillingController controller;
     private ThuPhiPanel parentThuPhi;
     private CauHinhPhiPanel parentCauHinh;
 
@@ -49,14 +49,14 @@ public class QuanLyKhoanPhiDialog extends JDialog {
     public QuanLyKhoanPhiDialog(JFrame parentFrame, ThuPhiPanel parentPanel) {
         super(parentFrame, "Quản lý Khoản Thu", true);
         this.parentThuPhi = parentPanel;
-        this.controller = new ThuPhiController();
+        this.controller = new BillingController();
         initComponents();
     }
 
     public QuanLyKhoanPhiDialog(JFrame parentFrame, CauHinhPhiPanel parentPanel) {
         super(parentFrame, "Quản lý Khoản Thu", true);
         this.parentCauHinh = parentPanel;
-        this.controller = new ThuPhiController();
+        this.controller = new BillingController();
         initComponents();
     }
 
@@ -173,11 +173,11 @@ public class QuanLyKhoanPhiDialog extends JDialog {
                 kp = new Fee(tenKhoan, donGia, donVi, loaiPhi);
             }
 
-            boolean success = isEditMode ? controller.updateKhoanPhi(kp) : controller.insertKhoanPhi(kp);
+            boolean success = isEditMode ? controller.updateFee(kp) : controller.addFee(kp);
 
             if (success) {
                 if (!isEditMode && loaiPhi == AppConstants.PHI_BAT_BUOC) {
-                    List<Fee> listAll = controller.getAllKhoanPhi();
+                    List<Fee> listAll = controller.getAllFees();
                     for (Fee dbKp : listAll) {
                         if (dbKp.getName().equals(tenKhoan)) {
                             kp.setId(dbKp.getId());
@@ -186,10 +186,10 @@ public class QuanLyKhoanPhiDialog extends JDialog {
                     }
                     Calendar cal = Calendar.getInstance();
                     if (kp.getUnit().equals("m2") || kp.getUnit().equals("lần")) {
-                        controller.tinhPhiTuDongChoKhoanPhi(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR), kp);
+                        controller.calculateFeeForNewType(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR), kp);
                     }
                     else {
-                        controller.chotSoPhiGuiXe(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR));
+                        controller.calculateVehicleFees(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR));
                     }
                     
                 }

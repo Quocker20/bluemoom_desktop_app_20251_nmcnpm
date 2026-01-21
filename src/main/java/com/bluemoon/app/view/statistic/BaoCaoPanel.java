@@ -30,7 +30,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import com.bluemoon.app.controller.statistic.BaoCaoController;
+import com.bluemoon.app.controller.statistic.ReportController;
 import com.bluemoon.app.model.Invoice;
 
 public class BaoCaoPanel extends JPanel {
@@ -45,11 +45,11 @@ public class BaoCaoPanel extends JPanel {
     private BarChartPanel barChart;
     private PieChartPanel pieChart;
 
-    private final BaoCaoController controller;
+    private final ReportController controller;
     private final Color COL_BG = new Color(245, 247, 250);
 
     public BaoCaoPanel() {
-        this.controller = new BaoCaoController();
+        this.controller = new ReportController();
         initComponents();
         loadData();
     }
@@ -157,15 +157,15 @@ public class BaoCaoPanel extends JPanel {
         int nam = (int) cbNam.getSelectedItem();
 
         // 1. Load Data cho Bar Chart
-        Map<String, Double> taiChinh = controller.getThongKeTaiChinh(thang, nam);
+        Map<String, Double> taiChinh = controller.getFinancialStats(thang, nam);
         barChart.setData(taiChinh.getOrDefault("TongThu", 0.0), taiChinh.getOrDefault("TongNo", 0.0));
 
         // 2. Load Data cho Pie Chart
-        Map<String, Integer> danCu = controller.getThongKeDanCu();
+        Map<String, Integer> danCu = controller.getDemographicStats();
         pieChart.setData(danCu);
 
         // 3. Load Data cho Table (Vẫn giữ hiển thị công nợ trên giao diện)
-        List<Invoice> list = controller.getChiTietBaoCao(thang, nam);
+        List<Invoice> list = controller.getReportDetails(thang, nam);
         tableModel.setRowCount(0);
         DecimalFormat df = new DecimalFormat("#,###");
         int stt = 1;
@@ -176,7 +176,7 @@ public class BaoCaoPanel extends JPanel {
                     cn.getRoomNumber(),
                     cn.getFeeName(),
                     df.format(cn.getAmountDue()),
-                    df.format(cn.getSoTienDaDong()),
+                    df.format(cn.getAmountPaid()),
                     df.format(cn.getRemainingAmount()),
                     trangThai
             });
@@ -201,7 +201,7 @@ public class BaoCaoPanel extends JPanel {
             }
             
             // Gọi Controller xử lý
-            boolean success = controller.xuatBaoCaoTamTruTamVang(fileToSave);
+            boolean success = controller.exportResidencyReport(fileToSave);
             
             if (success) {
                 JOptionPane.showMessageDialog(this, 

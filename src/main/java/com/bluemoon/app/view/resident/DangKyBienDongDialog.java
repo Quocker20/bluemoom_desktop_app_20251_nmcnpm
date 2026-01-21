@@ -24,7 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.resident.TamTruTamVangController;
+import com.bluemoon.app.controller.resident.ResidencyRecordController;
 import com.bluemoon.app.model.ResidencyRecord;
 import com.bluemoon.app.model.Resident;
 import com.bluemoon.app.util.AppConstants;
@@ -35,13 +35,13 @@ public class DangKyBienDongDialog extends JDialog {
     private JTextField txtTuNgay, txtDenNgay;
     private JTextArea txtLyDo;
     private JButton btnSave, btnCancel;
-    private TamTruTamVangController controller;
+    private ResidencyRecordController controller;
     private Resident nhanKhau; 
 
     public DangKyBienDongDialog(JFrame parentFrame, Resident nhanKhau) {
         super(parentFrame, "Đăng ký Biến động", true);
         this.nhanKhau = nhanKhau;
-        this.controller = new TamTruTamVangController();
+        this.controller = new ResidencyRecordController();
         initComponents();
     }
 
@@ -143,7 +143,7 @@ public class DangKyBienDongDialog extends JDialog {
                 }
             }
             ResidencyRecord tttv = new ResidencyRecord(nhanKhau.getId(), loai, tuNgay, denNgay, lyDo);
-            if (controller.addTamTruTamVang(tttv)) {
+            if (controller.add(tttv)) {
                 JOptionPane.showMessageDialog(this, "Đăng ký thành công!");
                 dispose();
             } else {

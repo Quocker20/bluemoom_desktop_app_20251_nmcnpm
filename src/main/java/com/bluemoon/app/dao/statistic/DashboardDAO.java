@@ -11,77 +11,83 @@ import java.util.logging.Logger;
 
 import com.bluemoon.app.util.DatabaseConnector;
 
+/**
+ * DAO for Dashboard widgets and summary data.
+ */
 public class DashboardDAO {
 
     private static final Logger logger = Logger.getLogger(DashboardDAO.class.getName());
 
     /**
-     * Lấy thống kê cơ bản: Số hộ, Số nhân khẩu
-     * 
-     * @return Map chứa key "soHo", "soNguoi"
-     * @throws SQLException lỗi truy vấn
+     * Get basic demographics: Count of Households and Residents.
+     *
+     * @return Map containing keys "householdCount" and "residentCount".
+     * @throws SQLException If a database access error occurs.
      */
-    public Map<String, Integer> getDemCuDan() throws SQLException {
+    public Map<String, Integer> getDemographics() throws SQLException {
         Map<String, Integer> map = new HashMap<>();
-        String sqlHo = "SELECT COUNT(*) FROM HO_KHAU WHERE IsDeleted = 0";
-        String sqlNguoi = "SELECT COUNT(*) FROM NHAN_KHAU";
+        String sqlHouseholds = "SELECT COUNT(*) FROM households WHERE is_deleted = 0";
+        String sqlResidents = "SELECT COUNT(*) FROM residents WHERE is_deleted = 0";
 
-        logger.info("[DASHBOARD] Lay thong ke dan cu");
+        logger.info("[DashboardDAO] Fetching demographic counts");
 
         try (Connection conn = DatabaseConnector.getConnection()) {
-            // Đếm hộ
-            try (PreparedStatement pst = conn.prepareStatement(sqlHo);
-                    ResultSet rs = pst.executeQuery()) {
-                if (rs.next())
-                    map.put("soHo", rs.getInt(1));
+            // Count Households
+            try (PreparedStatement pst = conn.prepareStatement(sqlHouseholds);
+                 ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    map.put("householdCount", rs.getInt(1));
+                }
             }
-            // Đếm người
-            try (PreparedStatement pst = conn.prepareStatement(sqlNguoi);
-                    ResultSet rs = pst.executeQuery()) {
-                if (rs.next())
-                    map.put("soNguoi", rs.getInt(1));
+            // Count Residents
+            try (PreparedStatement pst = conn.prepareStatement(sqlResidents);
+                 ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    map.put("residentCount", rs.getInt(1));
+                }
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[DASHBOARD] Loi lay thong ke dan cu", e);
+            logger.log(Level.SEVERE, "[DashboardDAO] Error in getDemographics", e);
             throw e;
         }
         return map;
     }
 
     /**
-     * Lấy thống kê tài chính theo tháng chỉ định
-     * 
-     * @param thang Tháng
-     * @param nam   Năm
-     * @return Map chứa key "tongThu", "congNo"
-     * @throws SQLException lỗi truy vấn
+     * Get financial summary for the current (or specific) month.
+     *
+     * @param month The month.
+     * @param year  The year.
+     * @return Map containing keys "revenue" and "debt".
+     * @throws SQLException If a database access error occurs.
      */
-    public Map<String, Double> getTaiChinhThangNay(int thang, int nam) throws SQLException {
+    public Map<String, Double> getMonthlyFinance(int month, int year) throws SQLException {
         Map<String, Double> map = new HashMap<>();
+        // Revenue: Sum of payments made in this month
+        // Debt: Sum of (Due - Paid) for invoices of this month
         String sql = "SELECT " +
-                "(SELECT COALESCE(SUM(SoTien), 0) FROM GIAO_DICH_NOP_TIEN WHERE MONTH(NgayNop) = ? AND YEAR(NgayNop) = ?) as TongThu, "
-                +
-                "(SELECT COALESCE(SUM(SoTienPhaiDong - SoTienDaDong), 0) FROM CONG_NO WHERE Thang = ? AND Nam = ?) as CongNo";
+                "(SELECT COALESCE(SUM(amount), 0) FROM payments WHERE MONTH(payment_date) = ? AND YEAR(payment_date) = ?) as revenue, " +
+                "(SELECT COALESCE(SUM(amount_due - amount_paid), 0) FROM invoices WHERE month = ? AND year = ?) as debt";
 
-        logger.log(Level.INFO, "[DASHBOARD] Lay thong ke tai chinh thang {0}/{1}", new Object[] { thang, nam });
+        logger.log(Level.INFO, "[DashboardDAO] Fetching monthly finance for {0}/{1}", new Object[]{month, year});
 
         try (Connection conn = DatabaseConnector.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql)) {
+             PreparedStatement pst = conn.prepareStatement(sql)) {
 
-            pst.setInt(1, thang);
-            pst.setInt(2, nam);
-            pst.setInt(3, thang);
-            pst.setInt(4, nam);
+            pst.setInt(1, month);
+            pst.setInt(2, year);
+            pst.setInt(3, month);
+            pst.setInt(4, year);
 
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    map.put("tongThu", rs.getDouble("TongThu"));
-                    double no = rs.getDouble("CongNo");
-                    map.put("congNo", no < 0 ? 0 : no);
+                    map.put("revenue", rs.getDouble("revenue"));
+                    double debt = rs.getDouble("debt");
+                    map.put("debt", debt < 0 ? 0 : debt);
                 }
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[DASHBOARD] Loi lay thong ke tai chinh", e);
+            logger.log(Level.SEVERE, "[DashboardDAO] Error in getMonthlyFinance", e);
             throw e;
         }
         return map;

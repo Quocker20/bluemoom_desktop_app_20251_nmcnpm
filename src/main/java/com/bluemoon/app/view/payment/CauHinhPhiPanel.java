@@ -38,14 +38,14 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.payment.ThuPhiController;
+import com.bluemoon.app.controller.payment.BillingController;
 import com.bluemoon.app.model.Fee;
 import com.bluemoon.app.util.AppConstants;
 
 public class CauHinhPhiPanel extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
-    private ThuPhiController controller;
+    private BillingController controller;
     private JTextField txtSearch;
     private List<Fee> currentList;
 
@@ -55,7 +55,7 @@ public class CauHinhPhiPanel extends JPanel {
     private final Color COL_TABLE_HEADER = new Color(217, 217, 217);
 
     public CauHinhPhiPanel() {
-        controller = new ThuPhiController();
+        controller = new BillingController();
         initComponents();
         loadData("");
     }
@@ -148,7 +148,7 @@ public class CauHinhPhiPanel extends JPanel {
 
     public void loadData(String keyword) {
         tableModel.setRowCount(0);
-        currentList = controller.getListKhoanPhi(keyword);
+        currentList = controller.searchFees(keyword);
         DecimalFormat df = new DecimalFormat("#,###");
 
         int stt = 1;
@@ -228,7 +228,7 @@ public class CauHinhPhiPanel extends JPanel {
                 if (row >= 0 && row < currentList.size()) {
                     Fee selected = currentList.get(row);
                     // Check xem có công nợ chưa để cảnh báo
-                    boolean isInUse = controller.checkKhoanPhiDangSuDung(selected.getId());
+                    boolean isInUse = controller.isFeeTypeInUse(selected.getId());
                     if (isInUse) {
                         int confirm = JOptionPane.showConfirmDialog(CauHinhPhiPanel.this,
                                 "Khoản phí này ĐÃ CÓ người đóng tiền/ghi nợ.\nViệc sửa giá tiền sẽ không ảnh hưởng công nợ cũ, nhưng sẽ áp dụng cho đợt mới.\nBạn có chắc chắn muốn sửa?",
@@ -249,7 +249,7 @@ public class CauHinhPhiPanel extends JPanel {
                     Fee selected = currentList.get(row);
 
                     // [LOGIC CHECK CÔNG NỢ]
-                    boolean isInUse = controller.checkKhoanPhiDangSuDung(selected.getId());
+                    boolean isInUse = controller.isFeeTypeInUse(selected.getId());
                     if (isInUse) {
                         JOptionPane.showMessageDialog(CauHinhPhiPanel.this,
                                 "KHÔNG THỂ XÓA!\nKhoản phí này đã phát sinh dữ liệu công nợ trong hệ thống.",
@@ -262,7 +262,7 @@ public class CauHinhPhiPanel extends JPanel {
                             "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
 
                     if (confirm == JOptionPane.YES_OPTION) {
-                        if (controller.disableKhoanPhi(selected.getId())) {
+                        if (controller.deleteFee(selected.getId())) {
                             JOptionPane.showMessageDialog(CauHinhPhiPanel.this, "Đã xóa thành công!");
                             loadData(txtSearch.getText());
                         } else {

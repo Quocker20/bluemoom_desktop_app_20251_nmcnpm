@@ -37,8 +37,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.resident.HoKhauController;
-import com.bluemoon.app.controller.resident.NhanKhauController;
+import com.bluemoon.app.controller.resident.HouseholdController;
+import com.bluemoon.app.controller.resident.ResidentController;
 import com.bluemoon.app.model.Household;
 import com.bluemoon.app.model.Resident;
 
@@ -46,8 +46,8 @@ public class NhanKhauPanel extends JPanel {
 
     private JTable table;
     private DefaultTableModel tableModel;
-    private NhanKhauController nkController;
-    private HoKhauController hkController;
+    private ResidentController nkController;
+    private HouseholdController hkController;
     private JTextField txtSearch;
     private List<Resident> currentList;
 
@@ -57,8 +57,8 @@ public class NhanKhauPanel extends JPanel {
     private final Color COL_TABLE_HEADER = new Color(217, 217, 217);
 
     public NhanKhauPanel() {
-        this.nkController = new NhanKhauController();
-        this.hkController = new HoKhauController();
+        this.nkController = new ResidentController();
+        this.hkController = new HouseholdController();
         initComponents();
         loadData();
     }
@@ -170,7 +170,7 @@ public class NhanKhauPanel extends JPanel {
 
     public void loadData() {
         tableModel.setRowCount(0);
-        currentList = nkController.getAllNhanKhau();
+        currentList = nkController.getAll();
         int stt = 1;
         for (Resident nk : currentList) {
             Household hk = hkController.getById(nk.getHouseholdId());
@@ -189,7 +189,7 @@ public class NhanKhauPanel extends JPanel {
 
     private void handleSearch() {
         String keyword = txtSearch.getText().trim();
-        currentList = nkController.searchNhanKhau(keyword);
+        currentList = nkController.search(keyword);
         tableModel.setRowCount(0);
         int stt = 1;
         for (Resident nk : currentList) {
@@ -277,7 +277,7 @@ public class NhanKhauPanel extends JPanel {
                             "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
                     if (confirm == JOptionPane.YES_OPTION) {
-                        boolean deleted = nkController.deleteNhanKhau(selectedNk.getId());
+                        boolean deleted = nkController.delete(selectedNk.getId());
                         if (deleted) {
                             JOptionPane.showMessageDialog(NhanKhauPanel.this, "Đã xóa thành công!");
                             loadData(); // Reload lại bảng

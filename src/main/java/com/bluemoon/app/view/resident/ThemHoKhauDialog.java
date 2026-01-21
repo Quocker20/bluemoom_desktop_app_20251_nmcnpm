@@ -25,8 +25,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.resident.HoKhauController;
-import com.bluemoon.app.dao.resident.CanHoDAO;
+import com.bluemoon.app.controller.resident.HouseholdController;
+import com.bluemoon.app.dao.resident.ApartmentDAO;
 import com.bluemoon.app.model.Apartment;
 import com.bluemoon.app.model.Household;
 import com.bluemoon.app.model.Resident;
@@ -40,16 +40,16 @@ public class ThemHoKhauDialog extends JDialog {
     private JComboBox<String> cbGioiTinh;
 
     private JButton btnSave, btnCancel;
-    private HoKhauController controller;
-    private CanHoDAO canHoDAO;
+    private HouseholdController controller;
+    private ApartmentDAO ApartmentDAO;
 
     private final Color COL_PRIMARY = new Color(52, 152, 219);
     private final Color COL_SECONDARY = new Color(149, 165, 166);
 
     public ThemHoKhauDialog(JFrame parent) {
         super(parent, "Thêm Hộ Khẩu Mới", true);
-        this.controller = new HoKhauController();
-        this.canHoDAO = new CanHoDAO(); 
+        this.controller = new HouseholdController();
+        this.ApartmentDAO = new ApartmentDAO(); 
         
         setSize(550, 650);
         setLocationRelativeTo(parent);
@@ -146,7 +146,7 @@ public class ThemHoKhauDialog extends JDialog {
 
     private void loadDanhSachPhongTrong() {
         try {
-            List<Apartment> list = canHoDAO.getDanhSachPhongTrong();
+            List<Apartment> list = ApartmentDAO.getVacantApartments();
             DefaultComboBoxModel<Apartment> model = new DefaultComboBoxModel<>();
             for (Apartment ch : list) {
                 model.addElement(ch);
@@ -199,7 +199,7 @@ public class ThemHoKhauDialog extends JDialog {
             chuHo.setRelationship(AppConstants.QH_CHU_HO);
 
             // [SỬA LỖI]: Gọi đúng tên phương thức như bạn yêu cầu
-            if (controller.addHoKhauWithChuHo(hk, chuHo)) {
+            if (controller.addHouseholdWithOwner(hk, chuHo)) {
                 JOptionPane.showMessageDialog(this, "Thêm mới thành công!");
                 dispose(); 
             } else {

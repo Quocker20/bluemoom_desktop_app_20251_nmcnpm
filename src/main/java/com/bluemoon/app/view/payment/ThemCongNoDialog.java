@@ -23,7 +23,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.payment.ThuPhiController;
+import com.bluemoon.app.controller.payment.BillingController;
 import com.bluemoon.app.model.Fee;
 
 public class ThemCongNoDialog extends JDialog {
@@ -32,7 +32,7 @@ public class ThemCongNoDialog extends JDialog {
     private JComboBox<Fee> cbKhoanPhi;
     private JButton btnSave, btnCancel;
 
-    private final ThuPhiController controller;
+    private final BillingController controller;
     private final ThuPhiPanel parentPanel;
     private final int thang, nam;
 
@@ -41,7 +41,7 @@ public class ThemCongNoDialog extends JDialog {
         this.parentPanel = parentPanel;
         this.thang = thang;
         this.nam = nam;
-        this.controller = new ThuPhiController();
+        this.controller = new BillingController();
         initComponents();
     }
 
@@ -102,7 +102,7 @@ public class ThemCongNoDialog extends JDialog {
     }
 
     private void loadComboBoxData() {
-        List<Fee> list = controller.getAllKhoanPhi();
+        List<Fee> list = controller.getAllFees();
         for (Fee kp : list) {
             cbKhoanPhi.addItem(kp); // KhoanPhi đã có toString() trả về tên
         }
@@ -117,7 +117,7 @@ public class ThemCongNoDialog extends JDialog {
             return;
         }
 
-        String result = controller.themCongNoDonLe(soCanHo, selectedPhi, thang, nam);
+        String result = controller.addSingleInvoice(soCanHo, selectedPhi, thang, nam);
 
         if ("SUCCESS".equals(result)) {
             JOptionPane.showMessageDialog(this, "Thêm thành công!");

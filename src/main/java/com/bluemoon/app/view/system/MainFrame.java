@@ -250,13 +250,13 @@ public class MainFrame extends JFrame {
 
     private void refreshDashboardData() {
         if (lblValHoKhau != null)
-            lblValHoKhau.setText(String.valueOf(dashboardController.getSoLuongHo()));
+            lblValHoKhau.setText(String.valueOf(dashboardController.getHouseholdCount()));
         if (lblValNhanKhau != null)
-            lblValNhanKhau.setText(String.valueOf(dashboardController.getSoLuongNguoi()));
+            lblValNhanKhau.setText(String.valueOf(dashboardController.getResidentCount()));
         if (lblValTongThu != null)
-            lblValTongThu.setText(dashboardController.getTongThuThangNay());
+            lblValTongThu.setText(dashboardController.getCurrentMonthRevenue());
         if (lblValCongNo != null)
-            lblValCongNo.setText(dashboardController.getCongNoThangNay());
+            lblValCongNo.setText(dashboardController.getCurrentMonthDebt());
     }
 
     private JPanel createDashboardUI() {

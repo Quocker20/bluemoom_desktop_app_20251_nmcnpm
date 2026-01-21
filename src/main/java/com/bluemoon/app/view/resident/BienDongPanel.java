@@ -31,7 +31,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.resident.TamTruTamVangController;
+import com.bluemoon.app.controller.resident.ResidencyRecordController;
 import com.bluemoon.app.model.ResidencyRecord;
 import com.bluemoon.app.util.AppConstants;
 
@@ -41,7 +41,7 @@ public class BienDongPanel extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cbFilter;
-    private TamTruTamVangController controller;
+    private ResidencyRecordController controller;
     
     JButton btnCleanup = new JButton("Dọn dẹp");
 
@@ -50,7 +50,7 @@ public class BienDongPanel extends JPanel {
     private final Color COL_TABLE_HEADER = new Color(217, 217, 217);
 
     public BienDongPanel() {
-        this.controller = new TamTruTamVangController();
+        this.controller = new ResidencyRecordController();
         initComponents();
         loadData();
     }
@@ -178,14 +178,14 @@ public class BienDongPanel extends JPanel {
     }
 
     public void loadData() {
-        updateTable(controller.getAllTamTruTamVang());
+        updateTable(controller.getAll());
     }
 
     private void handleFilter() {
         String selected = (String) cbFilter.getSelectedItem();
         List<ResidencyRecord> list;
         if (selected == null || selected.equals("Tất cả")) {
-            list = controller.getAllTamTruTamVang();
+            list = controller.getAll();
         } else {
             String loaiHinh = "";
             switch (selected) {
@@ -199,7 +199,7 @@ public class BienDongPanel extends JPanel {
                     loaiHinh = AppConstants.KHAI_TU;
                     break;
             }
-            list = controller.getByLoaiHinh(loaiHinh);
+            list = controller.getByType(loaiHinh);
         }
         updateTable(list);
         txtSearch.setText("");
@@ -221,10 +221,10 @@ public class BienDongPanel extends JPanel {
         String keyword = txtSearch.getText().trim();
         List<ResidencyRecord> list;
         if (keyword.isEmpty()) {
-            list = controller.getAllTamTruTamVang();
+            list = controller.getAll();
             cbFilter.setSelectedIndex(0);
         } else {
-            list = controller.getByHoTen(keyword);
+            list = controller.getByResidentName(keyword);
         }
         updateTable(list);
     }
@@ -330,7 +330,7 @@ public class BienDongPanel extends JPanel {
             
             // 2. Thao tác nặng (DAO) chạy trong luồng nền
             // Nó chạy ngay sau khi lệnh hiển thị dialog được đẩy lên EDT.
-            Boolean result = controller.deleteExpiredRecordsToday();
+            Boolean result = controller.deleteExpired();
             
             // 3. Đóng dialog ngay sau khi tác vụ nền xong, để giải phóng EDT
             SwingUtilities.invokeLater(() -> {

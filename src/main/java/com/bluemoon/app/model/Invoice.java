@@ -101,7 +101,7 @@ public class Invoice {
         this.amountDue = amountDue;
     }
 
-    public double getSoTienDaDong() {
+    public double getAmountPaid() {
         return amountPaid;
     }
 

@@ -26,9 +26,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.payment.GiaoDichController;
-import com.bluemoon.app.controller.payment.ThuPhiController;
-import com.bluemoon.app.controller.resident.HoKhauController;
+import com.bluemoon.app.controller.payment.BillingController;
+import com.bluemoon.app.controller.payment.PaymentHistoryController;
+import com.bluemoon.app.controller.resident.HouseholdController;
 import com.bluemoon.app.model.Fee;
 import com.bluemoon.app.model.Payment;
 
@@ -39,18 +39,18 @@ public class GiaoDichPanel extends JPanel {
     private JTextField txtSearch;
 
     // Controllers
-    private final GiaoDichController gdController;
-    private final HoKhauController hkController;
-    private final ThuPhiController tpController; // Để lấy tên khoản phí
+    private final PaymentHistoryController gdController;
+    private final HouseholdController hkController;
+    private final BillingController tpController; // Để lấy tên khoản phí
 
     private final Color COL_BG = new Color(245, 247, 250);
     private final Color COL_HEADER_BG = Color.WHITE;
     private final Color COL_TABLE_HEADER = new Color(217, 217, 217);
 
     public GiaoDichPanel() {
-        this.gdController = new GiaoDichController();
-        this.hkController = new HoKhauController();
-        this.tpController = new ThuPhiController();
+        this.gdController = new PaymentHistoryController();
+        this.hkController = new HouseholdController();
+        this.tpController = new BillingController();
 
         initComponents();
         loadData();
@@ -145,9 +145,9 @@ public class GiaoDichPanel extends JPanel {
         List<Payment> list = null;
 
         if (keyword.isEmpty()) {
-            list = gdController.getAll();
+            list = gdController.getAllPayments();
         } else {
-            list = gdController.getAllBySoCanHo(keyword);
+            list = gdController.getPaymentsByRoomNumber(keyword);
         }
 
         if (list == null) {
@@ -159,7 +159,7 @@ public class GiaoDichPanel extends JPanel {
         int stt = 1;
 
         // Cache danh sách khoản phí để đỡ query nhiều lần (Simple Optimization)
-        List<Fee> listPhi = tpController.getAllKhoanPhi();
+        List<Fee> listPhi = tpController.getAllFees();
 
         for (Payment gd : list) {
             // Mapping ID -> Name
@@ -169,7 +169,7 @@ public class GiaoDichPanel extends JPanel {
             String tenKhoanPhi = "N/A";
             // Tìm trong list cache
             for (Fee kp : listPhi) {
-                if (kp.getId() == gd.getFeeId()) {
+                if (kp.getId() == gd.getFeeTypeId()) {
                     tenKhoanPhi = kp.getName();
                     break;
                 }

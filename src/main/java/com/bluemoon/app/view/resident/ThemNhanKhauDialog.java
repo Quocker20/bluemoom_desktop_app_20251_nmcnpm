@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.resident.NhanKhauController;
+import com.bluemoon.app.controller.resident.ResidentController;
 import com.bluemoon.app.model.Household;
 import com.bluemoon.app.model.Resident;
 import com.bluemoon.app.util.AppConstants;
@@ -34,7 +34,7 @@ public class ThemNhanKhauDialog extends JDialog {
     private JButton btnSave;
     private JLabel lblTitle;
 
-    private NhanKhauController controller;
+    private ResidentController controller;
     
     // Biến để xác định màn hình cha gọi dialog này
     private QuanLyNhanKhauDialog parentDialog; 
@@ -50,7 +50,7 @@ public class ThemNhanKhauDialog extends JDialog {
         super(parentFrame, "Thông tin Nhân khẩu", true);
         this.parentDialog = parentDialog;
         this.hoKhauHienTai = hoKhau;
-        this.controller = new NhanKhauController();
+        this.controller = new ResidentController();
         initComponents();
     }
 
@@ -59,7 +59,7 @@ public class ThemNhanKhauDialog extends JDialog {
         super(parentFrame, "Thông tin Nhân khẩu", true);
         this.nhanKhauPanel = nhanKhauPanel;
         this.hoKhauHienTai = hoKhau; // Lưu ý: Khi Sửa thì hoKhau này không được null
-        this.controller = new NhanKhauController();
+        this.controller = new ResidentController();
         initComponents();
     }
 
@@ -166,7 +166,7 @@ public class ThemNhanKhauDialog extends JDialog {
                 currentNK.setRelationship(quanHe);
                 currentNK.setIdentityCard(cccd);
                 
-                if (controller.updateNhanKhau(currentNK)) {
+                if (controller.update(currentNK)) {
                     JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
                     
                     // [FIX] Cập nhật lại màn hình cha tương ứng
@@ -185,7 +185,7 @@ public class ThemNhanKhauDialog extends JDialog {
                 }
                 
                 Resident nk = new Resident(hoKhauHienTai.getId(), hoTen, ngaySinh, gioiTinh, cccd, quanHe);
-                if (controller.addNhanKhau(nk)) {
+                if (controller.add(nk)) {
                     JOptionPane.showMessageDialog(this, "Thêm mới thành công!");
                     
                     // [FIX] Cập nhật lại màn hình cha tương ứng

@@ -25,14 +25,14 @@ import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import com.bluemoon.app.controller.resident.NhanKhauController;
+import com.bluemoon.app.controller.resident.ResidentController;
 import com.bluemoon.app.model.Household;
 import com.bluemoon.app.model.Resident;
 
 public class QuanLyNhanKhauDialog extends JDialog {
 
     private Household hoKhau;
-    private NhanKhauController controller;
+    private ResidentController controller;
     private JTable table;
     private DefaultTableModel tableModel;
     private List<Resident> currentList;
@@ -40,7 +40,7 @@ public class QuanLyNhanKhauDialog extends JDialog {
     public QuanLyNhanKhauDialog(JFrame parent, Household hoKhau) {
         super(parent, "Quản lý Nhân khẩu - Hộ: " + hoKhau.getRoomNumber(), true);
         this.hoKhau = hoKhau;
-        this.controller = new NhanKhauController();
+        this.controller = new ResidentController();
         initComponents();
         loadData();
     }
@@ -110,7 +110,7 @@ public class QuanLyNhanKhauDialog extends JDialog {
 
     public void loadData() {
         tableModel.setRowCount(0);
-        currentList = controller.getNhanKhauByHoKhau(hoKhau.getId());
+        currentList = controller.getByHouseholdId(hoKhau.getId());
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
         int stt = 1;
@@ -161,7 +161,7 @@ public class QuanLyNhanKhauDialog extends JDialog {
             "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
             
         if (confirm == JOptionPane.YES_OPTION) {
-            if (controller.deleteNhanKhau(selectedNK.getId())) {
+            if (controller.delete(selectedNK.getId())) {
                 JOptionPane.showMessageDialog(this, "Đã xóa thành công!");
                 loadData();
             } else {

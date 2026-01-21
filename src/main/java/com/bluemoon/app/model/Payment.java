@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 public class Payment {
     private int id;
     private int householdId;
-    private int feeId;
+    private int feeTypeId;
 
     private Timestamp paymentDate;
 
@@ -26,7 +26,7 @@ public class Payment {
             String note) {
         this.id = maGiaoDich;
         this.householdId = maHo;
-        this.feeId = maKhoanPhi;
+        this.feeTypeId = maKhoanPhi;
         this.paymentDate = paymentDate;
         this.amount = amount;
         this.payerName = payerName;
@@ -36,7 +36,7 @@ public class Payment {
     // Constructor ngắn (dùng khi tạo giao dịch mới)
     public Payment(int householdId, int feeId, double amount, String payerName, String note) {
         this.householdId = householdId;
-        this.feeId = feeId;
+        this.feeTypeId = feeId;
         this.amount = amount;
         this.payerName = payerName;
         this.note = note;
@@ -69,12 +69,12 @@ public class Payment {
         this.householdId = householdId;
     }
 
-    public int getFeeId() {
-        return feeId;
+    public int getFeeTypeId() {
+        return feeTypeId;
     }
 
-    public void setFeeId(int feeId) {
-        this.feeId = feeId;
+    public void setFeeTypeId(int feeId) {
+        this.feeTypeId = feeId;
     }
 
     public double getAmount() {

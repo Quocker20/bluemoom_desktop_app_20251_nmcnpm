@@ -25,8 +25,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.resident.HoKhauController;
-import com.bluemoon.app.controller.vehicle.PhuongTienController;
+import com.bluemoon.app.controller.resident.HouseholdController;
+import com.bluemoon.app.controller.vehicle.VehicleController;
 import com.bluemoon.app.model.Household;
 import com.bluemoon.app.model.Vehicle;
 
@@ -38,9 +38,9 @@ public class ThemPhuongTienDialog extends JDialog {
     
     private JButton btnSave, btnCancel;
     private JLabel lblTitle;
-    
-    private final PhuongTienController ptController;
-    private final HoKhauController hkController;
+
+    private final VehicleController ptController;
+    private final HouseholdController hkController;
     private final GuiXePanel parentPanel;
 
     // [EDIT MODE] Biến cờ và dữ liệu cũ
@@ -53,8 +53,8 @@ public class ThemPhuongTienDialog extends JDialog {
     public ThemPhuongTienDialog(JFrame parentFrame, GuiXePanel parentPanel) {
         super(parentFrame, "Thêm Phương Tiện Mới", true);
         this.parentPanel = parentPanel;
-        this.ptController = new PhuongTienController();
-        this.hkController = new HoKhauController();
+        this.ptController = new VehicleController();
+        this.hkController = new HouseholdController();
 
         setSize(500, 450);
         setLocationRelativeTo(parentFrame);
@@ -193,7 +193,7 @@ public class ThemPhuongTienDialog extends JDialog {
             }
             
             // Nếu đổi biển số -> check trùng
-            if (ptController.isBienSoExist(bienSoMoi)) {
+            if (ptController.exists(bienSoMoi)) {
                 JOptionPane.showMessageDialog(this, "Biển số " + bienSoMoi + " đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -201,7 +201,7 @@ public class ThemPhuongTienDialog extends JDialog {
             // Cập nhật object
             currentPhuongTien.setLicensePlate(bienSoMoi);
             
-            boolean success = ptController.updatePhuongTien(currentPhuongTien);
+            boolean success = ptController.update(currentPhuongTien);
             if (success) {
                 JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
                 if (parentPanel != null) parentPanel.loadData();
@@ -226,7 +226,7 @@ public class ThemPhuongTienDialog extends JDialog {
             pt.setType(loaiXeValue);
             pt.setStatus(1);
 
-            int result = ptController.addPhuongTien(pt);
+            int result = ptController.add(pt);
 
             if (result == 1) {
                 JOptionPane.showMessageDialog(this, "Thêm thành công!");

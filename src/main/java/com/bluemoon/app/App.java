@@ -6,7 +6,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import com.bluemoon.app.controller.resident.TamTruTamVangController;
+import com.bluemoon.app.controller.resident.ResidencyRecordController;
 import com.bluemoon.app.util.DatabaseConnector;
 import com.bluemoon.app.view.system.LoginFrame;
 
@@ -62,8 +62,8 @@ public class App {
             System.out.println("Bắt đầu dọn dẹp Tạm trú/Tạm vắng hết hạn trong luồng nền...");
 
             try {
-                TamTruTamVangController controller = new TamTruTamVangController();
-                boolean success = controller.deleteExpiredRecordsToday();
+                ResidencyRecordController controller = new ResidencyRecordController();
+                boolean success = controller.deleteExpired();
 
                 if (success) {
                     System.out.println("Dọn dẹp CSDL thành công: Đã xóa các hồ sơ hết hạn.");

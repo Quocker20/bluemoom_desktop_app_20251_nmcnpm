@@ -36,14 +36,14 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.resident.HoKhauController;
+import com.bluemoon.app.controller.resident.HouseholdController;
 import com.bluemoon.app.model.Household;
 
 public class HoKhauPanel extends JPanel {
 
     private JTable table;
     private DefaultTableModel tableModel;
-    private HoKhauController controller;
+    private HouseholdController controller;
     private JTextField txtSearch;
     private List<Household> currentList;
 
@@ -53,7 +53,7 @@ public class HoKhauPanel extends JPanel {
     private final Color COL_TABLE_HEADER = new Color(217, 217, 217);
 
     public HoKhauPanel() {
-        this.controller = new HoKhauController();
+        this.controller = new HouseholdController();
         initComponents();
         loadData();
     }
@@ -264,7 +264,7 @@ public class HoKhauPanel extends JPanel {
                             
                     if (confirm == JOptionPane.YES_OPTION) {
                         // [CẬP NHẬT] Gọi hàm softDelete
-                        boolean deleted = controller.softDelete(selectedHk.getId());
+                        boolean deleted = controller.delete(selectedHk.getId());
                         if (deleted) {
                             JOptionPane.showMessageDialog(HoKhauPanel.this, "Đã xóa thành công!");
                             loadData();

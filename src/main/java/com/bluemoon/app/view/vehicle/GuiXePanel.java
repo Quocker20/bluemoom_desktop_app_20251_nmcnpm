@@ -36,14 +36,14 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.vehicle.PhuongTienController;
+import com.bluemoon.app.controller.vehicle.VehicleController;
 import com.bluemoon.app.model.Vehicle;
 
 public class GuiXePanel extends JPanel {
 
     private JTable table;
     private DefaultTableModel tableModel;
-    private PhuongTienController controller;
+    private VehicleController controller;
     private JTextField txtSearch;
     private List<Vehicle> currentList;
 
@@ -53,7 +53,7 @@ public class GuiXePanel extends JPanel {
     private final Color COL_TABLE_HEADER = new Color(217, 217, 217);
 
     public GuiXePanel() {
-        this.controller = new PhuongTienController();
+        this.controller = new VehicleController();
         initComponents();
         loadData();
     }
@@ -157,7 +157,7 @@ public class GuiXePanel extends JPanel {
 
     public void loadData() {
         tableModel.setRowCount(0);
-        currentList = controller.getAllPhuongTien();
+        currentList = controller.getAll();
         int stt = 1;
         for (Vehicle pt : currentList) {
             tableModel.addRow(new Object[] { 
@@ -173,7 +173,7 @@ public class GuiXePanel extends JPanel {
 
     private void handleSearch() {
         String keyword = txtSearch.getText().trim();
-        currentList = controller.searchPhuongTien(keyword);
+        currentList = controller.search(keyword);
         tableModel.setRowCount(0);
         int stt = 1;
         for (Vehicle pt : currentList) {
@@ -260,7 +260,7 @@ public class GuiXePanel extends JPanel {
                             "Xác nhận hủy gửi", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                             
                     if (confirm == JOptionPane.YES_OPTION) {
-                        boolean deleted = controller.deletePhuongTien(selectedPt.getLicensePlate());
+                        boolean deleted = controller.delete(selectedPt.getId());
                         if (deleted) {
                             JOptionPane.showMessageDialog(GuiXePanel.this, "Đã hủy gửi xe thành công!");
                             loadData();

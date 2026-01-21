@@ -11,104 +11,77 @@ import com.bluemoon.app.model.User;
 import com.bluemoon.app.util.DatabaseConnector;
 import com.bluemoon.app.util.SecurityUtil;
 
+/**
+ * Data Access Object for managing System Users.
+ * Handles authentication, registration, and password updates for the 'users' table.
+ */
 public class UserDAO {
 
     private static final Logger logger = Logger.getLogger(UserDAO.class.getName());
 
     /**
-     * Kiểm tra đăng nhập
-     * 
-     * @param username Tên đăng nhập
-     * @param password Mật khẩu
-     * @return User object hoặc null nếu sai
-     * @throws SQLException lỗi truy vấn
+     * Authenticates a user based on username and password.
+     *
+     * @param username The username to check.
+     * @param password The raw password to check.
+     * @return A {@link User} object if credentials are valid, otherwise {@code null}.
+     * @throws SQLException If a database access error occurs.
      */
     public User checkLogin(String username, String password) throws SQLException {
         User user = null;
-        String sql = "SELECT * FROM TAI_KHOAN WHERE TenDangNhap = ? AND MatKhau = ?";
-        logger.info("[USERDAO] Kiem tra dang nhap cho user: " + username);
+        // Updated table: users, columns: username, password
+        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        logger.log(Level.INFO, "[UserDAO] Checking login for user: {0}", username);
 
         try (Connection conn = DatabaseConnector.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            if (conn == null)
-                throw new SQLException("Khong the ket noi Database");
+            if (conn == null) {
+                throw new SQLException("Cannot connect to Database");
+            }
 
             pstmt.setString(1, username);
+            // Hash the input password to match the stored hash
             String hashedPassword = SecurityUtil.hashPassword(password);
             pstmt.setString(2, hashedPassword);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     user = new User();
-                    user.setId(rs.getInt("MaTK"));
-                    user.setUsername(rs.getString("TenDangNhap"));
-                    user.setPassword(rs.getString("MatKhau"));
-                    user.setRole(rs.getString("VaiTro"));
+                    user.setId(rs.getInt("id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setPassword(rs.getString("password"));
+                    user.setRole(rs.getString("role"));
                 }
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[USERDAO] Loi checkLogin", e);
+            logger.log(Level.SEVERE, "[UserDAO] Error in checkLogin", e);
             throw e;
         }
         return user;
     }
 
     /**
-     * Cập nhật mật khẩu
-     * 
-     * @param userId          ID tài khoản
-     * @param newPasswordHash Mật khẩu mới đã mã hóa
-     * @return true nếu thành công
-     * @throws SQLException lỗi truy vấn
+     * Updates the password for a specific user.
+     *
+     * @param userId          The ID of the user.
+     * @param newPasswordHash The new password (already hashed).
+     * @return {@code true} if the update was successful, {@code false} otherwise.
+     * @throws SQLException If a database access error occurs.
      */
     public boolean changePassword(int userId, String newPasswordHash) throws SQLException {
-        String sql = "UPDATE TAI_KHOAN SET MatKhau = ? WHERE MaTK = ?";
-        logger.info("[USERDAO] Doi mat khau cho User ID: " + userId);
+        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        logger.log(Level.INFO, "[UserDAO] Changing password for User ID: {0}", userId);
 
         try (Connection conn = DatabaseConnector.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, newPasswordHash);
             pstmt.setInt(2, userId);
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[USERDAO] Loi changePassword", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Dang ky User moi
-     * @param username
-     * @param password
-     * @param userRole
-     * @return
-     * @throws Exception
-     */
-    public boolean registerUser(String username, String password, String userRole) throws SQLException {
-        String sql = "INSERT INTO TAI_KHOAN (TenDangNhap, MatKhau, VaiTro) VALUES (?, ?, ?)";
-        logger.info("[USERDAO] Bat dau dang ky tai khoan moi voi vai tro: " + userRole);
-
-        try (Connection conn = DatabaseConnector.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, username);
-            String hashedPassword = SecurityUtil.hashPassword(password);
-            pstmt.setString(2, hashedPassword);
-            pstmt.setString(3, userRole);
-
-            int affectedRows = pstmt.executeUpdate();
-
-            if(affectedRows > 0) {
-                logger.info("[USERDAO] Dang ky User moi thanh cong");
-                
-                return true;
-            } else {
-                return false;
-            }
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[USERDAO] Loi dang ky User: ", e);
+            logger.log(Level.SEVERE, "[UserDAO] Error in changePassword", e);
             throw e;
         }
     }

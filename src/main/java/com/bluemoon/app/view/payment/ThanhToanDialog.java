@@ -25,7 +25,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
 
-import com.bluemoon.app.controller.payment.ThuPhiController;
+import com.bluemoon.app.controller.payment.BillingController;
 import com.bluemoon.app.model.Invoice;
 
 public class ThanhToanDialog extends JDialog {
@@ -35,7 +35,7 @@ public class ThanhToanDialog extends JDialog {
     private JComboBox<String> cbHinhThuc;
     private JTextArea txtGhiChu;
     private JButton btnConfirm;
-    private ThuPhiController controller;
+    private BillingController controller;
     private ThuPhiPanel parentPanel;
     private Invoice congNo; 
 
@@ -43,7 +43,7 @@ public class ThanhToanDialog extends JDialog {
         super(parentFrame, "Ghi nhận thanh toán", true);
         this.parentPanel = parentPanel;
         this.congNo = congNo;
-        this.controller = new ThuPhiController();
+        this.controller = new BillingController();
         initComponents();
     }
 
@@ -172,14 +172,14 @@ public class ThanhToanDialog extends JDialog {
 
             String fullGhiChu = hinhThuc + (ghiChu.isEmpty() ? "" : " - " + ghiChu);
 
-            boolean success = controller.thanhToan(congNo.getId(), soTien, nguoiNop, fullGhiChu);
+            boolean success = controller.processPayment(congNo.getId(), soTien, nguoiNop, fullGhiChu);
 
             if (success) {
                 JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
-                congNo = controller.getCongNoById(congNo.getId());
+                congNo = controller.getInvoiceById(congNo.getId());
                 
                 if (congNo.getStatus() == 1) {
-                    controller.deleteCongNoById(congNo.getId());
+                    controller.deleteInvoice(congNo.getId());
                 }
                 parentPanel.loadData(); 
                 dispose();

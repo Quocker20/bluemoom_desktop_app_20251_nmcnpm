@@ -39,14 +39,14 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import com.bluemoon.app.controller.payment.ThuPhiController;
+import com.bluemoon.app.controller.payment.BillingController;
 import com.bluemoon.app.model.Invoice;
 
 public class ThuPhiPanel extends JPanel {
 
     private JTable table;
     private DefaultTableModel tableModel;
-    private final ThuPhiController Controller;
+    private final BillingController Controller;
 
     private JTextField txtSearch;
     private List<Invoice> currentList;
@@ -64,7 +64,7 @@ public class ThuPhiPanel extends JPanel {
 
     public ThuPhiPanel() {
         // [QUAN TRỌNG] Khởi tạo Controller để tránh lỗi NullPointerException
-        this.Controller = new ThuPhiController();
+        this.Controller = new BillingController();
 
         Calendar cal = Calendar.getInstance();
         this.currentMonth = cal.get(Calendar.MONTH) + 1;
@@ -129,7 +129,7 @@ public class ThuPhiPanel extends JPanel {
                     "Bạn có chắc muốn tạo công nợ cho TOÀN BỘ hộ dân tháng " + currentMonth + "/" + currentYear + "?",
                     "Xác nhận", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                int recordsCreated = Controller.tinhPhiTuDong(currentMonth, currentYear);
+                int recordsCreated = Controller.calculateMonthlyFees(currentMonth, currentYear);
                 if (recordsCreated > 0) {
                     JOptionPane.showMessageDialog(this, "Thành công! Đã tạo " + recordsCreated + " bản ghi công nợ.");
                     loadData();
@@ -200,7 +200,7 @@ public class ThuPhiPanel extends JPanel {
     public void loadData() {
         tableModel.setRowCount(0);
         String keyword = txtSearch.getText().trim();
-        currentList = Controller.getDanhSachCongNo(currentMonth, currentYear, keyword);
+        currentList = Controller.getInvoices(currentMonth, currentYear, keyword);
 
         DecimalFormat df = new DecimalFormat("#,###");
         int stt = 1;
@@ -215,7 +215,7 @@ public class ThuPhiPanel extends JPanel {
                     soCanHo,
                     item.getFeeName(),
                     df.format(item.getAmountDue()),
-                    df.format(item.getSoTienDaDong()),
+                    df.format(item.getAmountPaid()),
                     df.format(item.getRemainingAmount()),
                     item.getStatus(),
                     ""

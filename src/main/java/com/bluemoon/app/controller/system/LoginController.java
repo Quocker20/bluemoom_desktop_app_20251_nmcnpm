@@ -11,7 +11,7 @@ import com.bluemoon.app.model.User;
 import com.bluemoon.app.util.DatabaseConnector;
 
 /**
- * Controller xử lý đăng nhập.
+ * Controller handling user login authentication.
  */
 public class LoginController {
 
@@ -24,11 +24,10 @@ public class LoginController {
     }
 
     /**
-     * Kiểm tra đăng nhập.
-     * 
-     * @param username Tên đăng nhập
-     * @param password Mật khẩu
-     * @return User object nếu đúng, null nếu sai
+     * Authenticates the user.
+     * * @param username The input username.
+     * @param password The input password.
+     * @return User object if successful, null if failed.
      */
     public User login(String username, String password) {
         // 1. Validate Input
@@ -38,11 +37,10 @@ public class LoginController {
         }
 
         // 2. Check Connection (UX Improvement)
-
         if (DatabaseConnector.getConnection() == null) {
             JOptionPane.showMessageDialog(null,
-                    "Không thể kết nối đến Cơ sở dữ liệu!\nVui lòng kiểm tra lại mạng hoặc cấu hình MySQL.",
-                    "Lỗi Kết Nối",
+                    "Cannot connect to Database!\nPlease check your network or MySQL configuration.",
+                    "Connection Error",
                     JOptionPane.ERROR_MESSAGE);
             return null;
         }
@@ -51,7 +49,7 @@ public class LoginController {
         try {
             return userDAO.checkLogin(username, password);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "[LoginController] Loi khi checkLogin", e);
+            logger.log(Level.SEVERE, "[LoginController] Error during login check", e);
             return null;
         }
     }
