@@ -121,7 +121,7 @@ public class Payment {
      * Formats the payment date for display.
      * Example output: "20/10/2025 14:30:00"
      */
-    public String getNgayNopHienThi() {
+    public String getDisplayPaymentDate() {
         if (paymentDate == null)
             return "";
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");

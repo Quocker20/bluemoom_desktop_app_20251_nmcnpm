@@ -9,11 +9,11 @@ public class User {
     public User() {
     }
 
-    public User(int maTK, String tenDangNhap, String matKhau, String vaiTro) {
-        this.id = maTK;
-        this.username = tenDangNhap;
-        this.password = matKhau;
-        this.role = vaiTro;
+    public User(int id, String username, String password, String role) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.role = role;
     }
 
     public int getId() {

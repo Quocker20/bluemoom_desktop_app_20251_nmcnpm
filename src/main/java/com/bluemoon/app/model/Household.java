@@ -78,7 +78,7 @@ public class Household {
         return createdAt;
     }
 
-    public void setNgayTao(Date date) {
+    public void setCreatedAt(Date date) {
         this.createdAt = date;
     }
 

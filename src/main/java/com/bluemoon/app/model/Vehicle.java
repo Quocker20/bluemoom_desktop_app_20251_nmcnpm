@@ -1,22 +1,20 @@
 package com.bluemoon.app.model;
 
 public class Vehicle {
-    // Các trường map với Database
     private int id;
     private int householdId;
     private String licensePlate;
     private int type; // 1: car, 2: motorbike/bicycle
     private int status; // 1: active, 0: inactive
 
-    // Các trường phụ (Dùng để hiển thị lên bảng)
+    // DTO Fields
     private String roomNumber;
     private String ownerName;
 
-    // Constructor mặc định
+
     public Vehicle() {
     }
 
-    // Constructor đầy đủ (Dùng khi thêm mới)
     public Vehicle(int householdId, String licensePlate, int type, int status) {
         this.householdId = householdId;
         this.licensePlate = licensePlate;
@@ -24,7 +22,7 @@ public class Vehicle {
         this.status = status;
     }
 
-    // Constructor đầy đủ (Dùng khi lấy từ DB ra, kèm thông tin hiển thị)
+
     public Vehicle(int id, int householdId, String licensePlate, int type, int status, String roomNumber,
             String ownerName) {
         this.id = id;
@@ -70,7 +68,7 @@ public class Vehicle {
         this.type = type;
     }
 
-    public int getTrangThai() {
+    public int getStatus() {
         return status;
     }
 

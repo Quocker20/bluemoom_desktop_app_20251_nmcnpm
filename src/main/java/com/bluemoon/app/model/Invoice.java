@@ -3,7 +3,7 @@ package com.bluemoon.app.model;
 public class Invoice {
     private int id;
     private int householdId;
-    private int FeeId;
+    private int feeTypeId;
     private double amountDue;
     private double amountPaid;
     private int month;
@@ -18,12 +18,12 @@ public class Invoice {
     }
 
     // Constructor đầy đủ (Cập nhật thêm roomNumber)
-    public Invoice(int id, int householdId, String roomNumber, int FeeId, String feeName, int month, int year,
+    public Invoice(int id, int householdId, String roomNumber, int feeTypeId, String feeName, int month, int year,
             double amountDue, double amountPaid, int status) {
         this.id = id;
         this.householdId = householdId;
         this.roomNumber = roomNumber;
-        this.FeeId = FeeId;
+        this.feeTypeId = feeTypeId;
         this.feeName = feeName;
         this.month = month;
         this.year = year;
@@ -61,12 +61,12 @@ public class Invoice {
         this.roomNumber = roomNumber;
     }
 
-    public int getFeeId() {
-        return FeeId;
+    public int getFeeTypeId() {
+        return feeTypeId;
     }
 
-    public void setFeeId(int feeId) {
-        this.FeeId = feeId;
+    public void setFeeTypeId(int feeTypeId) {
+        this.feeTypeId = feeTypeId;
     }
 
     public String getFeeName() {

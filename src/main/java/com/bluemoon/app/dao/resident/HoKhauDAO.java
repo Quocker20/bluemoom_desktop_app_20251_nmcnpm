@@ -42,7 +42,7 @@ public class HoKhauDAO {
                 hk.setOwnerName(rs.getString("TenChuHo"));
                 hk.setArea(rs.getDouble("DienTich")); // Lấy từ bảng CAN_HO
                 hk.setPhoneNumber(rs.getString("SDT"));
-                hk.setNgayTao(rs.getDate("NgayTao"));
+                hk.setCreatedAt(rs.getDate("NgayTao"));
                 list.add(hk);
             }
             logger.log(Level.INFO, "[HOKHAUDAO] Tim thay {0} ho khau", list.size());
@@ -233,7 +233,7 @@ public class HoKhauDAO {
                     hk.setOwnerName(rs.getString("TenChuHo"));
                     hk.setArea(rs.getDouble("DienTich"));
                     hk.setPhoneNumber(rs.getString("SDT"));
-                    hk.setNgayTao(rs.getDate("NgayTao"));
+                    hk.setCreatedAt(rs.getDate("NgayTao"));
                     list.add(hk);
                 }
             }

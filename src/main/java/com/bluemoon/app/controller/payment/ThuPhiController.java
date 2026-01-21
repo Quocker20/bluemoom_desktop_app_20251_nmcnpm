@@ -358,7 +358,7 @@ public class ThuPhiController {
                 return false;
             }
 
-            Payment gd = new Payment(cn.getHouseholdId(), cn.getFeeId(), soTienThu, nguoiNop, ghiChu);
+            Payment gd = new Payment(cn.getHouseholdId(), cn.getFeeTypeId(), soTienThu, nguoiNop, ghiChu);
             if (giaoDichDAO.insert(gd)) {
                 conn.commit();
                 return true;
@@ -446,7 +446,7 @@ public class ThuPhiController {
 
             Invoice cn = new Invoice();
             cn.setHouseholdId(hk.getId());
-            cn.setFeeId(kp.getId());
+            cn.setFeeTypeId(kp.getId());
             cn.setMonth(thang);
             cn.setYear(nam);
             cn.setAmountDue(soTien);

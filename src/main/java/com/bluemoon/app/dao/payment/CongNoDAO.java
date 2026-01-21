@@ -58,7 +58,7 @@ public class CongNoDAO {
                     Invoice cn = new Invoice();
                     cn.setId(rs.getInt("MaCongNo"));
                     cn.setHouseholdId(rs.getInt("MaHo"));
-                    cn.setFeeId(rs.getInt("MaKhoanPhi"));
+                    cn.setFeeTypeId(rs.getInt("MaKhoanPhi"));
                     cn.setFeeName(rs.getString("TenKhoanPhi"));
                     cn.setRoomNumber(rs.getString("SoCanHo"));
                     cn.setMonth(rs.getInt("Thang"));
@@ -85,12 +85,12 @@ public class CongNoDAO {
     public void insert(Invoice cn) throws SQLException {
         String sql = "INSERT INTO CONG_NO (MaHo, MaKhoanPhi, Thang, Nam, SoTienPhaiDong, SoTienDaDong, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?)";
         logger.log(Level.INFO, "[CONGNODAO] Bat dau them cong no cho Ho: {0}, Phi: {1}",
-                new Object[] { cn.getHouseholdId(), cn.getFeeId() });
+                new Object[] { cn.getHouseholdId(), cn.getFeeTypeId() });
 
         try (Connection conn = DatabaseConnector.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, cn.getHouseholdId());
-            pstmt.setInt(2, cn.getFeeId());
+            pstmt.setInt(2, cn.getFeeTypeId());
             pstmt.setInt(3, cn.getMonth());
             pstmt.setInt(4, cn.getYear());
             pstmt.setDouble(5, cn.getAmountDue());
@@ -179,7 +179,7 @@ public class CongNoDAO {
                     Invoice cn = new Invoice();
                     cn.setId(rs.getInt("MaCongNo"));
                     cn.setHouseholdId(rs.getInt("MaHo"));
-                    cn.setFeeId(rs.getInt("MaKhoanPhi"));
+                    cn.setFeeTypeId(rs.getInt("MaKhoanPhi"));
                     cn.setFeeName(rs.getString("TenKhoanPhi"));
                     cn.setRoomNumber(rs.getString("SoCanHo"));
                     cn.setAmountDue(rs.getDouble("SoTienPhaiDong"));
