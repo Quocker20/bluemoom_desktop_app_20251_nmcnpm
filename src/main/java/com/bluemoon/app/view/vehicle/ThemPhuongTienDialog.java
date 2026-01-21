@@ -223,7 +223,7 @@ public class ThemPhuongTienDialog extends JDialog {
             Vehicle pt = new Vehicle();
             pt.setHouseholdId(selectedHk.getId());
             pt.setLicensePlate(bienSoMoi);
-            pt.setVehicleType(loaiXeValue);
+            pt.setType(loaiXeValue);
             pt.setStatus(1);
 
             int result = ptController.addPhuongTien(pt);

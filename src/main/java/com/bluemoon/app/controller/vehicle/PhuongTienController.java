@@ -49,7 +49,7 @@ public class PhuongTienController {
     public int addPhuongTien(Vehicle pt) {
         try {
             // Validate: Kiểm tra trùng biển số trước
-            if (dao.checkExist(pt.getBienSo())) {
+            if (dao.checkExist(pt.getLicensePlate())) {
                 return -2; // Mã lỗi: Đã tồn tại
             }
             
