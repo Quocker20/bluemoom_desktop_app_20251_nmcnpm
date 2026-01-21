@@ -1,50 +1,50 @@
 package com.bluemoon.app.model;
 
 public class User {
-    private int maTK;
-    private String tenDangNhap;
-    private String matKhau;
-    private String vaiTro; // 'QuanLy', 'KeToan', 'ThuKy'
+    private int id;
+    private String username;
+    private String password;
+    private String role; // 'Manager', 'Secretary', 'Accountant'
 
     public User() {
     }
 
     public User(int maTK, String tenDangNhap, String matKhau, String vaiTro) {
-        this.maTK = maTK;
-        this.tenDangNhap = tenDangNhap;
-        this.matKhau = matKhau;
-        this.vaiTro = vaiTro;
+        this.id = maTK;
+        this.username = tenDangNhap;
+        this.password = matKhau;
+        this.role = vaiTro;
     }
 
-    public int getMaTK() {
-        return maTK;
+    public int getId() {
+        return id;
     }
 
-    public void setMaTK(int maTK) {
-        this.maTK = maTK;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getTenDangNhap() {
-        return tenDangNhap;
+    public String getUsername() {
+        return username;
     }
 
-    public void setTenDangNhap(String tenDangNhap) {
-        this.tenDangNhap = tenDangNhap;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getMatKhau() {
-        return matKhau;
+    public String getPassword() {
+        return password;
     }
 
-    public void setMatKhau(String matKhau) {
-        this.matKhau = matKhau;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public String getVaiTro() {
-        return vaiTro;
+    public String getRole() {
+        return role;
     }
 
-    public void setVaiTro(String vaiTro) {
-        this.vaiTro = vaiTro;
+    public void setRole(String role) {
+        this.role = role;
     }
 }

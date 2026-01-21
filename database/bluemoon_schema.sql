@@ -2,108 +2,127 @@ DROP DATABASE IF EXISTS bluemoon_db;
 CREATE DATABASE bluemoon_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE bluemoon_db;
 
-CREATE TABLE TAI_KHOAN (
-    MaTK INT AUTO_INCREMENT PRIMARY KEY,
-    TenDangNhap VARCHAR(50) NOT NULL UNIQUE,
-    MatKhau VARCHAR(255) NOT NULL,
-    VaiTro VARCHAR(20) NOT NULL
+-- Users table for authentication and authorization
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL -- Expected: 'Manager', 'Board', 'Accountant'
 );
 
-CREATE TABLE KHOAN_PHI (
-    MaKhoanPhi INT AUTO_INCREMENT PRIMARY KEY,
-    TenKhoanPhi VARCHAR(100) NOT NULL,
-    DonGia DOUBLE DEFAULT 0,
-    DonViTinh VARCHAR(20),
-    LoaiPhi INT DEFAULT 0,
-    TrangThai INT DEFAULT 1
+-- Management fee configurations
+CREATE TABLE fee_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    unit_price DOUBLE DEFAULT 0,
+    unit VARCHAR(20),
+    type INT DEFAULT 0, -- 0: Mandatory, 1: Voluntary
+    status INT DEFAULT 1 -- 1: Active, 0: Inactive
 );
 
-CREATE TABLE CAN_HO (
-    MaCanHo INT AUTO_INCREMENT PRIMARY KEY,
-    SoCanHo VARCHAR(20) NOT NULL UNIQUE,
-    DienTich DOUBLE NOT NULL,
-    TrangThai INT DEFAULT 0
+-- Apartment information
+CREATE TABLE apartments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    room_number VARCHAR(20) NOT NULL UNIQUE,
+    area DOUBLE NOT NULL,
+    status INT DEFAULT 0 -- 0: Vacant, 1: Occupied
 );
 
-CREATE TABLE HO_KHAU (
-    MaHo INT AUTO_INCREMENT PRIMARY KEY,
-    SoCanHo VARCHAR(20) NOT NULL,
-    TenChuHo VARCHAR(100) NOT NULL,
-    SDT VARCHAR(15),
-    NgayTao DATE DEFAULT (CURRENT_DATE),
-    IsDeleted INT DEFAULT 0,
-    FOREIGN KEY (SoCanHo) REFERENCES CAN_HO(SoCanHo) ON UPDATE CASCADE
+-- Household information (linked to an apartment)
+CREATE TABLE households (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    room_number VARCHAR(20) NOT NULL,
+    owner_name VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(15),
+    created_at DATE DEFAULT (CURRENT_DATE),
+    is_deleted INT DEFAULT 0, -- Soft delete flag
+    FOREIGN KEY (room_number) REFERENCES apartments(room_number) ON UPDATE CASCADE
 );
 
-CREATE TABLE NHAN_KHAU (
-    MaNhanKhau INT AUTO_INCREMENT PRIMARY KEY,
-    MaHo INT,
-    HoTen VARCHAR(100) NOT NULL,
-    NgaySinh DATE,
-    GioiTinh VARCHAR(10),
-    CCCD VARCHAR(20),
-    QuanHe VARCHAR(30),
-    IsDeleted INT DEFAULT 0,
-    FOREIGN KEY (MaHo) REFERENCES HO_KHAU(MaHo)
+-- Residents living in households
+CREATE TABLE residents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    household_id INT,
+    full_name VARCHAR(100) NOT NULL,
+    dob DATE,
+    gender VARCHAR(10), -- 'Male', 'Female'
+    identity_card VARCHAR(20),
+    relationship VARCHAR(30), -- Relationship to the household owner
+    is_deleted INT DEFAULT 0,
+    FOREIGN KEY (household_id) REFERENCES households(id)
 );
 
-CREATE TABLE TAM_TRU_TAM_VANG (
-    MaTTTV INT AUTO_INCREMENT PRIMARY KEY,
-    MaNhanKhau INT NOT NULL,
-    LoaiHinh VARCHAR(20) NOT NULL,
-    TuNgay DATE NOT NULL,
-    DenNgay DATE,
-    LyDo TEXT,
-    FOREIGN KEY (MaNhanKhau) REFERENCES NHAN_KHAU(MaNhanKhau)
+-- Temporary residence or absence records
+CREATE TABLE residency_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    resident_id INT NOT NULL,
+    type VARCHAR(20) NOT NULL, -- 'Temporary', 'Absence'
+    start_date DATE NOT NULL,
+    end_date DATE,
+    reason TEXT,
+    FOREIGN KEY (resident_id) REFERENCES residents(id)
 );
 
-CREATE TABLE CONG_NO (
-    MaCongNo INT AUTO_INCREMENT PRIMARY KEY,
-    MaHo INT NOT NULL,
-    MaKhoanPhi INT NOT NULL,
-    Thang INT NOT NULL,
-    Nam INT NOT NULL,
-    SoTienPhaiDong DOUBLE DEFAULT 0,
-    SoTienDaDong DOUBLE DEFAULT 0,
-    TrangThai INT DEFAULT 0,
-    FOREIGN KEY (MaHo) REFERENCES HO_KHAU(MaHo),
-    FOREIGN KEY (MaKhoanPhi) REFERENCES KHOAN_PHI(MaKhoanPhi)
+-- Monthly invoices for households
+CREATE TABLE invoices (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    household_id INT NOT NULL,
+    fee_type_id INT NOT NULL,
+    month INT NOT NULL,
+    year INT NOT NULL,
+    amount_due DOUBLE DEFAULT 0,
+    amount_paid DOUBLE DEFAULT 0,
+    status INT DEFAULT 0, -- 0: Unpaid, 1: Paid, 2: Partial
+    FOREIGN KEY (household_id) REFERENCES households(id),
+    FOREIGN KEY (fee_type_id) REFERENCES fee_types(id)
 );
 
-CREATE TABLE GIAO_DICH_NOP_TIEN (
-    MaGiaoDich INT AUTO_INCREMENT PRIMARY KEY,
-    MaHo INT NOT NULL,
-    MaKhoanPhi INT NOT NULL,
-    SoTien DOUBLE NOT NULL,
-    NgayNop DATETIME DEFAULT CURRENT_TIMESTAMP,
-    NguoiNop VARCHAR(100),
-    GhiChu TEXT,
-    FOREIGN KEY (MaHo) REFERENCES HO_KHAU(MaHo),
-    FOREIGN KEY (MaKhoanPhi) REFERENCES KHOAN_PHI(MaKhoanPhi)
+-- Payment transactions history
+CREATE TABLE payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    household_id INT NOT NULL,
+    fee_type_id INT NOT NULL,
+    amount DOUBLE NOT NULL,
+    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    payer_name VARCHAR(100),
+    note TEXT,
+    FOREIGN KEY (household_id) REFERENCES households(id),
+    FOREIGN KEY (fee_type_id) REFERENCES fee_types(id)
 );
 
-CREATE TABLE PHUONG_TIEN (
-    MaPhuongTien INT AUTO_INCREMENT PRIMARY KEY,
-    MaHo INT NOT NULL,
-    BienSo VARCHAR(50) NOT NULL,
-    LoaiXe INT NOT NULL COMMENT '1: Oto, 2: XeMay/XeDap',
-    TrangThai INT DEFAULT 1 COMMENT '1: Dang gui, 0: Da huy',
+-- Registered vehicles
+CREATE TABLE vehicles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    household_id INT NOT NULL,
+    license_plate VARCHAR(50) NOT NULL,
+    vehicle_type INT NOT NULL COMMENT '1: Car, 2: Motorbike/Bicycle',
+    status INT DEFAULT 1 COMMENT '1: Active, 0: Inactive',
+    FOREIGN KEY (household_id) REFERENCES households(id)
+);
 
-    FOREIGN KEY (MaHo) REFERENCES HO_KHAU(MaHo)
-)
-
+-- Triggers for automatic status updates
 DELIMITER $$
-CREATE TRIGGER AfterInsertHoKhau AFTER INSERT ON HO_KHAU
+
+/*
+ * Trigger: after_insert_household
+ * Description: Automatically sets apartment status to Occupied (1) when a new household is assigned.
+ */
+CREATE TRIGGER after_insert_household AFTER INSERT ON households
 FOR EACH ROW
 BEGIN
-    UPDATE CAN_HO SET TrangThai = 1 WHERE SoCanHo = NEW.SoCanHo;
+    UPDATE apartments SET status = 1 WHERE room_number = NEW.room_number;
 END$$
 
-CREATE TRIGGER AfterSoftDeleteHoKhau AFTER UPDATE ON HO_KHAU
+/*
+ * Trigger: after_soft_delete_household
+ * Description: Sets apartment status to Vacant (0) if the household is soft-deleted.
+ */
+CREATE TRIGGER after_soft_delete_household AFTER UPDATE ON households
 FOR EACH ROW
 BEGIN
-    IF NEW.IsDeleted = 1 AND OLD.IsDeleted = 0 THEN
-        UPDATE CAN_HO SET TrangThai = 0 WHERE SoCanHo = NEW.SoCanHo;
+    IF NEW.is_deleted = 1 AND OLD.is_deleted = 0 THEN
+        UPDATE apartments SET status = 0 WHERE room_number = NEW.room_number;
     END IF;
 END$$
-DELIMITER ; 
+
+DELIMITER ;
