@@ -30,12 +30,11 @@ public class ReportController {
 
     private final ReportDAO reportDAO;
     private final ResidencyRecordDAO residencyRecordDAO;
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(ReportController.class.getName());
 
     public ReportController() {
         this.reportDAO = new ReportDAO();
         this.residencyRecordDAO = new ResidencyRecordDAO();
-        this.logger = Logger.getLogger(ReportController.class.getName());
     }
 
     /**

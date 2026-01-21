@@ -15,11 +15,10 @@ import com.bluemoon.app.model.Resident;
 public class ResidentController {
 
     private final ResidentDAO residentDAO;
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(ResidentController.class.getName());
 
     public ResidentController() {
         this.residentDAO = new ResidentDAO();
-        this.logger = Logger.getLogger(ResidentController.class.getName());
     }
 
     /**

@@ -16,11 +16,10 @@ import com.bluemoon.app.model.Resident;
 public class HouseholdController {
 
     private final HouseholdDAO householdDAO;
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(HouseholdController.class.getName());
 
     public HouseholdController() {
         this.householdDAO = new HouseholdDAO();
-        this.logger = Logger.getLogger(HouseholdController.class.getName());
     }
 
     public List<Household> getAll() {

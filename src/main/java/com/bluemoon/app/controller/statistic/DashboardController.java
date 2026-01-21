@@ -15,11 +15,10 @@ import com.bluemoon.app.dao.statistic.DashboardDAO;
 public class DashboardController {
 
     private final DashboardDAO dashboardDAO;
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(DashboardController.class.getName());
 
     public DashboardController() {
         this.dashboardDAO = new DashboardDAO();
-        this.logger = Logger.getLogger(DashboardController.class.getName());
     }
 
     /**

@@ -16,11 +16,10 @@ import com.bluemoon.app.model.ResidencyRecord;
 public class ResidencyRecordController {
 
     private final ResidencyRecordDAO residencyRecordDAO;
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(ResidencyRecordController.class.getName());
 
     public ResidencyRecordController() {
         this.residencyRecordDAO = new ResidencyRecordDAO();
-        this.logger = Logger.getLogger(ResidencyRecordController.class.getName());
     }
 
     /**

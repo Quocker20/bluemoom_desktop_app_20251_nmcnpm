@@ -15,11 +15,10 @@ import com.bluemoon.app.model.Vehicle;
 public class VehicleController {
 
     private final VehicleDAO vehicleDAO;
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(VehicleController.class.getName());
 
     public VehicleController() {
         this.vehicleDAO = new VehicleDAO();
-        this.logger = Logger.getLogger(VehicleController.class.getName());
     }
 
     /**

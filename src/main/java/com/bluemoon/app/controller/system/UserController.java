@@ -14,16 +14,16 @@ import com.bluemoon.app.util.SecurityUtil;
 public class UserController {
 
     private final UserDAO userDAO;
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(UserController.class.getName());
 
     public UserController() {
         this.userDAO = new UserDAO();
-        this.logger = Logger.getLogger(UserController.class.getName());
     }
 
     /**
      * Handles password change request.
-     * * @param currentUser     The currently logged-in user.
+     * * @param currentUser The currently logged-in user.
+     * 
      * @param oldPassword     The old password input.
      * @param newPassword     The new password input.
      * @param confirmPassword The confirmation of the new password.

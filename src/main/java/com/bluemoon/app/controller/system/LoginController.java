@@ -16,11 +16,10 @@ import com.bluemoon.app.util.DatabaseConnector;
 public class LoginController {
 
     private final UserDAO userDAO;
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(LoginController.class.getName());
 
     public LoginController() {
         this.userDAO = new UserDAO();
-        this.logger = Logger.getLogger(LoginController.class.getName());
     }
 
     /**

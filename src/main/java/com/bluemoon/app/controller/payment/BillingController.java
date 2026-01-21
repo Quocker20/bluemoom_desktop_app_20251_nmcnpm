@@ -17,7 +17,7 @@ import com.bluemoon.app.model.Household;
 import com.bluemoon.app.model.Invoice;
 import com.bluemoon.app.model.Payment;
 import com.bluemoon.app.util.AppConstants;
-import com.bluemoon.app.util.DatabaseConnector; 
+import com.bluemoon.app.util.DatabaseConnector;
 
 /**
  * Controller for Billing Management.
@@ -29,23 +29,23 @@ public class BillingController {
     private final FeeDAO feeDAO;
     private final PaymentDAO paymentDAO;
     private final HouseholdDAO householdDAO;
-    private final Logger logger;
+    private static final Logger logger = Logger.getLogger(BillingController.class.getName());
 
     public BillingController() {
         this.invoiceDAO = new InvoiceDAO();
         this.feeDAO = new FeeDAO();
         this.paymentDAO = new PaymentDAO();
         this.householdDAO = new HouseholdDAO();
-        this.logger = Logger.getLogger(BillingController.class.getName());
     }
 
     // ==========================================
-    //              INVOICE MANAGEMENT
+    // INVOICE MANAGEMENT
     // ==========================================
 
     /**
      * Retrieves a list of invoices based on month, year, and search keyword.
-     * * @param month   The month filter.
+     * * @param month The month filter.
+     * 
      * @param year    The year filter.
      * @param keyword The search keyword (room number).
      * @return List of Invoice objects.
@@ -63,7 +63,8 @@ public class BillingController {
      * Retrieves invoice details by ID.
      */
     public Invoice getInvoiceById(int id) {
-        if (id <= 0) return null;
+        if (id <= 0)
+            return null;
         try {
             return invoiceDAO.getById(id);
         } catch (SQLException e) {
@@ -113,7 +114,8 @@ public class BillingController {
      * Deletes an invoice by ID.
      */
     public int deleteInvoice(int id) {
-        if (id <= 0) return 0;
+        if (id <= 0)
+            return 0;
         try {
             return invoiceDAO.deleteById(id);
         } catch (SQLException e) {
@@ -123,7 +125,7 @@ public class BillingController {
     }
 
     // ==========================================
-    //              FEE CONFIGURATION
+    // FEE CONFIGURATION
     // ==========================================
 
     public List<Fee> getAllFees() {
@@ -153,7 +155,8 @@ public class BillingController {
             logger.warning("[BillingController] Unit price cannot be negative");
             return false;
         }
-        // Assuming AppConstants.PHI_BAT_BUOC is renamed to AppConstants.FEE_MANDATORY (value 0)
+        // Assuming AppConstants.PHI_BAT_BUOC is renamed to AppConstants.FEE_MANDATORY
+        // (value 0)
         if (fee.getType() == AppConstants.PHI_BAT_BUOC && fee.getUnitPrice() <= 0) {
             logger.warning("[BillingController] Mandatory fee must have price > 0");
             return false;
@@ -167,7 +170,8 @@ public class BillingController {
     }
 
     public boolean updateFee(Fee fee) {
-        if (fee.getUnitPrice() < 0) return false;
+        if (fee.getUnitPrice() < 0)
+            return false;
         try {
             return feeDAO.update(fee);
         } catch (SQLException e) {
@@ -195,19 +199,21 @@ public class BillingController {
     }
 
     // ==========================================
-    //              BATCH PROCESSING
+    // BATCH PROCESSING
     // ==========================================
 
     /**
      * Batch job: Calculate monthly fees for all households (Mandatory fees only).
      * * @param month The target month.
-     * @param year  The target year.
+     * 
+     * @param year The target year.
      * @return Number of invoices created, or -1 if failed/already calculated.
      */
     public int calculateMonthlyFees(int month, int year) {
         try {
             if (invoiceDAO.isMonthCalculated(month, year)) {
-                logger.log(Level.WARNING, "[BillingController] Month {0}/{1} already calculated.", new Object[]{month, year});
+                logger.log(Level.WARNING, "[BillingController] Month {0}/{1} already calculated.",
+                        new Object[] { month, year });
                 return -1;
             }
         } catch (SQLException e) {
@@ -215,7 +221,8 @@ public class BillingController {
             return -1;
         }
 
-        logger.log(Level.INFO, "[BillingController] Starting batch fee calculation for {0}/{1}", new Object[]{month, year});
+        logger.log(Level.INFO, "[BillingController] Starting batch fee calculation for {0}/{1}",
+                new Object[] { month, year });
 
         List<Household> households;
         List<Fee> fees;
@@ -232,7 +239,8 @@ public class BillingController {
 
         try {
             conn = DatabaseConnector.getConnection();
-            if (conn == null) return -1;
+            if (conn == null)
+                return -1;
             conn.setAutoCommit(false);
 
             String sql = "INSERT INTO invoices (household_id, fee_type_id, month, year, amount_due, amount_paid, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -269,12 +277,21 @@ public class BillingController {
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "[BillingController] Batch job failed", e);
             if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
             return 0;
         } finally {
             if (conn != null) {
-                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -283,7 +300,8 @@ public class BillingController {
      * Calculates fee for a newly created Fee Type for all existing households.
      */
     public void calculateFeeForNewType(int month, int year, Fee fee) {
-        if (fee.getType() != AppConstants.PHI_BAT_BUOC) return;
+        if (fee.getType() != AppConstants.PHI_BAT_BUOC)
+            return;
 
         logger.log(Level.INFO, "[BillingController] Auto-calculating for new fee: {0}", fee.getName());
 
@@ -298,7 +316,8 @@ public class BillingController {
         Connection conn = null;
         try {
             conn = DatabaseConnector.getConnection();
-            if (conn == null) return;
+            if (conn == null)
+                return;
             conn.setAutoCommit(false);
 
             String sql = "INSERT INTO invoices (household_id, fee_type_id, month, year, amount_due, amount_paid, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -329,11 +348,19 @@ public class BillingController {
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "[BillingController] Error in calculateFeeForNewType", e);
             if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
         } finally {
             if (conn != null) {
-                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -349,23 +376,25 @@ public class BillingController {
             int countMotorbikes = 0;
 
             for (Fee fee : fees) {
-                // Ensure the database Fee Units are also updated to English ("Car", "Motorbike")
+                // Ensure the database Fee Units are also updated to English ("Car",
+                // "Motorbike")
                 String unit = fee.getUnit() != null ? fee.getUnit().trim() : "";
 
                 // 1. Process Cars (VehicleType = 1)
                 // Note: Make sure your DB data matches these English strings
-                if ("Car".equalsIgnoreCase(unit) || "Oto".equalsIgnoreCase(unit)) { 
+                if ("Car".equalsIgnoreCase(unit) || "Oto".equalsIgnoreCase(unit)) {
                     int rows = invoiceDAO.calculateVehicleFees(month, year, fee.getId(), fee.getUnitPrice(), 1);
                     countCars += rows;
-                } 
+                }
                 // 2. Process Motorbikes (VehicleType = 2)
                 else if ("Motorbike".equalsIgnoreCase(unit) || "XeMay".equalsIgnoreCase(unit)) {
                     int rows = invoiceDAO.calculateVehicleFees(month, year, fee.getId(), fee.getUnitPrice(), 2);
                     countMotorbikes += rows;
                 }
             }
-            
-            return String.format("Completed! Created invoices for %d Car households and %d Motorbike households.", countCars, countMotorbikes);
+
+            return String.format("Completed! Created invoices for %d Car households and %d Motorbike households.",
+                    countCars, countMotorbikes);
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "[BillingController] Error in calculateVehicleFees", e);
@@ -374,24 +403,27 @@ public class BillingController {
     }
 
     // ==========================================
-    //              PAYMENT PROCESSING
+    // PAYMENT PROCESSING
     // ==========================================
 
     /**
      * Processes a payment for a specific invoice.
      * * @param invoiceId The ID of the invoice being paid.
-     * @param amount    The amount paid.
-     * @param payer     Name of the payer.
-     * @param note      Optional note.
+     * 
+     * @param amount The amount paid.
+     * @param payer  Name of the payer.
+     * @param note   Optional note.
      * @return true if successful.
      */
     public boolean processPayment(int invoiceId, double amount, String payer, String note) {
-        if (amount <= 0) return false;
-        
+        if (amount <= 0)
+            return false;
+
         Connection conn = null;
         try {
             conn = DatabaseConnector.getConnection();
-            if (conn == null) return false;
+            if (conn == null)
+                return false;
             conn.setAutoCommit(false);
 
             Invoice invoice = invoiceDAO.getById(invoiceId);
@@ -418,16 +450,25 @@ public class BillingController {
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "[BillingController] Error in processPayment", e);
             if (conn != null) {
-                try { conn.rollback(); } catch (Exception ex) { ex.printStackTrace(); }
+                try {
+                    conn.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
             return false;
         } finally {
             if (conn != null) {
-                try { conn.setAutoCommit(true); conn.close(); } catch (Exception e) { e.printStackTrace(); }
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
-    
+
     public Household getHouseholdByRoomNumber(String roomNumber) {
         try {
             return householdDAO.getByRoomNumber(roomNumber);

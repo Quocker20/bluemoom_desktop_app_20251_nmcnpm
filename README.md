@@ -1,94 +1,163 @@
-# (BTL) Phần mềm Quản lý Chung cư BlueMoon (v1.0)
+Chào bạn Quốc Anh, dựa trên thông tin chi tiết và mã nguồn bạn cung cấp, đây là bản **README.md** hoàn chỉnh, chuyên nghiệp, sẵn sàng để bạn đưa lên GitHub cá nhân.
 
-> **Tác giả:** Vũ Quốc Anh
-> **MSSV:** [MSSV CỦA BẠN]
-> **Lớp:** [LỚP CỦA BẠN]
-> **Môn học:** Nhập môn Công nghệ phần mềm (Mã môn: [MÃ MÔN HỌC CỦA BẠN])
+Bản này tập trung vào thế mạnh **tư duy kiến trúc (Backend)** và **khả năng thích ứng công nghệ (AI-Workflow)** của bạn.
 
 ---
 
-> **LƯU Ý QUAN TRỌNG: TÀI LIỆU DỰ ÁN**
-> 
-> Kho lưu trữ (Repository) này **chỉ chứa Mã nguồn (Source Code)** của ứng dụng.
-> 
-> Toàn bộ Tài liệu Dự án (bao gồm `Thư mục 01` đến `Thư mục 06`: Tuyên ngôn Dự án, WBS, SRS, Đặc tả Use Case, Thiết kế, Báo cáo...) được lưu trữ và quản lý tập trung tại đây:
-> 
-> ### ➡️ **[Toàn bộ Tài liệu Dự án BlueMoon (Google Drive)](https://drive.google.com/drive/folders/1XDtw1UxgtzvF0eWAdbl8XzQ4arjFJObt)**
+### Hướng dẫn nhanh trước khi Commit:
+
+1. **Ảnh:** Tạo thư mục tên là `images` trong dự án của bạn (ngang hàng với `src`).
+2. **Copy:** Đổi tên file ảnh bạn gửi thành `dashboard.png` (MainFrame.png) và `report.png` (Report.png), rồi bỏ vào thư mục `images` đó.
+3. **File SQL:** Đảm bảo file `bluemoon_schema.sql` nằm đúng vị trí `src/main/resources/database/`.
 
 ---
 
-## 1. 📝 Mô tả Dự án
+### Nội dung file `README.md`
 
-Dự án này xây dựng một **ứng dụng Desktop (Java/MySQL)** nhằm tin học hóa quy trình nghiệp vụ tại Chung cư BlueMoon.
+```markdown
+# 🏢 BlueMoon - Apartment Management System
 
-**Vấn đề (Problem):** Ban quản trị (BQT) hiện đang quản lý thu phí và thông tin dân cư bằng phương thức thủ công (sổ sách, Excel), dẫn đến tốn thời gian, rủi ro sai sót cao và khó khăn trong việc tra cứu, thống kê (As-Is Scenario).
+![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![Architecture](https://img.shields.io/badge/Architecture-MVC-0052CC?style=flat-square)
+![Workflow](https://img.shields.io/badge/Workflow-AI%20Assisted-00A67E?style=flat-square)
 
-**Giải pháp (Solution):** Phần mềm cung cấp một công cụ tập trung, an toàn và hiệu quả cho BQT để quản lý các nghiệp vụ cốt lõi, thay thế hoàn toàn quy trình thủ công.
+> **Hệ thống quản lý chung cư Desktop toàn diện, được xây dựng với kiến trúc Java Core vững chắc kết hợp quy trình phát triển giao diện hiện đại hỗ trợ bởi AI.**
 
-## 2. 🛠️ Công nghệ Sử dụng (Tech Stack)
+## 📖 Giới thiệu (The Story)
 
-* **Ngôn ngữ:** Java (JDK 11+)
-* **Nền tảng:** Desktop (Java Swing)
-* **Cơ sở dữ liệu:** MySQL 8.0
-* **Quản lý Dự án & Thư viện:** Apache Maven
+**BlueMoon Management** giải quyết bài toán quản lý dữ liệu cư dân và tài chính phức tạp tại các chung cư vừa và nhỏ, thay thế hoàn toàn quy trình sổ sách thủ công.
 
-## 3. 🎯 Tính năng Cốt lõi (Phạm vi v1.0)
+Dự án này là minh chứng cho **Quy trình phát triển phần mềm lai (Hybrid Development Workflow)** mà tôi đang theo đuổi:
+1.  **Backend (Hand-coded):** Viết tay 100% để đảm bảo tuân thủ nghiêm ngặt các nguyên lý thiết kế phần mềm, bảo mật và toàn vẹn dữ liệu.
+2.  **Frontend (AI-Accelerated):** Tận dụng Generative AI để vượt qua rào cản của công nghệ cũ (Java Swing), tập trung thời gian vào trải nghiệm người dùng (UX) và logic nghiệp vụ.
 
-Hệ thống được thiết kế cho người dùng là **Ban quản trị**. Các chức năng chính bao gồm:
+---
 
-* **E-01: Quản lý Thu phí & Tài chính**
-    * (F-1.1) Cấu hình đơn giá (phí dịch vụ, phí quản lý).
-    * (F-1.2) Tự động tính phí bắt buộc hàng tháng theo diện tích.
-    * (F-1.3) Quản lý các đợt thu đóng góp tự nguyện (quỹ từ thiện).
-    * (F-1.5) Ghi nhận thanh toán và theo dõi công nợ chi tiết.
-* **E-02: Quản lý Cư dân**
-    * (F-2.1) Quản lý thông tin Hộ khẩu (Thêm/Sửa/Xóa).
-    * (F-2.2) Quản lý thông tin Nhân khẩu (thành viên trong hộ).
-    * (F-2.3) Ghi nhận biến động (tạm trú, tạm vắng).
-* **E-03: Báo cáo & Tra cứu**
-    * (F-3.2) Thống kê nhanh công nợ, tổng thu.
-    * (F-3.3) Tra cứu, trích xuất thông tin dân cư để báo cáo chính quyền.
-* **E-04: Hệ thống**
-    * (F-4.1) Đăng nhập bảo mật cho thành viên BQT.
+## 📸 Hình ảnh Demo
 
-## 4. 🚀 Hướng dẫn Cài đặt và Chạy (Demo)
+| Tổng quan (Dashboard) | Báo cáo & Thống kê |
+| :---: | :---: |
+| ![Dashboard](images/dashboard.png) | ![Report](images/report.png) |
 
-Để chạy dự án này trên máy của bạn, vui lòng làm theo các bước sau:
+---
 
-### 4.1. Yêu cầu Môi trường
+## 🛠️ Công nghệ & Kiến trúc
 
-* **Java JDK:** Phiên bản 11 trở lên.
-* **MySQL Server:** Phiên bản 8.0 trở lên (ví dụ: cài qua XAMPP hoặc MySQL Workbench).
-* **Maven:** (Thường đã tích hợp sẵn trong VS Code hoặc IntelliJ).
+### ⚙️ Backend: Java Core & Design Patterns
+Tôi xây dựng Backend hoàn toàn thủ công (No Framework) để thể hiện sự am hiểu sâu sắc về nền tảng ngôn ngữ:
+* **Mô hình:** **MVC** (Model - View - Controller) phân tách rõ ràng luồng dữ liệu.
+* **Data Access:** Sử dụng mẫu **DAO (Data Access Object)** và **Singleton** để quản lý kết nối JDBC hiệu quả.
+* **Database:** MySQL được chuẩn hóa (Normalization) để tối ưu truy vấn và ràng buộc dữ liệu.
+* **Libraries:**
+    * `mysql-connector-j`: Kết nối cơ sở dữ liệu.
+    * `apache-poi`: Xuất báo cáo ra file Excel chuyên nghiệp.
 
-### 4.2. Cài đặt Cơ sở dữ liệu
+### 🎨 Frontend: AI-Driven Workflow
+Để hiện đại hóa giao diện Java Swing:
+1.  **Design:** Thiết kế Prototype và luồng người dùng trên **Figma**.
+2.  **Generation:** Sử dụng **Google Gemini** để sinh mã nguồn giao diện (View) chi tiết.
+3.  **Integration (Vai trò của tôi):**
+    * Tái cấu trúc code AI sinh ra thành các Components tái sử dụng (`RoundedPanel`, `ColoredButton`).
+    * Xử lý sự kiện (Event Handling) và đấu nối dữ liệu từ Backend.
+    * Debug và tinh chỉnh Pixel-perfect.
 
-1.  Mở MySQL Workbench (hoặc phpMyAdmin).
-2.  Tạo một cơ sở dữ liệu (schema) mới với tên: `bluemoon_db`
-3.  Import file script SQL `database_script.sql` (bạn có thể tải file này từ link Google Drive ở đầu trang) để tạo các bảng và dữ liệu mẫu.
-4.  **QUAN TRỌNG:** Cấu hình kết nối CSDL:
-    * Mở file: `src/main/java/com/bluemoon/app/utils/DatabaseConnector.java`
-    * Thay đổi `USERNAME` và `PASSWORD` cho phù hợp với cấu hình MySQL trên máy của bạn.
+---
 
-### 4.3. Chạy Ứng dụng
+## 🚀 Chức năng Chính
 
-1.  Clone kho lưu trữ này về máy.
-2.  Mở dự án (thư mục `bluemoon-desktop`) bằng VS Code hoặc IntelliJ.
-3.  Đợi IDE (thông qua Maven) tự động tải về các thư viện (dependencies) đã khai báo trong `pom.xml` (bao gồm cả thư viện MySQL Connector).
-4.  Tìm và chạy file `src/main/java/com/bluemoon/app/App.java` (file chứa hàm `public static void main(String[] args)`).
-5.  Sử dụng tài khoản demo (nếu có):
-    * **Username:** `admin`
-    * **Password:** `123456`
+### 1. Quản lý Cư dân Chuyên sâu
+* Quản lý **Hộ khẩu** và **Nhân khẩu** (theo dõi quan hệ, CCCD, ngày sinh).
+* Ghi nhận biến động cư trú: **Tạm trú**, **Tạm vắng**, **Khai tử** (Có kiểm tra logic ngày tháng).
+* Tự động cập nhật trạng thái phòng (Trống/Có người ở) dựa trên dữ liệu hộ khẩu.
 
-## 5. 🗂️ Cấu trúc Thư mục Mã nguồn (MVC)
+### 2. Tài chính & Thu phí (Tự động hóa)
+* **Cấu hình linh hoạt:** Thiết lập đơn giá phí quản lý (theo m²), phí gửi xe (Ô tô/Xe máy), và các khoản đóng góp tự nguyện.
+* **Tự động tính toán:** Batch processing tạo công nợ hàng tháng cho hàng trăm hộ dân chỉ với 1 click.
+* **Thanh toán:** Ghi nhận lịch sử đóng tiền, hỗ trợ thanh toán từng phần.
 
-Dự án được tổ chức theo mô hình MVC (Model-View-Controller):
+### 3. Tiện ích & Báo cáo
+* Quản lý bãi xe: Theo dõi phương tiện, biển số xe của từng hộ.
+* **Dashboard:** Biểu đồ trực quan về doanh thu và cơ cấu dân số (Vẽ thủ công bằng Graphics2D).
+* **Xuất Excel:** Trích xuất danh sách Tạm trú/Tạm vắng phục vụ báo cáo hành chính.
 
-* `src/main/java/com/bluemoon/app/`
-    * `models/`: Định nghĩa các đối tượng (POJO) như `HoKhau`, `NhanKhau`, `CongNo`.
-    * `views/`: Chứa các file giao diện (JFrame, JPanel) như `FormLogin`, `FormMain`.
-    * `controllers/`: Chứa logic nghiệp vụ, xử lý sự kiện như `LoginController`, `ThuPhiController`.
-    * `utils/`: Chứa các lớp tiện ích, ví dụ `DatabaseConnector.java`.
-    * `App.java`: File khởi chạy ứng dụng.
-* `src/main/resources/`: Chứa icon, ảnh...
-* `pom.xml`: File quản lý thư viện (Maven).
+---
+
+## 📂 Cấu trúc Source Code
+
+```text
+src/main/java/com/bluemoon/app
+├── controller/          # Xử lý Logic nghiệp vụ (Billing, Resident, Statistic...)
+├── dao/                 # Lớp truy cập dữ liệu (JDBC, SQL Queries)
+├── model/               # Các POJO Mapping với bảng CSDL
+├── view/                # Giao diện người dùng (Swing Panels & Dialogs)
+│   ├── payment/         # Giao diện Thu phí
+│   ├── resident/        # Giao diện Cư dân
+│   ├── statistic/       # Giao diện Báo cáo (Charts)
+│   ├── system/          # Login, MainFrame
+│   └── vehicle/         # Quản lý xe
+└── util/                # DatabaseConnector, Security, Constants
+
+```
+
+---
+
+## ⚙️ Hướng dẫn Cài đặt
+
+### Yêu cầu
+
+* **Java JDK:** 11 trở lên.
+* **MySQL Server:** 8.0 trở lên.
+* **IDE:** IntelliJ IDEA, Eclipse hoặc VS Code.
+
+### Các bước triển khai
+
+**Bước 1: Clone Repository**
+
+```bash
+git clone [https://github.com/Quocker20/bluemoom_desktop_app_20251_nmcnpm.git](https://github.com/Quocker20/bluemoom_desktop_app_20251_nmcnpm.git)
+
+```
+
+**Bước 2: Cấu hình Database**
+
+1. Mở MySQL Workbench (hoặc tool tương tự).
+2. Tạo database mới tên `bluemoon_db`.
+3. Import file script tại: `src/main/resources/database/bluemoon_schema.sql` (File này đã bao gồm cấu trúc bảng và dữ liệu mẫu).
+
+**Bước 3: Cấu hình Kết nối**
+Mở file `src/main/java/com/bluemoon/app/util/DatabaseConnector.java` và cập nhật thông tin MySQL của bạn:
+
+```java
+private static final String URL = "jdbc:mysql://localhost:3306/bluemoon_db";
+private static final String USER = "root"; // User MySQL của bạn
+private static final String PASS = "your_password"; // Mật khẩu MySQL của bạn
+
+```
+
+**Bước 4: Chạy ứng dụng**
+
+* Chạy file: `src/main/java/com/bluemoon/app/view/system/LoginFrame.java` (hoặc `App.java` nếu có).
+* **Tài khoản Admin mặc định:**
+* Username: `admin`
+* Password: `123456` (Mật khẩu này khớp với hash trong DB mẫu).
+
+
+
+---
+
+## 📬 Liên hệ
+
+Nếu bạn quan tâm đến dự án hoặc muốn trao đổi về quy trình kết hợp **Software Architecture** với **AI Coding**, hãy liên hệ với tôi:
+
+* **Tác giả:** Vũ Quốc Anh
+* **Email:** quocanh20705@gmail.com
+* **GitHub:** [Quocker20](https://www.google.com/search?q=https://github.com/Quocker20)
+
+---
+
+*© 2024 Vu Quoc Anh. All Rights Reserved.*
+
+```
+
+```
