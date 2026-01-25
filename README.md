@@ -20,9 +20,9 @@ Dự án này là minh chứng cho **Quy trình phát triển phần mềm lai (
 
 ## 📸 Hình ảnh Demo
 
-| Tổng quan (Dashboard) | Báo cáo & Thống kê |
-| :---: | :---: |
-| ![Dashboard](src/main/resources/images/dashboard.png) | ![Report](src/main/images/report.png) |
+| Tổng quan (Dashboard) |               Báo cáo & Thống kê                |
+| :---: |:-----------------------------------------------:|
+| ![Dashboard](src/main/resources/images/dashboard.png) | ![Report](src/main/resources/images/report.png) |
 
 ---
 
